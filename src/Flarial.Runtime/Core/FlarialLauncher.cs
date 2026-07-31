@@ -35,10 +35,10 @@ if not %errorlevel%==0 goto _
 del ""%~f0""";
 
     const string AcceptedUri = "https://cdn.flarial.xyz/202.txt";
- 
+
     const string LauncherVersionUri = "https://cdn.flarial.xyz/launcher/launcherVersion.txt";
     const string LauncherDownloadUri = "https://cdn.flarial.xyz/launcher/Flarial.Launcher.exe";
- 
+
     const string Arguments = "/e:on /f:off /v:off /d /c call \"{0}\" & \"{1}\" /c start \"\" \"{2}\"";
 
     static readonly string s_source;
@@ -56,7 +56,7 @@ del ""%~f0""";
     public static async Task<bool> CheckForUpdatesAsync()
     {
         var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(LauncherVersionUri);
-        return json["version"] != s_version;
+        return false && json["version"] != s_version;
     }
 
     public static async Task DownloadAsync(Action<int> callback)

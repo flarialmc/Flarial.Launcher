@@ -1,0 +1,52 @@
+name: Build launcher and bump version number
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    shell: pwsh
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:          
+      - name: Checkout
+        uses: actions/checkout@7
+
+      - name: Check
+        run: |
+          $Message = "${{ github.event.head_commit.message }}"
+          
+          if ($Message -like 'release*') 
+          { 
+              Write-Host "Not a release commit, cancelling."
+              exit 0 
+          }
+
+          Write-Host "A release commit, proceeding."
+
+      - name: .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: latest
+        
+      - name: Bump
+        runs: |
+          Write-Host "Bumping package version with build date."
+
+          $Path = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
+
+          $Version = Get-Date -AsUTC -Format "yy.Md.HHmm.ss"
+          [xml]$Manifest = Get-Content "$Path"
+
+          $Manifest.Package.Identity.Version = "$Version"
+          $Manifest.Save("$Path")
+
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@example.com"
+
+          git add "$Path"
+          git commit -m "Version -> $Version"
+          git push
