@@ -34,7 +34,7 @@ jobs:
         
       - name: Bump
         shell: pwsh
-        runs: |
+        run: |
           Write-Host "Bumping package version with build date."
 
           $Path = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
