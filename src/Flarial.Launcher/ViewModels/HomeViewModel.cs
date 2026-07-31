@@ -20,8 +20,8 @@ public partial class HomeViewModel : ViewModelBase
     [Reactive] bool _showPromotions = true;
     [Reactive] bool _isLaunching = true;
 
-    [Reactive] string _launcherVersion;
     [Reactive] string _launcherStatus = "Preparing...";
+    [Reactive] string _launcherVersion = FlarialLauncher.Version;
 
     [Reactive] string _gameVersion = "0.0.0";
     [Reactive] IImmutableSolidColorBrush _gameVersionColor = Brushes.Gray;
@@ -40,9 +40,6 @@ public partial class HomeViewModel : ViewModelBase
     public HomeViewModel(MainWindowViewModel model)
     {
         _model = model;
-
-        var assembly = Assembly.GetExecutingAssembly();
-        _launcherVersion = FlarialLauncher.Version;
 
         Launch = ReactiveCommand.CreateFromTask(OnLaunchAsync);
         CloseWindow = ReactiveCommand.Create(static () => MessageBus.Current.SendMessage(WindowStateArgs.Close));

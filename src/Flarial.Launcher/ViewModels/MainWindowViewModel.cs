@@ -78,6 +78,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
 
         if (await FlarialLauncher.CheckForUpdatesAsync() && (_settings.AutomaticUpdates || await LauncherUpdateAvailableDialog._.ShowAsync()))
         {
+            HomeViewModel.LauncherStatus = "Updating...";
             await FlarialLauncher.DownloadAsync(OnDownload);
             return;
         }
