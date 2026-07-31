@@ -115,14 +115,14 @@ jobs:
           Move-Item "$LauncherPackage" "launcher\Flarial.Launcher.msix" -Force
           Move-Item "$LauncherCertificate" "launcher\Flarial.Launcher.cer" -Force
 
-          git add "cdn\launcher\Flarial.Launcher.cer"
+          git add "launcher\Flarial.Launcher.cer"
           git commit "Update Launcher Certificate"
           git push
 
-          git add "cdn\launcher\Flarial.Launcher.json"
+          git add "launcher\Flarial.Launcher.json"
           git commit "Update Launcher Version"
           git push
 
-          git add "cdn\launcher\Flarial.Launcher.msix"
+          git add "launcher\Flarial.Launcher.msix"
           git commit "Update Launcher Package"
           git push
