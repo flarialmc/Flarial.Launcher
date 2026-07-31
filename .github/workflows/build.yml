@@ -9,6 +9,9 @@ jobs:
     runs-on: windows-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PRIVATE_CERTIFICATE_BASE64: ${{ secrets.PRIVATE_CERTIFICATE_BASE64 }}
+      PRIVATE_CERTIFICATE_PASSWORD: ${{ secrets.PRIVATE_CERTIFICATE_PASSWORD }}
+      PRIVATE_CERTIFICATE_FINGERPRINT: ${{ secrets.PRIVATE_CERTIFICATE_FINGERPRINT }}
 
     steps: 
       - name: Checkout
@@ -59,4 +62,14 @@ jobs:
         shell: pwsh
         run: |
           $Path = "$(Get-Location)\src\Flarial.Launcher\Flarial.Launcher.csproj"
-          dotnet publish "$Path"
+          dotnet publish "$ProjectPath"
+
+      - name: Sign
+        shell: pwsh
+        run: |
+          $Path = "$(Get-Location)\Certificate.pfx"
+          $Bytes = [System.Convert]::FromBase64String($ENV:PRIVATE_CERTIFICATE_BASE64)
+          [System.IO.File]::WriteAllBytes($Path, $Bytes)
+
+          dotnet tool install --tool-path . --prerelease sign
+          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:PRIVATE_CERTIFICATE_FINGERPRINT" "AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "AppPackages\Flarial.Launcher.msix"
