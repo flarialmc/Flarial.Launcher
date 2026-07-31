@@ -8,6 +8,8 @@ namespace Flarial.Runtime.Core;
 
 public static class FlarialLauncher
 {
+    public static string Version => s_version is { } ? s_version : "0.0.0.0";
+
     static readonly string? s_version;
 
     static FlarialLauncher()

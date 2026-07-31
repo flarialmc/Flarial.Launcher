@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Unmanaged;
 
 [assembly: AssemblyCompany("Flarial")]
@@ -38,8 +39,7 @@ Exception: {1}
 
     static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = $"{assembly.GetName().Version}";
+        var version = FlarialLauncher.Version;
 
         var exception = (Exception)args.ExceptionObject;
         var information = exception.StackTrace?.Trim();

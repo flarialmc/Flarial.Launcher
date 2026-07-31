@@ -42,7 +42,7 @@ public partial class HomeViewModel : ViewModelBase
         _model = model;
 
         var assembly = Assembly.GetExecutingAssembly();
-        _launcherVersion = $"{assembly.GetName().Version}";
+        _launcherVersion = FlarialLauncher.Version;
 
         Launch = ReactiveCommand.CreateFromTask(OnLaunchAsync);
         CloseWindow = ReactiveCommand.Create(static () => MessageBus.Current.SendMessage(WindowStateArgs.Close));
