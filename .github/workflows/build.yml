@@ -73,3 +73,54 @@ jobs:
 
           dotnet tool install --tool-path . --prerelease sign
           ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:PRIVATE_CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
+
+      - name: Token
+        uses: actions/create-github-app-token@v3
+        id: token
+        with:
+          app-id: ${{ secrets.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: flarialmc
+          repositories: newcdn
+
+      - name: CDN
+        uses: actions/checkout@v7
+        with:
+          repository: 'flarialmc/newcdn'
+          ref: 'main'
+          path: 'cdn'
+          token: ${{ steps.token.outputs.token }}
+
+      - name: Deploy
+        shell: pwsh
+        run: |
+          $LauncherVersion = "$(Get-Location)\Flarial.Launcher.json"
+          $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
+          $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
+
+          $CertificateBytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
+          [System.IO.File]::WriteAllBytes($Path, $Bytes)
+
+          $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
+          $PackageVersion = ([xml](Get-Content $Manifest)).Package.Identity.Version
+          "`"$PackageVersion`"" | Set-Content -Path "$LauncherVersion"
+
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@example.com"
+
+          Move-Item "$LauncherVersion" "cdn\launcher\Flarial.Launcher.json"
+          Move-Item "$LauncherPackage" "cdn\launcher\Flarial.Launcher.msix"
+          Move-Item "$LauncherCertificate" "cdn\launcher\Flarial.Launcher.cer"
+
+          git add "cdn\launcher\Flarial.Launcher.msix"
+          git commit "Update Launcher Package"
+          git push
+
+          git add "cdn\launcher\Flarial.Launcher.cer"
+          git commit "Update Launcher Certificate"
+          git push
+
+
+          git add "cdn\launcher\Flarial.Launcher.json"
+          git commit "Update Launcher Version"
+          git push
