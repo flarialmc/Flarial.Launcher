@@ -53,3 +53,9 @@ jobs:
           git add "$Path"
           git commit -m "Version -> '$Version'"
           git push
+
+      - name: Build
+        shell: pwsh
+        run: |
+          $Path = "$(Get-Location)\src\Flarial.Launcher\Flarial.Launcher.csproj"
+          dotnet publish "$Path"
