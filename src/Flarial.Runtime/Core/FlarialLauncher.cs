@@ -28,8 +28,8 @@ public static class FlarialLauncher
     }
 
     const string AcceptedUri = "https://cdn.flarial.xyz/202.txt";
-    const string LauncherVersionUri = "https://github.com/flarialmc/newcdn/raw/refs/heads/main/launcher/Flarial.Launcher.json";
-    const string LauncherPackageUri = "https://github.com/flarialmc/newcdn/raw/refs/heads/main/launcher/Flarial.Launcher.msix";
+    const string LauncherVersionUri = "https://cdn.flarial.xyz/launcher/Flarial.Launcher.json";
+    const string LauncherPackageUri = "https://cdn.flarial.xyz/launcher/Flarial.Launcher.msix";
 
     public static async Task<bool> CanConnectAsync()
     {
