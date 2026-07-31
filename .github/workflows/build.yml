@@ -62,7 +62,7 @@ jobs:
         shell: pwsh
         run: |
           $Path = "$(Get-Location)\src\Flarial.Launcher\Flarial.Launcher.csproj"
-          dotnet publish "$ProjectPath"
+          dotnet publish "$Path"
 
       - name: Sign
         shell: pwsh
