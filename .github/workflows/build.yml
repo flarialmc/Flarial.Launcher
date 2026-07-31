@@ -11,12 +11,15 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps: 
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Verify
         shell: pwsh
         run: |
           $Message = "${{ github.event.head_commit.message }}"
           
-          if ($Message -notlike 'release*') 
+          if ($Message -notlike 'release:*') 
           { 
               Write-Host "Not a release commit, cancelling."
               gh run cancel "${{ github.run_id }}"
@@ -25,9 +28,6 @@ jobs:
           }
 
           Write-Host "A release commit, proceeding."
-
-      - name: Checkout
-        uses: actions/checkout@v7
 
       - name: .NET
         uses: actions/setup-dotnet@v6
