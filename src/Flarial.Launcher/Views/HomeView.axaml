@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flarial.Launcher.ViewModels"
+             xmlns:types="clr-namespace:Flarial.Launcher.Types"
+             xmlns:controls="clr-namespace:Flarial.Launcher.Controls.ToolTip"
+             xmlns:spotlightDecorator="clr-namespace:Flarial.Launcher.Controls.SpotlightDecorator"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Flarial.Launcher.Views.HomeView"
+             x:DataType="vm:HomeViewModel"
+             Initialized="OnInitialized"
+             BorderThickness="{StaticResource ButtonBorderThickness}"
+             BorderBrush="{StaticResource BackgroundBorderColor}"
+             CornerRadius="25"
+             Width="800" Height="500">
+    <Grid>
+        <Border IsHitTestVisible="False" Name="MainBorder" Background="{StaticResource BackgroundColor}" CornerRadius="25">
+            <Grid>
+
+                <Image Margin="0,75,0,75" HorizontalAlignment="Center" Stretch="UniformToFill" Grid.Row="0" Source="/Resources/background.webp"/>
+
+                <Grid Margin="0,70,0,0" VerticalAlignment="Top" Height="150">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="50%, 0%" EndPoint="50%, 100%">
+                            <GradientStop Color="#ff201A1B" Offset="0.04"/>
+                            <GradientStop Color="#00201A1B" Offset="1"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                </Grid>
+
+                <Grid Margin="0,0,0,70" VerticalAlignment="Bottom" Height="150">
+                    <Grid.Background>
+                        <LinearGradientBrush StartPoint="50%, 0%" EndPoint="50%, 100%">
+                            <GradientStop Color="#00201A1B" Offset="0"/>
+                            <GradientStop Color="#ff201A1B" Offset="0.96"/>
+                        </LinearGradientBrush>
+                    </Grid.Background>
+                </Grid>
+
+                <!--Flarial Logo-->
+                <Grid Margin="20" VerticalAlignment="Top" HorizontalAlignment="Stretch" ColumnDefinitions="Auto,Auto">
+                    <Image Source="/Resources/app.ico" Height="40" Width="40" Margin="0" RenderOptions.BitmapInterpolationMode="HighQuality"/>
+                    <TextBlock Grid.Column="1" Margin="10,0,0,0" Text="Flarial Client" FontWeight="Medium" VerticalAlignment="Center" FontSize="22" Foreground="White"/>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Grid>
+            <!--Window State Buttons-->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,20,20,0">
+                <Grid ColumnDefinitions="35,*,Auto" VerticalAlignment="Top" HorizontalAlignment="Right">
+                    <Border Grid.Column="0"
+                            CornerRadius="30"
+                            Height="{Binding RelativeSource={RelativeSource Self}, Path=Bounds.Width}"
+                            RenderOptions.BitmapInterpolationMode="HighQuality">
+                        <Border.Background>
+                            <ImageBrush Source="{Binding DiscordAccount.Avatar}" Stretch="UniformToFill"/>
+                        </Border.Background>
+                    </Border>
+
+                    <WrapPanel Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,15,0">
+                        <TextBlock Text="{Binding DiscordAccount.Username}"
+                                   FontSize="18" TextWrapping="Wrap"
+                                   Foreground="{StaticResource ForegroundColor}"/>
+                        <Border BorderThickness="1"
+                                CornerRadius="20"
+                                VerticalAlignment="Center"
+                                Background="{Binding DiscordAccount.Role.Background}"
+                                BorderBrush="{Binding DiscordAccount.Role.Border}"
+                                Padding="7.5,2.5,7.5,2.5"
+                                Margin="5,0,0,0">
+                            <TextBlock Text="{Binding DiscordAccount.Role.Name}"
+                                       FontSize="14"
+                                       Foreground="{StaticResource ForegroundColor}"/>
+                        </Border>
+                    </WrapPanel>
+                </Grid>
+
+                <Button x:Name="MinimizeButton" Classes="MinimizeButton" Command="{Binding MinimizeWindow}"/>
+                <Button x:Name="CloseButton" Classes="CloseButton" Command="{Binding CloseWindow}"/>
+            </StackPanel>
+
+            <Border Name="VersionTextBorder" CornerRadius="15" HorizontalAlignment="Left" Background="{Binding GameVersionColor}" Opacity="1" VerticalAlignment="Top" Margin="20,75,0,25" controls:CustomToolTip.Content="Your Minecraft version is unsupported by Flarial">
+                <TextBlock TextAlignment="Left" IsHitTestVisible="False" Name="VersionLabel" Margin="10,5,10,5" Text="{Binding GameVersion}" FontSize="16" Foreground="White"/>
+            </Border>
+
+            <TextBlock VerticalAlignment="Top" HorizontalAlignment="Right"  TextAlignment="Left" IsHitTestVisible="False" Margin="0,75,20,25" Text="{Binding LauncherVersion}" FontSize="16" Foreground="White"/>
+
+            <!--Launcher Version + License Indicator-->
+            <Grid IsVisible="False" Height="45" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20,75,0,0" RowDefinitions="*,*" ColumnDefinitions="*,Auto">
+                <TextBlock Name="LicenseText" Grid.Column="0" Margin="0,0,0,0" Text="⚫" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="16" Foreground="Gray"/>
+                <TextBlock Name="LauncherVersion" Grid.Row="0" Grid.Column="1" Margin="5,0,0,0" Text="{Binding LauncherVersion}" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="16" Foreground="White"/>
+                <TextBlock Name="StatusLabel" Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0" Margin="0,0,0,0" Text="Ready!" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="16" Foreground="#797676"/>
+            </Grid>
+
+            <!--Center Content and Buttons-->
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Name="GreetingLabel" Margin="0,0,0,0" Text="Welcome!" HorizontalAlignment="Center" FontSize="28" Foreground="White"/>
+                <TextBlock Margin="0,0,0,0" Text="{Binding LauncherStatus}" HorizontalAlignment="Center" FontSize="18" Foreground="DarkGray" />
+                <VisualLayerManager>
+                    <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                        <StackPanel Background="Transparent">
+                            <Button IsEnabled="{Binding !IsLaunching}" Name="LaunchButton" Classes="LaunchButton" Command="{Binding Launch}"/>
+                            <Button Name="SettingsButton" Classes="SettingsButton" Command="{Binding NavigateCommand}" CommandParameter="{x:Static types:PageTransitions.SettingsPage}"/>
+                        </StackPanel>
+                    </spotlightDecorator:SpotlightDecorator>
+                </VisualLayerManager>
+            </StackPanel>
+
+            <UniformGrid IsVisible="{Binding ShowPromotions}" Rows="1" Margin="0,0,0,20" Name="Promotions" VerticalAlignment="Bottom" HorizontalAlignment="Center" ColumnSpacing="5"/>
+        </Grid>
+    </Grid>
+</UserControl>
