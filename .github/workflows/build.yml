@@ -1,4 +1,4 @@
-name: Build launcher and bump version number
+name: Workflow
 on:
   push:
     branches: ["main"]
@@ -41,9 +41,10 @@ jobs:
 
           $Path = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
 
-          $Version = Get-Date -AsUTC -Format "yy.Md.HHmm.ss"
-          [xml]$Manifest = Get-Content "$Path"
+          $Date = Get-Date -AsUTC -Format "yy.Md.HHmm.ss"
+          $Version = [version]::new($Date).ToString()
 
+          [xml]$Manifest = Get-Content "$Path"
           $Manifest.Package.Identity.Version = "$Version"
           $Manifest.Save("$Path")
 
