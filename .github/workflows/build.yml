@@ -9,6 +9,7 @@ jobs:
     runs-on: windows-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PUBLIC_CERTIFICATE_BASE64: ${{ secrets.PUBLIC_CERTIFICATE_BASE64 }}
       PRIVATE_CERTIFICATE_BASE64: ${{ secrets.PRIVATE_CERTIFICATE_BASE64 }}
       PRIVATE_CERTIFICATE_PASSWORD: ${{ secrets.PRIVATE_CERTIFICATE_PASSWORD }}
       PRIVATE_CERTIFICATE_FINGERPRINT: ${{ secrets.PRIVATE_CERTIFICATE_FINGERPRINT }}
@@ -112,15 +113,14 @@ jobs:
           Move-Item "$LauncherPackage" "cdn\launcher\Flarial.Launcher.msix"
           Move-Item "$LauncherCertificate" "cdn\launcher\Flarial.Launcher.cer"
 
-          git add "cdn\launcher\Flarial.Launcher.msix"
-          git commit "Update Launcher Package"
-          git push
-
           git add "cdn\launcher\Flarial.Launcher.cer"
           git commit "Update Launcher Certificate"
           git push
 
-
           git add "cdn\launcher\Flarial.Launcher.json"
           git commit "Update Launcher Version"
+          git push
+
+          git add "cdn\launcher\Flarial.Launcher.msix"
+          git commit "Update Launcher Package"
           git push
