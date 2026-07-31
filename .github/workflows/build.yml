@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: windows-latest
-    shell: pwsh
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -16,6 +15,7 @@ jobs:
         uses: actions/checkout@7
 
       - name: Check
+        shell: pwsh
         run: |
           $Message = "${{ github.event.head_commit.message }}"
           
@@ -33,6 +33,7 @@ jobs:
           dotnet-version: latest
         
       - name: Bump
+        shell: pwsh
         runs: |
           Write-Host "Bumping package version with build date."
 
