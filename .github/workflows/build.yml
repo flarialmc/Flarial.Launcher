@@ -72,4 +72,4 @@ jobs:
           [System.IO.File]::WriteAllBytes($Path, $Bytes)
 
           dotnet tool install --tool-path . --prerelease sign
-          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:PRIVATE_CERTIFICATE_FINGERPRINT" "AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "AppPackages\Flarial.Launcher.msix"
+          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:PRIVATE_CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
