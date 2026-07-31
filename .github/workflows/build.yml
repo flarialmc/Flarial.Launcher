@@ -99,11 +99,11 @@ jobs:
           $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
           $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
 
-          $Bytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
-          [System.IO.File]::WriteAllBytes($LauncherCertificate, $Bytes)
+          $LauncherCertificateBytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
+          [System.IO.File]::WriteAllBytes($LauncherCertificate, $LauncherCertificateBytes)
 
           $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
-          $PackageVersion = ([xml](Get-Content "$Manifest")).Package.Identity.Version
+          $PackageVersion = ([xml](Get-Content "$PackageManifest")).Package.Identity.Version
           "`"$PackageVersion`"" | Set-Content -Path "$LauncherVersion"
 
           git config --global user.name "GitHub Actions Bot"
