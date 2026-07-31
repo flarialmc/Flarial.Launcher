@@ -95,6 +95,8 @@ jobs:
       - name: Deploy
         shell: pwsh
         run: |
+          Set-Location "cdn"
+
           $LauncherVersion = "$(Get-Location)\Flarial.Launcher.json"
           $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
           $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
