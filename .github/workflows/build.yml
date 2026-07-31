@@ -95,8 +95,6 @@ jobs:
       - name: Deploy
         shell: pwsh
         run: |
-          Set-Location "cdn"
-
           $LauncherVersion = "$(Get-Location)\Flarial.Launcher.json"
           $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
           $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
@@ -107,6 +105,8 @@ jobs:
           $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
           $PackageVersion = ([xml](Get-Content "$PackageManifest")).Package.Identity.Version
           "`"$PackageVersion`"" | Set-Content -Path "$LauncherVersion"
+
+          Set-Location "cdn"
 
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@example.com"
