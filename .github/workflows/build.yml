@@ -109,9 +109,9 @@ jobs:
           git config --global user.name "GitHub Actions Bot"
           git config --global user.email "actions@example.com"
 
-          Move-Item "$LauncherVersion" "cdn\launcher\Flarial.Launcher.json"
-          Move-Item "$LauncherPackage" "cdn\launcher\Flarial.Launcher.msix"
-          Move-Item "$LauncherCertificate" "cdn\launcher\Flarial.Launcher.cer"
+          Move-Item "$LauncherVersion" "cdn\launcher\Flarial.Launcher.json" -Force
+          Move-Item "$LauncherPackage" "cdn\launcher\Flarial.Launcher.msix" -Force
+          Move-Item "$LauncherCertificate" "cdn\launcher\Flarial.Launcher.cer" -Force
 
           git add "cdn\launcher\Flarial.Launcher.cer"
           git commit "Update Launcher Certificate"
