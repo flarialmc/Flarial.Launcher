@@ -1,12 +1,9 @@
 using System;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using Windows.ApplicationModel;
 using Windows.Foundation;
 using Windows.Management.Deployment;
 using static Windows.Foundation.AsyncStatus;
-using static Windows.Management.Deployment.DeploymentOptions;
 using static Windows.Win32.PInvoke;
 
 namespace Flarial.Runtime.Services;
@@ -15,12 +12,18 @@ static class PackageService
 {
     static readonly PackageManager s_manager = new();
 
+    static readonly AddPackageOptions s_options = new()
+    {
+        ForceAppShutdown = true,
+        ForceUpdateFromAnyVersion = true
+    };
+
     internal static Package? Get(string packageFamilyName) => s_manager.FindPackagesForUser(string.Empty, packageFamilyName).FirstOrDefault();
 
     internal unsafe static void Add(Uri uri, Action<int> callback)
     {
         var handle = CreateEvent(null, true, false, null);
-        var info = s_manager.AddPackageAsync(uri, null, ForceApplicationShutdown | ForceUpdateFromAnyVersion);
+        var info = s_manager.AddPackageByUriAsync(uri, s_options);
 
         try
         {
