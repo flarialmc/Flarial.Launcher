@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <PlatformTarget>x64</PlatformTarget>
         <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+
+        <Platforms>x64</Platforms>
+        <PlatformTarget>x64</PlatformTarget>
 
         <Optimize>true</Optimize>
         <PublishRelease>true</PublishRelease>
@@ -27,12 +29,8 @@
     </PropertyGroup>
 
     <PropertyGroup>
-        <PublishTrimmed>true</PublishTrimmed>
-        <PublishSingleFile>true</PublishSingleFile>
-
         <SelfContained>true</SelfContained>
-        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <PublishTrimmed>true</PublishTrimmed>
 
         <UseSizeOptimizedLinq>true</UseSizeOptimizedLinq>
         <InvariantGlobalization>true</InvariantGlobalization>
@@ -51,9 +49,30 @@
 
     <ItemGroup>
         <Compile Include="..\AssemblyVersion.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <AvaloniaResource Include="Resources\**" />
         <AvaloniaResource Remove="Resources\app.manifest" />
     </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="Assets\**\*.png" />
+        <Content Include="Assets\**\*.png" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <EnableMsixTooling>true</EnableMsixTooling>
+        <UseSdkBuildToolsPackage>true</UseSdkBuildToolsPackage>
+
+        <AppxPackageName>$(AssemblyName)</AppxPackageName>
+
+        <WindowsPackageType>MSIX</WindowsPackageType>
+        <PublishAppxPackage>true</PublishAppxPackage>
+
+        <AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+        <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+    </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Flarial.Runtime\Flarial.Runtime.csproj" />
@@ -63,13 +82,18 @@
         <PackageReference Include="System.Reactive" Version="7.0.0" />
 
         <PackageReference Include="SkiaSharp" Version="4.150.1" />
-        <PackageReference Include="Avalonia.Skia" Version="12.1.0" />
+        <PackageReference Include="Avalonia.Skia" Version="12.1.1" />
 
-        <PackageReference Include="Avalonia.Win32" Version="12.1.0" />
-        <PackageReference Include="Avalonia.HarfBuzz" Version="12.1.0" />
+        <PackageReference Include="Avalonia.Win32" Version="12.1.1" />
+        <PackageReference Include="Avalonia.HarfBuzz" Version="12.1.1" />
 
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.0" />
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="3.1.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX" Version="1.7.260610101" />
     </ItemGroup>
 
 </Project>
