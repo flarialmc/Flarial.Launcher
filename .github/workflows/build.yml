@@ -99,7 +99,7 @@ jobs:
           $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
           $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
 
-          $CertificateBytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
+          $Bytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
           [System.IO.File]::WriteAllBytes($LauncherCertificate, $Bytes)
 
           $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
