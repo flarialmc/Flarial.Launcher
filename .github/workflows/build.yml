@@ -46,7 +46,7 @@ jobs:
 
           $Path = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
 
-          $Date = Get-Date -AsUTC -Format "yyMM.ddHH.mmss.0"
+          $Date = Get-Date -AsUTC -Format "yyyy.MM.dd.HHmm"
           $Version = [version]::new($Date).ToString()
 
           [xml]$Manifest = Get-Content "$Path"
