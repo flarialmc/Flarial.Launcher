@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 using Windows.ApplicationModel;
@@ -10,16 +11,16 @@ public static class FlarialLauncher
 {
     public static string Version => s_version is { } ? s_version : "0.0.0.0";
 
+    static readonly string s_path;
     static readonly string? s_version;
 
     static FlarialLauncher()
     {
+        s_path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         try
         {
             var package = Package.Current;
-
-            if (package.IsDevelopmentMode)
-                return;
+            if (package.IsDevelopmentMode) return;
 
             var packageVersion = package.Id.Version;
             s_version = $"{packageVersion.Major}.{packageVersion.Minor}.{packageVersion.Build}.{packageVersion.Revision}";
@@ -42,13 +43,12 @@ public static class FlarialLauncher
         return s_version is { } && version != s_version;
     }
 
-    public static Task DownloadAsync(Action<int> callback)
+    public static async Task DownloadAsync(Action<int> callback)
     {
-        if (s_version is { })
-        {
-            RegisterApplicationRestart(null, default);
-            return Task.Run(() => PackageService.Add(new(LauncherPackageUri), callback));
-        }
-        return Task.CompletedTask;
+        if (s_version is { }) return;
+        await HttpService.DownloadAsync(LauncherPackageUri, s_path, callback);
+
+        RegisterApplicationRestart(null, default);
+        await Task.Run(() => PackageService.Add(new(s_path), callback));
     }
 }
