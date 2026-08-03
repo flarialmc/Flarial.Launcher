@@ -10,7 +10,7 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
-      PUBLIC_CERTIFICATE_BASE64: ${{ secrets.PUBLIC_CERTIFICATE_BASE64 }}
+      CERTIFICATE_BASE64: ${{ secrets.PUBLIC_CERTIFICATE_BASE64 }}
       PRIVATE_CERTIFICATE_BASE64: ${{ secrets.PRIVATE_CERTIFICATE_BASE64 }}
       
       PRIVATE_CERTIFICATE_PASSWORD: ${{ secrets.PRIVATE_CERTIFICATE_PASSWORD }}
@@ -75,7 +75,7 @@ jobs:
           [System.IO.File]::WriteAllBytes($Path, $Bytes)
 
           dotnet tool install --tool-path . --prerelease sign
-          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:PRIVATE_CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
+          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
 
       - name: Token
         uses: actions/create-github-app-token@v3
@@ -101,7 +101,7 @@ jobs:
           $LauncherPackage = "$(Get-Location)\Flarial.Launcher.msix"
           $LauncherCertificate = "$(Get-Location)\Flarial.Launcher.cer"
 
-          $LauncherCertificateBytes = [System.Convert]::FromBase64String($ENV:PUBLIC_CERTIFICATE_BASE64)
+          $LauncherCertificateBytes = [System.Convert]::FromBase64String($ENV:CERTIFICATE_BASE64)
           [System.IO.File]::WriteAllBytes($LauncherCertificate, $LauncherCertificateBytes)
 
           $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
