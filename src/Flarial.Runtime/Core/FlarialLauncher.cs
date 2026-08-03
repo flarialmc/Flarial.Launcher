@@ -19,11 +19,11 @@ public static class FlarialLauncher
         s_path = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
         try
         {
-            var package = Package.Current;
-            if (package.IsDevelopmentMode) return;
-
-            var packageVersion = package.Id.Version;
-            s_version = $"{packageVersion.Major}.{packageVersion.Minor}.{packageVersion.Build}.{packageVersion.Revision}";
+            if (Package.Current is { IsDevelopmentMode: false } package)
+            {
+                var _ = package.Id.Version;
+                s_version = $"{_.Major}.{_.Minor}.{_.Build}.{_.Revision}";
+            }
         }
         catch { }
     }
@@ -45,7 +45,7 @@ public static class FlarialLauncher
 
     public static async Task DownloadAsync(Action<int> callback)
     {
-        if (s_version is { }) return;
+        if (s_version is null) return;
         await HttpService.DownloadAsync(LauncherPackageUri, s_path, callback);
 
         RegisterApplicationRestart(null, default);
