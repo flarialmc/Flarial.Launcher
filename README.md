@@ -1,18 +1,12 @@
 # Flarial Launcher
 
-Source code for Flarial Client's launcher.
+The official launcher for Flarial Client.
 
-## Arguments
+## Notes
+- This repository only contains the source code for the launcher.
+  
+- If you want to install the launcher, please download the installer:
 
-### Supported
-|Argument|Description|
-|-|-|
-|`--inject <value>`|Launches Minecraft & injects the specified DLL.|
-
-### Deprecated
-|Argument|Description|
-|-|-|
-|`--use-proxy`|Makes the launcher use a local web proxy on port `65535`.|
-|`--use-dns-over-https`|Makes the launcher use a crude DOH implementation.|
-|`--no-hardware-acceleration`|Disables hardware acceleration in the launcher.|
-|`--allow-unsigned-installs`|Makes the launcher not check for unsigned installs.|
+  - Download: https://cdn.flarial.xyz/launcher/Flarial.Launcher.Installer.exe
+  
+  - Repository: https://github.com/flarialmc/Flarial.Launcher.Installer
