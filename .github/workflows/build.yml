@@ -18,6 +18,10 @@ jobs:
     steps: 
       - name: Checkout
         uses: actions/checkout@v7
+        shell: pwsh
+        run:  |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@example.com"
 
       - name: Verify
         shell: pwsh
