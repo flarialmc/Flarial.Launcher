@@ -53,9 +53,6 @@ jobs:
           $Manifest.Package.Identity.Version = "$Version"
           $Manifest.Save("$Path")
 
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@example.com"
-
           git add "$Path"
           git commit -m "Version -> '$Version'"
           git push
@@ -63,8 +60,7 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
-          $Path = "$(Get-Location)\src\Flarial.Launcher\Flarial.Launcher.csproj"
-          dotnet publish "$Path"
+          dotnet publish "src\Flarial.Launcher\Flarial.Launcher.csproj"
 
       - name: Sign
         shell: pwsh
@@ -72,6 +68,8 @@ jobs:
           $Path = "$(Get-Location)\Flarial.Launcher.pfx"
           $Bytes = [System.Convert]::FromBase64String($ENV:PRIVATE_CERTIFICATE_BASE64)
           [System.IO.File]::WriteAllBytes($Path, $Bytes)
+
+          Write-Host "Signing the launcher's MSIX package."
 
           dotnet tool install --tool-path . --prerelease sign
           ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
@@ -109,21 +107,13 @@ jobs:
 
           Set-Location "cdn"
 
-          git config --global user.name "GitHub Actions Bot"
-          git config --global user.email "actions@example.com"
-
           Move-Item "$LauncherVersion" "launcher\Flarial.Launcher.json" -Force
           Move-Item "$LauncherPackage" "launcher\Flarial.Launcher.msix" -Force
           Move-Item "$LauncherCertificate" "launcher\Flarial.Launcher.cer" -Force
 
           git add "launcher\Flarial.Launcher.cer"
-          git commit -m "Update Launcher Certificate"
-          git push
-
           git add "launcher\Flarial.Launcher.json"
-          git commit -m "Update Launcher Version"
-          git push
-
           git add "launcher\Flarial.Launcher.msix"
-          git commit -m "Update Launcher Package"
+
+          git commit -m "Update Launcher Package -> '$PackageVersion'"
           git push
