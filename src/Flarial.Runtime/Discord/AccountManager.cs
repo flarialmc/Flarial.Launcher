@@ -1,0 +1,35 @@
+using System.Net.Http;
+using System.Threading.Tasks;
+using Flarial.Runtime.Identity;
+using Flarial.Runtime.Services;
+
+namespace Flarial.Runtime.Discord;
+
+public static class AccountManager
+{
+    const string UserAgent = "Samsung AI-Powered Washing Machine";
+    const string AvatarUri = "https://cdn.discordapp.com/avatars/{0}/{1}";
+    const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";
+
+    public static async Task<AccountDetails?> LoginAsync()
+    {
+        if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } token)
+            return null;
+
+        using HttpRequestMessage request = new(HttpMethod.Post, PremiumUri);
+
+        request.Headers.UserAgent.ParseAdd(UserAgent);
+        request.Headers.Authorization = new("Bearer", token);
+
+        using var response = await HttpService.SendAsync(request);
+        if (!response.IsSuccessStatusCode) return null;
+
+        using var stream = await response.Content.ReadAsStreamAsync();
+        var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
+
+        var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
+        return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
+    }
+
+    public static void Logout() => RefreshTokenManager._.Remove();
+}

@@ -7,7 +7,7 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity;
 
-public sealed class AccountDetails
+sealed class AccountDetails
 {
     readonly Task<byte[]?> _task = null!;
 
@@ -31,13 +31,13 @@ public sealed class AccountDetails
     public Task<byte[]?> GetAvatarAsync() => _task;
 }
 
-public static class AccountManager
+static class AccountManager
 {
     const string AccountUri = "https://flarial.xyz/api/v1/launcher/account";
 
     public static async Task<AccountDetails?> LoginAsync()
     {
-        if (await OAuthManager.GetAccessTokenAsync() is not { } accessToken)
+        if (await AuthenticationManager.GetAccessTokenAsync() is not { } accessToken)
             return null;
 
         using HttpRequestMessage request = new(HttpMethod.Get, AccountUri);
@@ -49,7 +49,7 @@ public static class AccountManager
         return await GetAccountDetailsAsync(response);
     }
 
-    public static Task LogoutAsync() => OAuthManager.RevokeRefreshTokenAsync();
+    public static Task LogoutAsync() => AuthenticationManager.RevokeRefreshTokenAsync();
 
     static async Task<AccountDetails> GetAccountDetailsAsync(HttpResponseMessage response)
     {

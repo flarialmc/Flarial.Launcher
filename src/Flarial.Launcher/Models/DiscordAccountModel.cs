@@ -35,7 +35,7 @@ public sealed partial class DiscordAccountModel : ReactiveObject
         Username = DefaultUserName;
     }
 
-    public void Login(DiscordAccount account) => Dispatcher.UIThread.Post(async () =>
+    public void Login(AccountDetails account) => Dispatcher.UIThread.Post(async () =>
     {
         var hasBetaAccess = account.HasBetaAccess;
         var hasFlarialPlus = account.HasFlarialPlus;

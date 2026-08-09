@@ -145,7 +145,7 @@ public partial class SettingsGeneralViewModel : ViewModelBase
     {
         DiscordLoginAvailable = false;
 
-        if (!await DiscordAuthenticationManager.AuthenticateAsync())
+        if (!await AuthenticationManager.AuthenticateAsync())
         {
             OnLogout();
             return;
@@ -158,7 +158,7 @@ public partial class SettingsGeneralViewModel : ViewModelBase
     {
         DiscordLoginAvailable = false;
 
-        if (await DiscordAccountManager.LoginAsync() is not { } account)
+        if (await AccountManager.LoginAsync() is not { } account)
         {
             OnLogout();
             return;
@@ -176,7 +176,7 @@ public partial class SettingsGeneralViewModel : ViewModelBase
         HasBetaAccess = false;
         _model.HomeViewModel.ShowPromotions = true;
 
-        DiscordAccountManager.Logout();
+        AccountManager.Logout();
         DiscordAccount.Logout();
 
         DiscordLoginAvailable = true;
