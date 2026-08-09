@@ -8,7 +8,7 @@ namespace Flarial.Runtime.Discord;
 readonly struct DiscordSession(string token)
 {
     const string GuildId = "1049946152092586054";
-    const string TesterRoleId = "1469952430149210175";
+    const string TesterRoleId = "1535480632514445462";
     const string FlarialPlusRoleId = "1268949825865650268";
 
     const string ProfileUri = "https://discord.com/api/users/@me";
