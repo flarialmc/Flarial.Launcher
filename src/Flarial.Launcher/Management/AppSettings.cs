@@ -15,10 +15,6 @@ public sealed class AppSettings
 
     public bool PerformanceMode { get; set; } = false;
 
-    [JsonIgnore]
-    [Obsolete(" ", true)]
-    bool UseCustomDll { get; set; } = false;
-
     public BuildType BuildType { get; set; } = BuildType.Release;
 
     public string? CustomDllPath

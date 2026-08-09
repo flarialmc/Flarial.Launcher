@@ -21,9 +21,6 @@ public partial class SettingsView : UserControl
         MessageBus.Current.Listen<PageTransitions>().Subscribe(PageTransition);
     }
 
-    [Obsolete("", true)]
-    static bool PerformanceMode => (Application.Current as App)?.Settings?.PerformanceMode ?? false;
-
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
     private double _currentPageY;
