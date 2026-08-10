@@ -1,6 +1,3 @@
-using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -10,6 +7,7 @@ using Flarial.Launcher.Views;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;

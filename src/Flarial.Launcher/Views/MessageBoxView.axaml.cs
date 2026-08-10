@@ -1,6 +1,4 @@
 using System;
-using System.Reactive.Disposables.Fluent;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Animation;
 using Avalonia.Animation.Easings;
@@ -12,6 +10,8 @@ using Flarial.Launcher.Controls.AcrylicBlur;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Extensions;
 
 namespace Flarial.Launcher.Views;
 
@@ -26,8 +26,8 @@ public partial class MessageBoxView : ReactiveUserControl<MessageBoxViewModel>
             Dispatcher.UIThread.Post(PlayEnterAnimation, DispatcherPriority.Render);
 
             this.WhenAnyValue(x => x.ViewModel)
-                .WhereNotNull()
-                .SelectMany(vm => vm.CloseRequested.Select(_ => vm))
+                .WhereIsNotNull()
+                .SelectMany(vm => vm!.CloseRequested.Select(_ => vm))
                 .Subscribe(PlayExitAnimation)
                 .DisposeWith([.. disposables]);
         });

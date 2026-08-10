@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Shapes;
 using Avalonia.Media;
 using Avalonia.Threading;
+using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Controls.ToolTip;
 

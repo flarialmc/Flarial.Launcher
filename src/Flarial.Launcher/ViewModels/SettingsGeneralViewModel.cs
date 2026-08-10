@@ -1,13 +1,9 @@
-using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Flarial.Launcher.Controls.SegmentedBar;
 using Flarial.Launcher.Management;
@@ -15,8 +11,8 @@ using Flarial.Launcher.Models;
 using Flarial.Runtime.Discord;
 using Flarial.Runtime.Unmanaged;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
-using Splat;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -81,7 +77,7 @@ public partial class SettingsGeneralViewModel : ViewModelBase
         FileTypeFilter = [new("Dynamic Link Libraries") { Patterns = ["*.dll"] }]
     };
 
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Open { get; }
+    public ReactiveCommand<RxVoid, ReactiveUI.Primitives.RxVoid> Open { get; }
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Login { get; }
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Logout { get; }
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> OpenClientFolder { get; }

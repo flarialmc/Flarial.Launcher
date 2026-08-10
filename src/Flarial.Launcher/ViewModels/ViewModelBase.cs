@@ -1,7 +1,6 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using Flarial.Launcher.Types;
+﻿using Flarial.Launcher.Types;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;

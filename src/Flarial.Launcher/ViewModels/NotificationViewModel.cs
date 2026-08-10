@@ -1,7 +1,7 @@
 using System;
-using System.Reactive;
-using System.Reactive.Subjects;
 using ReactiveUI;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Signals;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -9,7 +9,7 @@ public class NotificationViewModel : ReactiveObject
 {
     public string Message { get; }
 
-    public Subject<Unit> CloseRequested { get; } = new();
+    public Signal<RxVoid> CloseRequested { get; } = new();
 
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> CloseCommand { get; }
 
@@ -19,7 +19,7 @@ public class NotificationViewModel : ReactiveObject
     {
         Message = message;
         _onDismissed = onDismissed;
-        CloseCommand = ReactiveCommand.Create(() => CloseRequested.OnNext(Unit.Default));
+        CloseCommand = ReactiveCommand.Create(() => CloseRequested.OnNext(RxVoid.Default));
     }
 
     public void CompleteDismiss() => _onDismissed();

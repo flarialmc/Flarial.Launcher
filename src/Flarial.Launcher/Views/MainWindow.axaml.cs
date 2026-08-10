@@ -1,19 +1,15 @@
-using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Types;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
-using SkiaSharp;
-using Windows.Win32;
+using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Views;
 

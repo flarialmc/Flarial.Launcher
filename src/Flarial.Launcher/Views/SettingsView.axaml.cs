@@ -10,6 +10,7 @@ using Flarial.Launcher.Management;
 using Flarial.Launcher.Types;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Views;
 
