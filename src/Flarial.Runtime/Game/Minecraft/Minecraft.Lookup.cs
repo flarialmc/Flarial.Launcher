@@ -34,7 +34,7 @@ unsafe partial class Minecraft
                     if (CompareStringOrdinal(processNamePtr, -1, processInfo.pProcessName, -1, true) != CSTR_EQUAL)
                         continue;
 
-                    if (NativeProcess.Open(PROCESS_QUERY_LIMITED_INFORMATION, processInfo.ProcessId) is not { } process)
+                    if (PROCESS_QUERY_LIMITED_INFORMATION.Open(processInfo.ProcessId) is not { } process)
                         continue;
 
                     using (process)
@@ -66,7 +66,7 @@ unsafe partial class Minecraft
                 if (processId is { } && processId != window._processId)
                     continue;
 
-                if (NativeProcess.Open(PROCESS_QUERY_LIMITED_INFORMATION, window._processId) is not { } process)
+                if (PROCESS_QUERY_LIMITED_INFORMATION.Open(window._processId) is not { } process)
                     continue;
 
                 return window;

@@ -23,14 +23,14 @@ public static class Injector
         }
     }
 
-    public unsafe static bool Launch( Library library)
+    public unsafe static bool Launch(Library library)
     {
         var path = library.EnsureLoadable();
 
         if (Minecraft.Launch() is not { } processId)
             return false;
 
-        if (NativeProcess.Open(PROCESS_ALL_ACCESS, processId) is not { } process)
+        if (PROCESS_ALL_ACCESS.Open(processId) is not { } process)
             return false;
 
         using (process)

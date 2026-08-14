@@ -52,7 +52,7 @@ unsafe partial class Minecraft
         if (Activate() is not { } processId)
             return null;
 
-        if (NativeProcess.Open(PROCESS_SYNCHRONIZE, processId) is not { } process)
+        if (PROCESS_SYNCHRONIZE.Open(processId) is not { } process)
             return null;
 
         using (process)

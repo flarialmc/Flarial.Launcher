@@ -46,7 +46,6 @@ public sealed class VersionItem
             catch { }
         }
 
-
         void OnInstall(int value) => callback(value, true);
         void OnDownload(int value) => callback(value, false);
     }

@@ -6,7 +6,6 @@ namespace Flarial.Runtime.Unmanaged;
 unsafe readonly struct NativeWindow
 {
     readonly HWND _handle;
-
     internal readonly uint _processId;
 
     internal NativeWindow(HWND handle)
