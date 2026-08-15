@@ -8,7 +8,7 @@ unsafe readonly struct NativeWindow
     readonly HWND _handle;
     internal readonly uint _processId;
 
-    internal NativeWindow(HWND handle)
+    NativeWindow(HWND handle)
     {
         uint processId = 0;
         _ = GetWindowThreadProcessId(handle, &processId);
