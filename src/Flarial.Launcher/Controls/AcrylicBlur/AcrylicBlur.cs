@@ -4,7 +4,7 @@ using Avalonia.Media;
 
 namespace Flarial.Launcher.Controls.AcrylicBlur;
 
-public class AcrylicBlur : ContentControl
+public sealed class AcrylicBlur : ContentControl
 {
     private static readonly ImmutableExperimentalAcrylicMaterial DefaultAcrylicMaterial = (ImmutableExperimentalAcrylicMaterial) new ExperimentalAcrylicMaterial()
     {

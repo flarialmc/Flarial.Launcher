@@ -6,7 +6,7 @@ using Avalonia.Data.Converters;
 
 namespace Flarial.Launcher.Converters;
 
-public class AnyNonEmptyStringToDouble : IMultiValueConverter
+public sealed class AnyNonEmptyStringToDouble : IMultiValueConverter
 {
     public double TrueValue { get; set; } = 1.0;
     public double FalseValue { get; set; }

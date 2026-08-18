@@ -14,7 +14,7 @@ using ReactiveUI.Primitives.Extensions;
 
 namespace Flarial.Launcher.Views;
 
-public partial class NotificationView : ReactiveUserControl<NotificationViewModel>
+public sealed partial class NotificationView : ReactiveUserControl<NotificationViewModel>
 {
     public NotificationView()
     {

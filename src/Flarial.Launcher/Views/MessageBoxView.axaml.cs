@@ -15,7 +15,7 @@ using ReactiveUI.Primitives.Extensions;
 
 namespace Flarial.Launcher.Views;
 
-public partial class MessageBoxView : ReactiveUserControl<MessageBoxViewModel>
+public sealed partial class MessageBoxView : ReactiveUserControl<MessageBoxViewModel>
 {
     public MessageBoxView()
     {

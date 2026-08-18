@@ -5,7 +5,7 @@ using ReactiveUI.Primitives.Signals;
 
 namespace Flarial.Launcher.ViewModels;
 
-public class NotificationViewModel : ReactiveObject
+public sealed class NotificationViewModel : ReactiveObject
 {
     public string Message { get; }
 

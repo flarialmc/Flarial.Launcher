@@ -16,7 +16,6 @@ public abstract class FlarialClient<T> : FlarialClient where T : FlarialClient<T
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
     public static readonly T _ = new();
 }
 

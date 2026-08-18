@@ -10,7 +10,7 @@ using SkiaSharp;
 
 namespace Flarial.Launcher.Controls.AcrylicBlur;
 
-public class AcrylicBlurRenderOperation(
+public sealed class AcrylicBlurRenderOperation(
     AcrylicBlur acrylicBlur,
     ImmutableExperimentalAcrylicMaterial material,
     int blur,
@@ -45,8 +45,8 @@ public class AcrylicBlurRenderOperation(
         byte[] a = new byte[256];
         for (int i = 0; i < 256; i++)
         {
-            c[i] = (byte) i;
-            a[i] = (byte) (i * opacity);
+            c[i] = (byte)i;
+            a[i] = (byte)(i * opacity);
         }
 
         return SKColorFilter.CreateTable(a, c, c, c);
@@ -56,7 +56,7 @@ public class AcrylicBlurRenderOperation(
     {
         var rect = SKRect.Create(0, 0, width, height);
         var roundRect = new SKRoundRect();
-        
+
         // Set individual corner radii
         var radii = new[]
         {
@@ -66,8 +66,8 @@ public class AcrylicBlurRenderOperation(
             new SKPoint((float)_cornerRadius.BottomLeft, (float)_cornerRadius.BottomLeft)
         };
         roundRect.SetRectRadii(rect, radii);
-        
-        
+
+
         return roundRect;
     }
 
@@ -84,7 +84,7 @@ public class AcrylicBlurRenderOperation(
         if (!lease.SkCanvas.TotalMatrix.TryInvert(out SKMatrix currentInvertedTransform) || lease.SkSurface == null)
             return;
 
-        if (lease.SkCanvas.GetLocalClipBounds(out SKRect bounds) && !bounds.Contains(SKRect.Create(bounds.Left, bounds.Top, (float) acrylicBlur.Bounds.Width, (float) acrylicBlur.Bounds.Height)))
+        if (lease.SkCanvas.GetLocalClipBounds(out SKRect bounds) && !bounds.Contains(SKRect.Create(bounds.Left, bounds.Top, (float)acrylicBlur.Bounds.Width, (float)acrylicBlur.Bounds.Height)))
         {
             Dispatcher.UIThread.Invoke(() => acrylicBlur.InvalidateVisual());
         }
@@ -93,33 +93,33 @@ public class AcrylicBlurRenderOperation(
             _backgroundSnapshot?.Dispose();
             _backgroundSnapshot = lease.SkSurface.Snapshot();
         }
-        
+
         _backgroundSnapshot ??= lease.SkSurface.Snapshot();
-        
+
         float width = (float)_bounds.Width;
         float height = (float)_bounds.Height;
-        
+
         // Create rounded rectangle for clipping
         using var roundRect = CreateRoundRect(width, height);
-        
+
         // Save canvas state and apply rounded clip
         lease.SkCanvas.Save();
         lease.SkCanvas.ClipRoundRect(roundRect, SKClipOperation.Intersect, true);
-        
+
         using SKShader? backdropShader = SKShader.CreateImage(_backgroundSnapshot, SKShaderTileMode.Clamp, SKShaderTileMode.Clamp, currentInvertedTransform);
         using SKSurface? blurred = SKSurface.Create(
             lease.GrContext,
             false,
-            new SKImageInfo((int) Math.Ceiling(_bounds.Width), (int) Math.Ceiling(_bounds.Height), SKImageInfo.PlatformColorType, SKAlphaType.Premul)
+            new SKImageInfo((int)Math.Ceiling(_bounds.Width), (int)Math.Ceiling(_bounds.Height), SKImageInfo.PlatformColorType, SKAlphaType.Premul)
         );
         using (SKImageFilter? filter = SKImageFilter.CreateBlur(blur, blur, SKShaderTileMode.Clamp))
-        using (SKPaint blurPaint = new SKPaint {Shader = backdropShader, ImageFilter = filter})
+        using (SKPaint blurPaint = new SKPaint { Shader = backdropShader, ImageFilter = filter })
         {
             blurred.Canvas.DrawRect(0, 0, width, height, blurPaint);
 
             using (SKImage? blurSnap = blurred.Snapshot())
             using (SKShader? blurSnapShader = SKShader.CreateImage(blurSnap))
-            using (SKPaint blurSnapPaint = new SKPaint {Shader = blurSnapShader, IsAntialias = true})
+            using (SKPaint blurSnapPaint = new SKPaint { Shader = blurSnapShader, IsAntialias = true })
             {
                 // Rendering twice to reduce opacity
                 lease.SkCanvas.DrawRect(0, 0, width, height, blurSnapPaint);
@@ -151,7 +151,7 @@ public class AcrylicBlurRenderOperation(
                 lease.SkCanvas.DrawRect(0, 0, width, height, acrylliPaint);
             }
         }
-        
+
         // Restore canvas state
         lease.SkCanvas.Restore();
     }
@@ -160,8 +160,8 @@ public class AcrylicBlurRenderOperation(
 
     public bool Equals(ICustomDrawOperation? other)
     {
-        return other is AcrylicBlurRenderOperation op && 
-               op._bounds == _bounds && 
+        return other is AcrylicBlurRenderOperation op &&
+               op._bounds == _bounds &&
                op._material.Equals(_material) &&
                op._cornerRadius == _cornerRadius;
     }

@@ -13,7 +13,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
-public partial class HomeViewModel : ViewModelBase
+public sealed partial class HomeViewModel : ViewModelBase
 {
     [Reactive] bool _showPromotions = true;
     [Reactive] bool _isLaunching = true;

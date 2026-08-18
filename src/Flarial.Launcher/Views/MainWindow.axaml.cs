@@ -14,7 +14,7 @@ using ReactiveUI.Primitives;
 namespace Flarial.Launcher.Views;
 
 // ReSharper disable once PartialTypeWithSinglePart
-public partial class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     public static Canvas? ToolTipLayerInstance { get; private set; }
 

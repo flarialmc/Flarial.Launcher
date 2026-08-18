@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using Flarial.Launcher.ViewModels;
 using Flarial.Runtime.Discord;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;

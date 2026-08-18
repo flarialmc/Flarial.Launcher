@@ -6,7 +6,7 @@ using ReactiveUI.Primitives.Signals;
 
 namespace Flarial.Launcher.ViewModels;
 
-public class MessageBoxViewModel : ReactiveObject
+public sealed class MessageBoxViewModel : ReactiveObject
 {
     private readonly TaskCompletionSource<string> _tcs = new();
     private string? _pendingResult;

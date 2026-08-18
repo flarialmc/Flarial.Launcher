@@ -1,3 +1,3 @@
 namespace Flarial.Launcher.ViewModels;
 
-public class SettingsConfigsViewModel : ViewModelBase;
+public sealed class SettingsConfigsViewModel : ViewModelBase;

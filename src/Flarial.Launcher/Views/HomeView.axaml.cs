@@ -12,7 +12,7 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Launcher.Views;
 
-public partial class HomeView : UserControl
+public sealed partial class HomeView : UserControl
 {
     static readonly Cursor s_cursor = new(StandardCursorType.Hand);
 

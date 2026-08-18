@@ -14,7 +14,7 @@ using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Views;
 
-public partial class SettingsView : UserControl
+public sealed partial class SettingsView : UserControl
 {
     public SettingsView()
     {

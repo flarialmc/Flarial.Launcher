@@ -3,7 +3,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
-public partial class SettingsVersionsViewModel : ViewModelBase
+public sealed partial class SettingsVersionsViewModel : ViewModelBase
 {
     [Reactive]
     bool _isInstalling;

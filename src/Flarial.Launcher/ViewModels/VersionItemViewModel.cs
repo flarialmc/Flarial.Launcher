@@ -14,7 +14,7 @@ namespace Flarial.Launcher.ViewModels;
 
 public enum VersionItemState { Downloading, Installing, Installed, NotInstalled }
 
-public partial class VersionItemViewModel : ViewModelBase
+public sealed partial class VersionItemViewModel : ViewModelBase
 {
     public string Version { get; }
 

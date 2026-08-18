@@ -11,20 +11,21 @@ public sealed class VersionItem
 {
     static readonly string s_path = Path.GetTempPath();
 
-    public override string ToString() => _string;
-
-    internal VersionItem(string version, string[] downloadUris, byte[] gameLaunchHelper)
+    internal VersionItem(GameVersion version, string[] downloadUris, byte[] gameLaunchHelper)
     {
         _version = version;
+        _string = version.ToString();
+
         _downloadUris = downloadUris;
         _gameLaunchHelper = gameLaunchHelper;
-        _string = new GameVersion(version).ToString();
     }
 
     readonly string _string;
     readonly string[] _downloadUris;
     readonly byte[] _gameLaunchHelper;
-    internal readonly string _version;
+
+    internal readonly GameVersion _version;
+    public override string ToString() => _string;
 
     async Task InstallAsync(string uri, Action<int, bool> callback)
     {

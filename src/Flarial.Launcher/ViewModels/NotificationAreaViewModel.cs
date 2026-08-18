@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Flarial.Launcher.ViewModels;
 
-public class NotificationAreaViewModel : ViewModelBase
+public sealed class NotificationAreaViewModel : ViewModelBase
 {
     public ObservableCollection<NotificationViewModel> Notifications { get; } = [];
 

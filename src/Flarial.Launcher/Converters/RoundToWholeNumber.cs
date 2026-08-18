@@ -4,7 +4,7 @@ using Avalonia.Data.Converters;
 
 namespace Flarial.Launcher.Converters;
 
-public class RoundToWholeNumber : IValueConverter
+public sealed class RoundToWholeNumber : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

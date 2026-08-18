@@ -4,16 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
-using Flarial.Launcher.Dialogs;
 using Flarial.Launcher.Dialogs.Metadata;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
 using Flarial.Runtime.Core;
-using Flarial.Runtime.Discord;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 

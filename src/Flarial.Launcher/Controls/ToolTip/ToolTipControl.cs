@@ -9,25 +9,25 @@ using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Controls.ToolTip;
 
-public class ToolTipControl : ContentControl
+public sealed class ToolTipControl : ContentControl
 {
     private Control? _geometryHost;
     private AcrylicBlur.AcrylicBlur? _acrylic;
     private Path? _border;
     private double _arrowCenterX;
 
-    
+
     public static readonly StyledProperty<Control?> TargetProperty =
         AvaloniaProperty.Register<ToolTipControl, Control?>(nameof(Target));
 
     public static readonly StyledProperty<PlacementMode> PlacementProperty =
         AvaloniaProperty.Register<ToolTipControl, PlacementMode>(
-            nameof(Placement), 
+            nameof(Placement),
             defaultValue: PlacementMode.Top);
 
     public static readonly StyledProperty<double> OffsetProperty =
         AvaloniaProperty.Register<ToolTipControl, double>(
-            nameof(Offset), 
+            nameof(Offset),
             defaultValue: 8.0);
 
     public Control? Target
@@ -52,7 +52,7 @@ public class ToolTipControl : ContentControl
     {
         AffectsArrange<ToolTipControl>(TargetProperty, PlacementProperty, OffsetProperty, BoundsProperty);
     }
-    
+
     public ToolTipControl()
     {
         HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
@@ -74,10 +74,10 @@ public class ToolTipControl : ContentControl
         const double r = 10;          // Corner Radius
         const double arrowW = 12;     // Arrow Width at base
         const double arrowH = 16;     // Arrow Height
-        
+
         // Ensure the arrow stays within the rounded corners
         var center = ClampArrowCenter(_arrowCenterX, w);
-        
+
         var g = new StreamGeometry();
 
         using (var ctx = g.Open())
@@ -118,7 +118,7 @@ public class ToolTipControl : ContentControl
                 ctx.ArcTo(new Point(r, arrowH), new Size(r, r), 0, false, SweepDirection.Clockwise);
             }
             // === PLACEMENT: TOP / DEFAULT (Arrow points DOWN) ===
-            else 
+            else
             {
                 // The "body" starts at Y = 0 and goes to h - arrowH
                 var bodyBottom = h - arrowH;
@@ -151,7 +151,7 @@ public class ToolTipControl : ContentControl
         _acrylic.Clip = g;
         _border.Data = g;
     }
-    
+
     private void UpdatePadding()
     {
         const double arrowH = 16;     // Must match UpdateGeometry
@@ -159,10 +159,10 @@ public class ToolTipControl : ContentControl
 
         // If arrow is on Top (Placement=Bottom), push content down.
         // If arrow is on Bottom (Placement=Top), push content up (bottom padding).
-        Padding = Placement == PlacementMode.Bottom ? new Thickness(contentMargin, contentMargin + arrowH, contentMargin, contentMargin) 
+        Padding = Placement == PlacementMode.Bottom ? new Thickness(contentMargin, contentMargin + arrowH, contentMargin, contentMargin)
             : new Thickness(contentMargin, contentMargin, contentMargin, contentMargin + arrowH);
     }
-    
+
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
     {
         base.OnAttachedToVisualTree(e);
@@ -172,14 +172,14 @@ public class ToolTipControl : ContentControl
     protected override void OnApplyTemplate(TemplateAppliedEventArgs e)
     {
         base.OnApplyTemplate(e);
-        
+
         _geometryHost = e.NameScope.Find<Control>("PART_GeometryHost");
         _acrylic = e.NameScope.Find<AcrylicBlur.AcrylicBlur>("PART_Acrylic");
         _border = e.NameScope.Find<Path>("PART_Border");
 
         _geometryHost?.GetObservable(BoundsProperty)
             .Subscribe(_ => UpdateGeometry());
-        
+
         // Initial setup
         UpdatePadding();
     }
@@ -209,7 +209,7 @@ public class ToolTipControl : ContentControl
     protected override Size ArrangeOverride(Size finalSize)
     {
         var result = base.ArrangeOverride(finalSize);
-        
+
         // Only update position if we have a target
         if (Target != null)
             UpdatePosition(result);
@@ -220,7 +220,7 @@ public class ToolTipControl : ContentControl
                 if (Target != null) InvalidateArrange();
             }, DispatcherPriority.Render);
         }
-        
+
         return result;
     }
 
@@ -265,7 +265,7 @@ public class ToolTipControl : ContentControl
             Canvas.SetTop(this, position.Y);
         }
         else RenderTransform = new TranslateTransform(position.X, position.Y);
-        
+
         UpdateGeometry();
 
     }
@@ -279,7 +279,7 @@ public class ToolTipControl : ContentControl
         return Math.Clamp(x, margin, width - margin);
     }
 
-    
+
     private Point CalculatePosition(Rect targetBounds, double tooltipWidth, double tooltipHeight)
     {
         return Placement switch
@@ -287,19 +287,19 @@ public class ToolTipControl : ContentControl
             PlacementMode.Top => new Point(
                 targetBounds.X + (targetBounds.Width - tooltipWidth) / 2,
                 targetBounds.Y - tooltipHeight - Offset),
-            
+
             PlacementMode.Bottom => new Point(
                 targetBounds.X + (targetBounds.Width - tooltipWidth) / 2,
                 targetBounds.Y + targetBounds.Height + Offset),
-            
+
             PlacementMode.Left => new Point(
                 targetBounds.X - tooltipWidth - Offset,
                 targetBounds.Y + (targetBounds.Height - tooltipHeight) / 2),
-            
+
             PlacementMode.Right => new Point(
                 targetBounds.X + targetBounds.Width + Offset,
                 targetBounds.Y + (targetBounds.Height - tooltipHeight) / 2),
-            
+
             _ => new Point(
                 targetBounds.X + (targetBounds.Width - tooltipWidth) / 2,
                 targetBounds.Y - tooltipHeight - Offset)

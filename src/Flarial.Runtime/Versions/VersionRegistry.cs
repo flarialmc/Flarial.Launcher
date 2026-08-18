@@ -12,8 +12,8 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
     {
         public int Compare(VersionItem? x, VersionItem? y)
         {
-            GameVersion a = new(x!._version!);
-            GameVersion b = new(y!._version);
+            GameVersion a = x!._version;
+            GameVersion b = y!._version;
 
             if (b._major != a._major)
                 return b._major.CompareTo(a._major);
@@ -23,12 +23,6 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
 
             return b._build.CompareTo(a._build);
         }
-    }
-
-    static string RoundVersionBuild(in GameVersion version)
-    {
-        var build = version._build / 10 * 10;
-        return $"{version._major}.{version._minor}.{build}";
     }
 
     public static string InstalledVersion
@@ -47,12 +41,12 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
     const string DownloadLinksUri = "https://cdn.jsdelivr.net/gh/MinecraftBedrockArchiver/GdkLinks@latest/urls.min.json";
 
     readonly List<VersionItem> _versionItems;
-    readonly HashSet<string> _supportedVersions;
+    readonly HashSet<GameVersion> _gameVersions;
 
-    VersionRegistry(HashSet<string> supportedVersions, List<VersionItem> versionItems)
+    VersionRegistry(HashSet<GameVersion> gameVersions, List<VersionItem> versionItems)
     {
+        _gameVersions = gameVersions;
         _versionItems = versionItems;
-        _supportedVersions = supportedVersions;
         PreferredVersion = $"{_versionItems[0]}";
     }
 
@@ -65,15 +59,15 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
             var packageVersion = Minecraft.Package.Id.Version;
             GameVersion gameVersion = new(packageVersion);
 
-            var roundedVersion = RoundVersionBuild(gameVersion);
-            return _supportedVersions.Contains(roundedVersion);
+            var truncatedVersion = gameVersion.Truncate();
+            return _gameVersions.Contains(truncatedVersion);
         }
     }
 
     public static Task<VersionRegistry> GetAsync() => Task.Run(static async () =>
     {
         var gameLaunchHelperTask = HttpService.GetBytesAsync(GameLaunchHelperUri);
-        var supportedVersionsTask = HttpService.GetJsonAsync<HashSet<string>>(SupportedVersionsUri);
+        var supportedVersionsTask = HttpService.GetJsonAsync<List<string>>(SupportedVersionsUri);
         var downloadLinksTask = HttpService.GetJsonAsync<Dictionary<string, Dictionary<string, string[]>>>(DownloadLinksUri);
 
         await Task.WhenAll(gameLaunchHelperTask, supportedVersionsTask, downloadLinksTask);
@@ -83,6 +77,13 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
         var supportedVersions = await supportedVersionsTask;
 
         List<VersionItem> versionItems = [];
+        HashSet<GameVersion> gameVersions = new(supportedVersions.Count);
+
+        foreach (var version in supportedVersions)
+        {
+            GameVersion gameVersion = new(version);
+            gameVersions.Add(gameVersion.Truncate());
+        }
 
         foreach (var item in downloadLinks["release"])
         {
@@ -90,17 +91,16 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
             var downloadVersion = item.Key[..index];
 
             GameVersion gameVersion = new(downloadVersion);
-            var roundedVersion = RoundVersionBuild(gameVersion);
+            var truncatedVersion = gameVersion.Truncate();
 
-            if (!supportedVersions.Contains(roundedVersion))
+            if (!gameVersions.Contains(truncatedVersion))
                 continue;
 
-            versionItems.Add(new(downloadVersion, item.Value, gameLaunchHelper));
+            versionItems.Add(new(gameVersion, item.Value, gameLaunchHelper));
         }
 
         versionItems.Sort(s_comparer);
-
-        return new VersionRegistry(supportedVersions, versionItems);
+        return new VersionRegistry(gameVersions, versionItems);
     });
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

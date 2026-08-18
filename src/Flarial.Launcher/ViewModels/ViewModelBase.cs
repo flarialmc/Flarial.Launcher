@@ -9,7 +9,7 @@ public abstract partial class ViewModelBase : ReactiveObject
 {
     // wtf why did i think this was going to work
     // todo: change this to be static instead
-    [Reactive] 
+    [Reactive]
     private bool _isAnimating;
 
     public ReactiveCommand<PageTransitions, ReactiveUI.Primitives.RxVoid> NavigateCommand { get; }

@@ -20,7 +20,6 @@ abstract class StorePage<T> : StorePage where T : StorePage<T>, new()
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
     internal static readonly T _ = new();
 }
 

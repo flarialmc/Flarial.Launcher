@@ -16,7 +16,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
-public partial class SettingsGeneralViewModel : ViewModelBase
+public sealed partial class SettingsGeneralViewModel : ViewModelBase
 {
     [Reactive] string? _customDllPath = null;
     [Reactive] bool _customDllSelected = false;
