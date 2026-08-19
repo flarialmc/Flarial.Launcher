@@ -5,13 +5,13 @@ namespace Flarial.Runtime.Services;
 
 abstract class CredentialService<T> : CredentialService where T : CredentialService<T>, new()
 {
+    internal static readonly T _ = new();
+
     private protected CredentialService()
     {
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
-    internal static readonly T _  = new();
 }
 
 abstract class CredentialService

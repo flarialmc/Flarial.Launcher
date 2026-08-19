@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 using Windows.ApplicationModel;
+using Windows.Management.Deployment;
 using static Windows.Win32.PInvoke;
 
 namespace Flarial.Runtime.Core;
@@ -43,12 +44,25 @@ public static class FlarialLauncher
         return s_version is { } && version != s_version;
     }
 
-    public static async Task DownloadAsync(Action<int> callback)
+    readonly struct OnDownloadAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<int>
+    {
+        public void Report(int value)
+        {
+            progress.Report(value);
+        }
+
+        public void Report(DeploymentProgress value)
+        {
+            progress.Report((int)value.percentage);
+        }
+    }
+
+    public static async Task DownloadAsync<T>(T progress) where T : IProgress<int>
     {
         if (s_version is null) return;
-        await HttpService.DownloadAsync(LauncherPackageUri, s_path, callback);
+        await HttpService.DownloadAsync(LauncherPackageUri, s_path, progress);
 
         RegisterApplicationRestart(null, default);
-        await Task.Run(() => PackageService.Add(new(s_path), callback));
+        await PackageService.AddAsync(new(s_path), new OnDownloadAsync<T>(progress));
     }
 }

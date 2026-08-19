@@ -10,13 +10,13 @@ namespace Flarial.Launcher.Dialogs;
 
 abstract class MessageDialog<T> : MessageDialog where T : MessageDialog<T>, new()
 {
+    internal static readonly T _ = new();
+
     private protected MessageDialog()
     {
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
-    internal static readonly T _  = new(); 
 }
 
 abstract class MessageDialog

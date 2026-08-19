@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
+using Windows.Management.Deployment;
 
 namespace Flarial.Runtime.Versions;
 
@@ -27,14 +28,28 @@ public sealed class VersionItem
     internal readonly GameVersion _version;
     public override string ToString() => _string;
 
-    async Task InstallAsync(string uri, Action<int, bool> callback)
+    readonly struct OnInstallAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<(int, bool)>
     {
+        public void Report(int value)
+        {
+            progress.Report((value, false));
+        }
+
+        public void Report(DeploymentProgress value)
+        {
+            progress.Report(((int)value.percentage, true));
+        }
+    }
+
+    async Task InstallAsync<T>(string uri, T progress) where T : IProgress<(int, bool)>
+    {
+        OnInstallAsync<T> callback = new(progress);
         var packagePath = Path.Combine(s_path, Path.GetRandomFileName());
 
         try
         {
-            await HttpService.DownloadAsync(uri, packagePath, OnDownload);
-            await Task.Run(() => PackageService.Add(new(packagePath), OnInstall));
+            await HttpService.DownloadAsync(uri, packagePath, callback);
+            await PackageService.AddAsync(new(packagePath), callback);
 
             var installedPath = Minecraft.Package.InstalledPath;
             var gameLaunchHelperPath = Path.Combine(installedPath, "gamelaunchhelper.dll");
@@ -46,12 +61,9 @@ public sealed class VersionItem
             try { File.Delete(packagePath); }
             catch { }
         }
-
-        void OnInstall(int value) => callback(value, true);
-        void OnDownload(int value) => callback(value, false);
     }
 
-    public async Task<Task?> InstallAsync(Action<int, bool> callback)
+    public async Task<Task?> InstallAsync<T>(T progress) where T : IProgress<(int, bool)>
     {
         if (!GamingServices.IsInstalled)
             throw new GamingServicesNotInstalledException();
@@ -65,6 +77,6 @@ public sealed class VersionItem
         if (await HttpService.ProbeAsync(_downloadUris) is not { } uri)
             return null;
 
-        return InstallAsync(uri, callback);
+        return InstallAsync(uri, progress);
     }
 }

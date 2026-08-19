@@ -11,12 +11,13 @@ namespace Flarial.Runtime.Core;
 
 public abstract class FlarialClient<T> : FlarialClient where T : FlarialClient<T>, new()
 {
+    public static readonly T _ = new();
+
     private protected FlarialClient()
     {
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-    public static readonly T _ = new();
 }
 
 public abstract partial class FlarialClient
@@ -71,7 +72,7 @@ public abstract partial class FlarialClient
         catch { return string.Empty; }
     }
 
-    public async Task<bool> DownloadAsync(Action<int> callback)
+    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
     {
         var localHashTask = GetLocalHashAsync();
         var remoteHashTask = GetRemoteHashAsync();
@@ -86,7 +87,7 @@ public abstract partial class FlarialClient
         try { File.Delete(FileName); }
         catch { return false; }
 
-        await HttpService.DownloadAsync(DownloadUri, FileName, callback);
+        await HttpService.DownloadAsync(DownloadUri, FileName, progress);
         return true;
     }
 }

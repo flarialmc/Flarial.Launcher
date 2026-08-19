@@ -11,7 +11,7 @@ public sealed class NotificationViewModel : ReactiveObject
 
     public Signal<RxVoid> CloseRequested { get; } = new();
 
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> CloseCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CloseCommand { get; }
 
     private readonly Action _onDismissed;
 

@@ -6,7 +6,7 @@ namespace Flarial.Runtime.Services;
 
 static partial class HttpService
 {
-    internal static async Task DownloadAsync(string uri, string path, Action<int> callback)
+    internal static async Task DownloadAsync<T>(string uri, string path, T progress) where T : IProgress<int>
     {
         using var response = await GetAsync(uri, default);
         response.EnsureSuccessStatusCode();
@@ -31,7 +31,7 @@ static partial class HttpService
             var arg = value += count;
             arg = arg / length * 100;
 
-            callback((int)arg);
+            progress.Report((int)arg);
         }
     }
 }

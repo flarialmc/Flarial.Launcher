@@ -14,7 +14,7 @@ using ReactiveUI;
 
 namespace Flarial.Launcher.ViewModels;
 
-public sealed partial class MainWindowViewModel : ViewModelBase
+public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
 {
     readonly SemaphoreSlim _semaphore = new(1, 1);
 
@@ -56,7 +56,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         finally { _semaphore.Release(); }
     }
 
-    void OnDownload(int value) => HomeViewModel.LauncherStatus = $"Updating... {value}%";
+    public void Report(int value)
+    {
+        HomeViewModel.LauncherStatus = $"Updating... {value}%";
+    }
 
     async Task LoginWithDiscordAsync()
     {
@@ -76,7 +79,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         if (await FlarialLauncher.CheckForUpdatesAsync() && (_settings.AutomaticUpdates || await LauncherUpdateAvailableDialog._.ShowAsync()))
         {
             HomeViewModel.LauncherStatus = "Updating...";
-            await FlarialLauncher.DownloadAsync(OnDownload);
+            await FlarialLauncher.DownloadAsync(this);
             return;
         }
 

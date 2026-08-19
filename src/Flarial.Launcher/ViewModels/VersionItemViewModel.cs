@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -14,21 +15,16 @@ namespace Flarial.Launcher.ViewModels;
 
 public enum VersionItemState { Downloading, Installing, Installed, NotInstalled }
 
-public sealed partial class VersionItemViewModel : ViewModelBase
+public sealed partial class VersionItemViewModel : ViewModelBase, IProgress<(int Percentage, bool Installing)>
 {
     public string Version { get; }
 
-    [Reactive]
-    VersionItemState _state = VersionItemState.NotInstalled;
+    [Reactive] VersionItemState _state = VersionItemState.NotInstalled;
+    [Reactive] double _installPercentage;
+    [Reactive] bool _isProgressing;
 
-    [Reactive]
-    double _installPercentage;
-
-    [Reactive]
-    bool _isProgressing;
-
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> DeleteCommand { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> InstallCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> DeleteCommand { get; }
+    public ReactiveCommand<RxVoid, RxVoid> InstallCommand { get; }
 
     public bool IsInstalling => State is VersionItemState.Installing;
     public bool IsDownloading => State is VersionItemState.Downloading;
@@ -55,7 +51,6 @@ public sealed partial class VersionItemViewModel : ViewModelBase
         }
         set;
     }
-
 
     public VersionItemViewModel(MainWindowViewModel mainWindowViewModel, VersionItem versionItem)
     {
@@ -84,10 +79,10 @@ public sealed partial class VersionItemViewModel : ViewModelBase
         InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.NotInstalled));
     }
 
-    void OnInstall(int percentage, bool installing)
+    public void Report((int Percentage, bool Installing) value)
     {
-        InstallPercentage = percentage;
-        if (installing) State = VersionItemState.Installing;
+        InstallPercentage = value.Percentage;
+        if (value.Installing) State = VersionItemState.Installing;
     }
 
     async void OnClosing(object? sender, WindowClosingEventArgs args)
@@ -130,7 +125,7 @@ public sealed partial class VersionItemViewModel : ViewModelBase
             InstallPercentage = 0;
             State = VersionItemState.Downloading;
 
-            var task = await _versionItem.InstallAsync(OnInstall);
+            var task = await _versionItem.InstallAsync(this);
 
             if (task is null)
             {

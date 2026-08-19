@@ -16,7 +16,7 @@ public sealed class MessageBoxViewModel : ReactiveObject
     public IEnumerable<string> Buttons { get; }
     public Signal<RxVoid> CloseRequested { get; } = new();
 
-    public ReactiveCommand<string, ReactiveUI.Primitives.RxVoid> SelectButtonCommand { get; }
+    public ReactiveCommand<string, RxVoid> SelectButtonCommand { get; }
 
     public Task<string> Result => _tcs.Task;
 

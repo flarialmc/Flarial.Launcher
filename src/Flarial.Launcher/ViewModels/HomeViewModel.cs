@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
@@ -13,7 +14,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
-public sealed partial class HomeViewModel : ViewModelBase
+public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 {
     [Reactive] bool _showPromotions = true;
     [Reactive] bool _isLaunching = true;
@@ -110,7 +111,7 @@ public sealed partial class HomeViewModel : ViewModelBase
                 return;
 
             LauncherStatus = "Verifying...";
-            if (!await client.DownloadAsync(OnDownload))
+            if (!await client.DownloadAsync(this))
             {
                 await ClientUpdateFailureDialog._.ShowAsync();
                 return;
@@ -136,7 +137,7 @@ public sealed partial class HomeViewModel : ViewModelBase
         }
     }
 
-    void OnDownload(int value) => LauncherStatus = $"Downloading... {value}%";
+    public void Report(int value) => LauncherStatus = $"Downloading... {value}%";
 
     public void OnPackageStatusChanged()
     {
