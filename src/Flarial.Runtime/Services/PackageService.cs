@@ -23,6 +23,6 @@ static class PackageService
 
     internal static Task AddAsync<T>(Uri packageUri, T progress) where T : IProgress<DeploymentProgress>
     {
-        return s_manager.AddPackageByUriAsync(packageUri, s_options).AsTask(progress);
+        return s_manager.AddPackageByUriAsync(packageUri, s_options).AsTask(default, progress);
     }
 }
