@@ -10,15 +10,14 @@ using Flarial.Runtime.Core;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
 public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 {
-    [Reactive] bool _showPromotions = true;
     [Reactive] bool _isLaunching = true;
-
     [Reactive] string _launcherStatus = "Preparing...";
     [Reactive] string _launcherVersion = FlarialLauncher.Version;
 
@@ -32,9 +31,9 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
     readonly MainWindowViewModel _model;
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Launch { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> CloseWindow { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> MinimizeWindow { get; }
+    public ReactiveCommand<RxVoid, RxVoid> Launch { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CloseWindow { get; }
+    public ReactiveCommand<RxVoid, RxVoid> MinimizeWindow { get; }
 
     public HomeViewModel(MainWindowViewModel model)
     {
