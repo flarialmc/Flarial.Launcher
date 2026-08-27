@@ -78,7 +78,7 @@
         <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.1" />
         <PackageReference Include="ReactiveUI.SourceGenerators" Version="3.2.0" />
 
-        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2526" />
+        <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.28000.2705" />
         <PackageReference Include="Microsoft.Windows.SDK.BuildTools.MSIX" Version="1.7.260610101" />
     </ItemGroup>
 
