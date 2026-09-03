@@ -10,7 +10,6 @@ namespace Flarial.Runtime.Discord;
 public static class AccountManager
 {
     const string UserAgent = "Samsung AI-Powered Washing Machine";
-    const string AvatarUri = "https://cdn.discordapp.com/avatars/{0}/{1}";
     const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
@@ -31,12 +30,10 @@ public static class AccountManager
             if (!response.IsSuccessStatusCode) return null;
 
             using var stream = await response.Content.ReadAsStreamAsync();
-            var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
+            var metadata = await JsonService.Default.ReadAsync<AccountMetadata>(stream);
 
             FlarialClientBeta._.AccessToken = accessToken;
-
-            var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
-            return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
+            return new(metadata);
         }
         finally { s_semaphore.Release(); }
     }

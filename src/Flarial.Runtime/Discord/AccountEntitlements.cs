@@ -2,10 +2,10 @@ using System.Text.Json.Serialization;
 
 namespace Flarial.Runtime.Discord;
 
-sealed class AccountEntitlements
+sealed class AccountMetadata
 {
     [JsonConstructor]
-    internal AccountEntitlements(string? avatar, string username, string discordId, bool hasTesterRole, bool hasFlarialPlus)
+    internal AccountMetadata(string? avatar, string username, string discordId, bool hasTesterRole, bool hasFlarialPlus)
     {
         Avatar = avatar;
         Username = username;

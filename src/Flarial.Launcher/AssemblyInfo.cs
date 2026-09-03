@@ -7,6 +7,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Unmanaged;
+using ReactiveUI.Primitives.Extensions;
 
 [assembly: AssemblyCompany("Flarial")]
 [assembly: AssemblyProduct("Launcher")]
@@ -54,7 +55,15 @@ Exception: {1}
         nint handle = new(lifetime?.MainWindow?.TryGetPlatformHandle()?.Handle ?? 0);
 
         var content = string.Format(Content, version, type, message);
-        NativeMethods.TaskDialog(handle, Title, Instruction, content, information);
+
+        new NativeDialog
+        {
+            Handle = handle,
+            Title = Title,
+            Content = content,
+            Instruction = Instruction,
+            Information = information,
+        }.Show();
 
         Environment.Exit(1);
     }

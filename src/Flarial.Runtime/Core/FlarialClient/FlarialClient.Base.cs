@@ -28,6 +28,7 @@ public abstract partial class FlarialClient
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
 
+    private protected abstract Task<string> GetLocalHashAsync();
     private protected abstract Task<bool> DownloadClientAsync<T>(T progress) where T : IProgress<int>;
 
     private protected FlarialClient() { }
@@ -46,6 +47,12 @@ public abstract partial class FlarialClient
         }
     }
 
+    async Task<string> GetRemoteHashAsync()
+    {
+        var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
+        return json[Build];
+    }
+
     public bool Launch()
     {
         if (!IsRunning && Injector.Launch(new(FileName)))
@@ -54,23 +61,6 @@ public abstract partial class FlarialClient
             return true;
         }
         return false;
-    }
-
-    async Task<string> GetRemoteHashAsync()
-    {
-        var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
-        return json[Build];
-    }
-
-    protected private virtual async Task<string> GetLocalHashAsync()
-    {
-        try
-        {
-            using var stream = File.OpenRead(FileName);
-            var array = await SHA256.HashDataAsync(stream);
-            return Convert.ToHexString(array);
-        }
-        catch { return string.Empty; }
     }
 
     public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>

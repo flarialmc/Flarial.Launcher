@@ -7,11 +7,13 @@ using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
 using Flarial.Launcher.Types;
 using Flarial.Runtime.Core;
+using Flarial.Runtime.Discord;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
+using Windows.Services.Maps;
 
 namespace Flarial.Launcher.ViewModels;
 

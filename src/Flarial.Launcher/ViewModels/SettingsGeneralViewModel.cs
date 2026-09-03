@@ -169,12 +169,11 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     async Task OnLogoutAsync()
     {
         HasBetaAccess = false;
+        await AccountManager.LogoutAsync();
 
         DiscordAccount.Logout();
         DiscordLoginAvailable = true;
         DiscordAccountAvailable = false;
-
-        await AccountManager.LogoutAsync();
     }
 
     private void OnBuildChanged(SegmentItem? item)
