@@ -1,6 +1,6 @@
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
@@ -11,11 +11,17 @@ namespace Flarial.Runtime.Core;
 
 public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
 {
-    const string DownloadUri = "https://cdn.flarial.xyz/dll/beta.dll";
+    const string DownloadUri = "https://api.flarial.xyz/api/v2/beta/dll";
 
     private protected override string Build => "commitHash";
     private protected override string FileName => "Flarial.Client.Beta.dll";
     private protected override string HashesUri => "https://api.flarial.xyz/api/v2/beta/dll/hash";
+
+    internal string? AccessToken
+    {
+        set => Interlocked.Exchange(ref field, value);
+        get => Interlocked.CompareExchange(ref field, null, null);
+    }
 
     private protected unsafe override Task<string> GetLocalHashAsync()
     {
@@ -34,8 +40,15 @@ public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
         }
     }
 
-    private protected override Task<string> GetDownloadUriAsync()
+    private protected override async Task<bool> DownloadClientAsync<T>(T progress)
     {
-        return Task.FromResult(DownloadUri);
+        using HttpRequestMessage request = new(HttpMethod.Post, DownloadUri);
+        request.Headers.Authorization = new("Bearer", AccessToken);
+
+        using var response = await HttpService.SendAsync(request);
+        if (!response.IsSuccessStatusCode) return false;
+
+        await response.DownloadAsync(FileName, progress);
+        return true;
     }
 }

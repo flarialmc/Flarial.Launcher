@@ -1,7 +1,9 @@
 using System.Net.Http;
 using System.Threading.Tasks;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
+using Windows.UI.WebUI;
 
 namespace Flarial.Runtime.Discord;
 
@@ -13,13 +15,13 @@ public static class AccountManager
 
     public static async Task<AccountDetails?> LoginAsync()
     {
-        if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } token)
+        if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
             return null;
 
         using HttpRequestMessage request = new(HttpMethod.Post, PremiumUri);
 
         request.Headers.UserAgent.ParseAdd(UserAgent);
-        request.Headers.Authorization = new("Bearer", token);
+        request.Headers.Authorization = new("Bearer", accessToken);
 
         using var response = await HttpService.SendAsync(request);
         if (!response.IsSuccessStatusCode) return null;
@@ -27,9 +29,15 @@ public static class AccountManager
         using var stream = await response.Content.ReadAsStreamAsync();
         var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
 
+        FlarialClientBeta._.AccessToken = accessToken;
+
         var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
         return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
     }
 
-    public static void Logout() => RefreshTokenManager._.Remove();
+    public static void Logout()
+    {
+        FlarialClientBeta._.AccessToken = null;
+        RefreshTokenManager._.Remove();
+    }
 }

@@ -27,7 +27,8 @@ public abstract partial class FlarialClient
     private protected abstract string Build { get; }
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
-    private protected abstract Task<string> GetDownloadUriAsync();
+
+    private protected abstract Task<bool> DownloadClientAsync<T>(T progress) where T : IProgress<int>;
 
     private protected FlarialClient() { }
 
@@ -87,9 +88,6 @@ public abstract partial class FlarialClient
         try { File.Delete(FileName); }
         catch { return false; }
 
-        var downloadUri = await GetDownloadUriAsync();
-        await HttpService.DownloadAsync(downloadUri, FileName, progress);
-
-        return true;
+        return await DownloadClientAsync(progress);
     }
 }
