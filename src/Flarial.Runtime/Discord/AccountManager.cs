@@ -30,10 +30,10 @@ public static class AccountManager
             using var response = await HttpService.SendAsync(request);
             if (!response.IsSuccessStatusCode) return null;
 
-            FlarialClientBeta._.AccessToken = accessToken;
-
             using var stream = await response.Content.ReadAsStreamAsync();
             var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
+
+            FlarialClientBeta._.AccessToken = accessToken;
 
             var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
             return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
