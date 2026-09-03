@@ -22,9 +22,12 @@ public abstract class FlarialClient<T> : FlarialClient where T : FlarialClient<T
 
 public abstract partial class FlarialClient
 {
+    const string ClassName = "Flarial Client";
+
     private protected abstract string Build { get; }
     private protected abstract string FileName { get; }
-    private protected abstract string DownloadUri { get; }
+    private protected abstract string HashesUri { get; }
+    private protected abstract Task<string> GetDownloadUriAsync();
 
     private protected FlarialClient() { }
 
@@ -52,16 +55,13 @@ public abstract partial class FlarialClient
         return false;
     }
 
-    const string ClassName = "Flarial Client";
-    const string HashesUri = "https://cdn.flarial.xyz/dll_hashes.json";
-
     async Task<string> GetRemoteHashAsync()
     {
         var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
         return json[Build];
     }
 
-    async Task<string> GetLocalHashAsync()
+    protected private virtual async Task<string> GetLocalHashAsync()
     {
         try
         {
@@ -87,7 +87,9 @@ public abstract partial class FlarialClient
         try { File.Delete(FileName); }
         catch { return false; }
 
-        await HttpService.DownloadAsync(DownloadUri, FileName, progress);
+        var downloadUri = await GetDownloadUriAsync();
+        await HttpService.DownloadAsync(downloadUri, FileName, progress);
+
         return true;
     }
 }
