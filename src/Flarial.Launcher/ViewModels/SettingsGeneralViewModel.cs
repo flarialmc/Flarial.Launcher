@@ -130,9 +130,9 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         PerformanceMode = _settings.PerformanceMode;
         AutomaticUpdates = _settings.AutomaticUpdates;
 
-        Logout = ReactiveCommand.Create(OnLogout);
         Open = ReactiveCommand.CreateFromTask(OnOpenAsync);
         Login = ReactiveCommand.CreateFromTask(OnLoginAsync);
+        Logout = ReactiveCommand.CreateFromTask(OnLogoutAsync);
         OpenClientFolder = ReactiveCommand.Create(OnOpenClientFolder);
         OpenLauncherFolder = ReactiveCommand.Create(OnOpenLauncherFolder);
     }
@@ -143,7 +143,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 
         if (!await AuthenticationManager.AuthenticateAsync())
         {
-            OnLogout();
+            await OnLogoutAsync();
             return;
         }
 
@@ -156,7 +156,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 
         if (await AccountManager.LoginAsync() is not { } account)
         {
-            OnLogout();
+            await OnLogoutAsync();
             return;
         }
 
@@ -166,15 +166,15 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         DiscordAccount.Login(account);
     }
 
-    void OnLogout()
+    async Task OnLogoutAsync()
     {
         HasBetaAccess = false;
 
-        AccountManager.Logout();
         DiscordAccount.Logout();
-
         DiscordLoginAvailable = true;
         DiscordAccountAvailable = false;
+
+        await AccountManager.LogoutAsync();
     }
 
     private void OnBuildChanged(SegmentItem? item)

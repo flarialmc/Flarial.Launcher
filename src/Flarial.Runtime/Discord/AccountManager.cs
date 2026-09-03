@@ -1,9 +1,9 @@
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
-using Windows.UI.WebUI;
 
 namespace Flarial.Runtime.Discord;
 
@@ -13,31 +13,41 @@ public static class AccountManager
     const string AvatarUri = "https://cdn.discordapp.com/avatars/{0}/{1}";
     const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";
 
+    static readonly SemaphoreSlim s_semaphore = new(1, 1);
+
     public static async Task<AccountDetails?> LoginAsync()
     {
-        if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
-            return null;
+        await s_semaphore.WaitAsync(); try
+        {
+            if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
+                return null;
 
-        using HttpRequestMessage request = new(HttpMethod.Post, PremiumUri);
+            using HttpRequestMessage request = new(HttpMethod.Post, PremiumUri);
 
-        request.Headers.UserAgent.ParseAdd(UserAgent);
-        request.Headers.Authorization = new("Bearer", accessToken);
+            request.Headers.UserAgent.ParseAdd(UserAgent);
+            request.Headers.Authorization = new("Bearer", accessToken);
 
-        using var response = await HttpService.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return null;
+            using var response = await HttpService.SendAsync(request);
+            if (!response.IsSuccessStatusCode) return null;
 
-        using var stream = await response.Content.ReadAsStreamAsync();
-        var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
+            FlarialClientBeta._.AccessToken = accessToken;
 
-        FlarialClientBeta._.AccessToken = accessToken;
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var entitlements = await JsonService.Default.ReadAsync<AccountEntitlements>(stream);
 
-        var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
-        return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
+            var avatarUri = string.Format(AvatarUri, entitlements.DiscordId, entitlements.Avatar);
+            return new(entitlements.Username, avatarUri, entitlements.HasFlarialPlus, entitlements.HasTesterRole);
+        }
+        finally { s_semaphore.Release(); }
     }
 
-    public static void Logout()
+    public static async Task LogoutAsync()
     {
-        FlarialClientBeta._.AccessToken = null;
-        RefreshTokenManager._.Remove();
+        await s_semaphore.WaitAsync(); try
+        {
+            FlarialClientBeta._.AccessToken = null;
+            RefreshTokenManager._.Remove();
+        }
+        finally { s_semaphore.Release(); }
     }
 }
