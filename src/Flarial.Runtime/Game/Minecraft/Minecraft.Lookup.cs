@@ -56,17 +56,16 @@ unsafe partial class Minecraft
 
     internal static NativeWindow? GetWindow(uint? processId = null, string className = ClassName)
     {
-        fixed (char* classNamePtr = className)
-        fixed (char* packageFamilyNamePtr = PackageFamilyName)
+        fixed (char* ptr = className)
         {
-            NativeWindow window = HWND.Null;
+            HWND handle = new();
 
-            while ((window = FindWindowEx(HWND.Null, window, classNamePtr, null)) != HWND.Null)
+            while ((handle = FindWindowEx(new(), handle, ptr, null)) > 0)
             {
-                if (processId is { } && processId != window._processId)
+                if (NativeWindow.Open(handle) is not { } window)
                     continue;
 
-                if (PROCESS_QUERY_LIMITED_INFORMATION.Open(window._processId) is not { } process)
+                if (processId is { } && processId != window._processId)
                     continue;
 
                 return window;

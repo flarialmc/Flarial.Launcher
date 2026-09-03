@@ -8,18 +8,24 @@ unsafe readonly struct NativeWindow
     readonly HWND _handle;
     internal readonly uint _processId;
 
-    NativeWindow(HWND handle)
-    {
-        uint processId = 0;
-        _ = GetWindowThreadProcessId(handle, &processId);
+    internal bool IsVisible => IsWindowVisible(_handle);
+    internal void SetActive() => SwitchToThisWindow(_handle, true);
 
+    NativeWindow(HWND handle, uint processId)
+    {
         _handle = handle;
         _processId = processId;
     }
 
-    internal bool IsVisible => IsWindowVisible(_handle);
-    internal void Switch() => SwitchToThisWindow(_handle, true);
+    internal static NativeWindow? Open(HWND handle)
+    {
+        uint processId = 0;
 
-    public static implicit operator NativeWindow(in HWND handle) => new(handle);
+        if (GetWindowThreadProcessId(handle, &processId) < 0)
+            return null;
+
+        return new(handle, processId);
+    }
+
     public static implicit operator HWND(in NativeWindow window) => window._handle;
 }
