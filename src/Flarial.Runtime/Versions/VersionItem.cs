@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
+using Windows.Foundation;
 using Windows.Management.Deployment;
 
 namespace Flarial.Runtime.Versions;
@@ -28,7 +29,7 @@ public sealed class VersionItem
     internal readonly GameVersion _version;
     public override string ToString() => _string;
 
-    readonly struct OnInstallAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<(int, bool)>
+    internal readonly struct OnInstallAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<(int, bool)>
     {
         public void Report(int value)
         {

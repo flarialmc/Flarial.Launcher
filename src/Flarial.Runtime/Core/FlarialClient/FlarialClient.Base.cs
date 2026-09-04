@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
+using Windows.Networking.Vpn;
 using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
@@ -24,7 +25,7 @@ public abstract partial class FlarialClient
 {
     const string ClassName = "Flarial Client";
 
-    private protected abstract string Build { get; }
+    private protected abstract string HashName { get; }
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
 
@@ -47,12 +48,6 @@ public abstract partial class FlarialClient
         }
     }
 
-    async Task<string> GetRemoteHashAsync()
-    {
-        var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
-        return json[Build];
-    }
-
     public bool Launch()
     {
         if (!IsRunning && Injector.Launch(new(FileName)))
@@ -63,7 +58,18 @@ public abstract partial class FlarialClient
         return false;
     }
 
-    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
+    private protected async Task<string> GetRemoteHashAsync()
+    {
+        var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
+        return json[HashName];
+    }
+
+    /*
+        - Hash comparisons for beta builds could be improved.
+        - Hence decoupling this functionality in case that happens.
+    */
+
+    private protected virtual async Task<bool> VerifyClientAsync()
     {
         var localHashTask = GetLocalHashAsync();
         var remoteHashTask = GetRemoteHashAsync();
@@ -72,7 +78,12 @@ public abstract partial class FlarialClient
         var localHash = await localHashTask;
         var remoteHash = await remoteHashTask;
 
-        if (localHash.Equals(remoteHash, OrdinalIgnoreCase))
+        return localHash.Equals(remoteHash, OrdinalIgnoreCase);
+    }
+
+    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
+    {
+        if (await VerifyClientAsync())
             return true;
 
         try { File.Delete(FileName); }

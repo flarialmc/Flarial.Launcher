@@ -38,6 +38,14 @@ static class PackageService
 
     unsafe static void Add<T>(Uri packageUri, T progress) where T : IProgress<DeploymentProgress>
     {
+        /*
+            https://github.com/microsoft/CsWinRT/issues/1720
+            https://github.com/microsoft/CsWinRT/issues/1822
+            
+            - `PackageManager.AddAsync()` apparently hangs when awaited.
+            - To workaround this, we wrap it using `Task.Run()` and await that.
+        */
+
         var handle = CreateEvent(null, false, false, null);
         var operation = s_manager.AddPackageByUriAsync(packageUri, s_options);
         try

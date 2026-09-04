@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading;
@@ -13,7 +14,7 @@ public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
 {
     const string DownloadUri = "https://api.flarial.xyz/api/v2/beta/dll";
 
-    private protected override string Build => "commitHash";
+    private protected override string HashName => "commitHash";
     private protected override string FileName => "Flarial.Client.Beta.dll";
     private protected override string HashesUri => "https://api.flarial.xyz/api/v2/beta/dll/hash";
 
@@ -23,22 +24,25 @@ public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
         get => Interlocked.CompareExchange(ref field, null, null);
     }
 
-    private protected unsafe override Task<string> GetLocalHashAsync()
+    private protected override Task<string> GetLocalHashAsync() => Task.Run(static (in _) =>
     {
-        var path = Path.GetFullPath(FileName);
-
-        if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
-            return Task.FromResult(string.Empty);
-
-        using (module) fixed (byte* ptr = "FlarialGetCommitHash"u8)
+        unsafe
         {
-            if (GetProcAddress(module, new(ptr)) is not { IsNull: false } procedure)
-                return Task.FromResult(string.Empty);
+            var path = Path.GetFullPath(_.FileName);
 
-            var action = (delegate* unmanaged[Stdcall]<sbyte*>)(nint)procedure;
-            return Task.FromResult<string>(new(action()));
+            if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
+                return string.Empty;
+
+            using (module) fixed (byte* ptr = "FlarialGetCommitHash"u8)
+            {
+                if (GetProcAddress(module, new(ptr)) is not { IsNull: false } procedure)
+                    return string.Empty;
+
+                var action = (delegate* unmanaged[Stdcall]<sbyte*>)(nint)procedure;
+                return new(action());
+            }
         }
-    }
+    }, this);
 
     private protected override async Task<bool> DownloadClientAsync<T>(T progress)
     {

@@ -10,7 +10,7 @@ public sealed class FlarialClientRelease : FlarialClient<FlarialClientRelease>
 {
     const string DownloadUri = "https://cdn.flarial.xyz/dll/latest.dll";
 
-    private protected override string Build => "Release";
+    private protected override string HashName => "Release";
     private protected override string FileName => "Flarial.Client.Release.dll";
     private protected override string HashesUri => "https://cdn.flarial.xyz/dll_hashes.json";
 
