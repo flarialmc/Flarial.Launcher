@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
-using Windows.Networking.Vpn;
 using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
