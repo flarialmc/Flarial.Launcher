@@ -29,7 +29,7 @@ public sealed class VersionItem
     internal readonly GameVersion _version;
     public override string ToString() => _string;
 
-    internal readonly struct OnInstallAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<(int, bool)>
+    readonly struct OnInstallAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<(int, bool)>
     {
         public void Report(int value)
         {
