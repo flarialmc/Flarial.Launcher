@@ -4,7 +4,6 @@ using System.IO;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
-using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
 
@@ -27,7 +26,7 @@ public abstract partial class FlarialClient
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
 
-    private protected abstract Task<string> GetLocalHashAsync();
+    private protected abstract Task<bool> VerifyClientAsync();
     private protected abstract Task<bool> DownloadClientAsync<T>(T progress) where T : IProgress<int>;
 
     private protected FlarialClient() { }
@@ -60,23 +59,6 @@ public abstract partial class FlarialClient
     {
         var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
         return json[HashName];
-    }
-
-    /*
-        - Hash comparisons for beta builds could be improved.
-        - Hence decoupling this functionality in case that happens.
-    */
-
-    private protected virtual async Task<bool> VerifyClientAsync()
-    {
-        var localHashTask = GetLocalHashAsync();
-        var remoteHashTask = GetRemoteHashAsync();
-        await Task.WhenAll(localHashTask, remoteHashTask);
-
-        var localHash = await localHashTask;
-        var remoteHash = await remoteHashTask;
-
-        return localHash.Equals(remoteHash, OrdinalIgnoreCase);
     }
 
     public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>

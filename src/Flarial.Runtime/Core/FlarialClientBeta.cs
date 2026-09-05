@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
@@ -23,25 +24,27 @@ public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
         get => Interlocked.CompareExchange(ref field, null, null);
     }
 
-    private protected override Task<string> GetLocalHashAsync() => Task.Run(static (in _) =>
+    private protected override async Task<bool> VerifyClientAsync()
     {
-        unsafe
+        /*
+            - Inspect the client's commit hash via an exported symbol.
+            - Somewhat "efficient" over an actual hash when updating.
+        */
+
+        var hash = $"_{await GetRemoteHashAsync()}_"; unsafe
         {
-            var path = Path.GetFullPath(_.FileName);
-
-            if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
-                return string.Empty;
-
-            using (module) fixed (byte* ptr = "FlarialGetCommitHash"u8)
+            fixed (byte* ptr = Encoding.UTF8.GetBytes(hash))
             {
-                if (GetProcAddress(module, new(ptr)) is not { IsNull: false } procedure)
-                    return string.Empty;
+                var path = Path.GetFullPath(FileName);
 
-                var action = (delegate* unmanaged[Stdcall]<sbyte*>)(nint)procedure;
-                return new(action());
+                if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
+                    return false;
+
+                using (module)
+                    return !GetProcAddress(module, new(ptr)).IsNull;
             }
         }
-    }, this);
+    }
 
     private protected override async Task<bool> DownloadClientAsync<T>(T progress)
     {
