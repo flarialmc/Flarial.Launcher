@@ -15,7 +15,7 @@ readonly struct GameVersion
         _build = value.Build;
     }
 
-    internal GameVersion(PackageVersion version)
+    internal GameVersion(in PackageVersion version)
     {
         _major = version.Major;
         _minor = version.Minor;

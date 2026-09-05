@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
-using Windows.Foundation;
 using Windows.Management.Deployment;
 
 namespace Flarial.Runtime.Versions;
