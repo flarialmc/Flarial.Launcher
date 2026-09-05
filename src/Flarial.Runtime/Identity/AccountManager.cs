@@ -1,71 +1,49 @@
-using System;
-using System.Collections.Generic;
 using System.Net.Http;
-using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity;
 
-sealed class AccountDetails
+public static class AccountManager
 {
-    readonly Task<byte[]?> _task = null!;
+    const string UserAgent = "Samsung AI-Powered Washing Machine";
+    const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";
 
-    public string DisplayName { get; } = null!;
-
-    public bool HasBetaAccess { get; }
-    public bool HasFlarialPlus { get; }
-
-    internal AccountDetails(string displayName, bool hasFlarialPlus, string? avatarUrl)
-    {
-        DisplayName = displayName;
-
-        HasBetaAccess = hasFlarialPlus;
-        HasFlarialPlus = hasFlarialPlus;
-
-        _task = avatarUrl is null
-        ? Task.FromResult<byte[]?>(null)
-        : HttpService.TryGetBytesAsync(avatarUrl);
-    }
-
-    public Task<byte[]?> GetAvatarAsync() => _task;
-}
-
-static class AccountManager
-{
-    const string AccountUri = "https://flarial.xyz/api/v1/launcher/account";
+    static readonly SemaphoreSlim s_semaphore = new(1, 1);
 
     public static async Task<AccountDetails?> LoginAsync()
     {
-        if (await AuthenticationManager.GetAccessTokenAsync() is not { } accessToken)
-            return null;
+        await s_semaphore.WaitAsync(); try
+        {
+            if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
+                return null;
 
-        using HttpRequestMessage request = new(HttpMethod.Get, AccountUri);
-        request.Headers.Authorization = new("Bearer", accessToken);
+            using HttpRequestMessage request = new(HttpMethod.Post, PremiumUri);
 
-        using var response = await HttpService.SendAsync(request);
-        if (!response.IsSuccessStatusCode) return null;
+            request.Headers.UserAgent.ParseAdd(UserAgent);
+            request.Headers.Authorization = new("Bearer", accessToken);
 
-        return await GetAccountDetailsAsync(response);
+            using var response = await HttpService.SendAsync(request);
+            if (!response.IsSuccessStatusCode) return null;
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var metadata = await JsonService.Default.ReadAsync<AccountMetadata>(stream);
+
+            FlarialClientBeta._.AccessToken = accessToken;
+            return new(metadata);
+        }
+        finally { s_semaphore.Release(); }
     }
 
-    public static Task LogoutAsync() => AuthenticationManager.RevokeRefreshTokenAsync();
-
-    static async Task<AccountDetails> GetAccountDetailsAsync(HttpResponseMessage response)
+    public static async Task LogoutAsync()
     {
-        using var stream = await response.Content.ReadAsStreamAsync();
-        using var document = await JsonDocument.ParseAsync(stream);
-
-        var user = document.RootElement.GetProperty("user");
-        var entitlements = document.RootElement.GetProperty("entitlements");
-
-        var avatarUrl = user.GetProperty("avatar_url").GetString();
-        var displayName = user.GetProperty("display_name").GetString();
-
-        var flarialPlus = entitlements.GetProperty("flarial_plus");
-        var hasFlarialPlus = flarialPlus.GetProperty("active").GetBoolean();
-
-        return new(displayName!, hasFlarialPlus, avatarUrl);
+        await s_semaphore.WaitAsync(); try
+        {
+            FlarialClientBeta._.AccessToken = null;
+            RefreshTokenManager._.Remove();
+        }
+        finally { s_semaphore.Release(); }
     }
-
 }

@@ -1,10 +1,7 @@
-using System;
-using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
-using Windows.ApplicationModel.Store.Preview.InstallControl;
 
-namespace Flarial.Runtime.Discord;
+namespace Flarial.Runtime.Identity;
 
 public sealed class AccountDetails
 {

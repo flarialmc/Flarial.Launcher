@@ -29,7 +29,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
     public NotificationAreaViewModel NotificationArea { get; }
     public VersionRegistry VersionRegistry { get; private set; }
 
-    internal readonly DiscordAccountModel _discordAccount;
+    internal readonly AccountModel _account;
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
     public MainWindowViewModel()
@@ -38,8 +38,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
         SettingsViewModel = new SettingsViewModel(this);
         NotificationArea = new NotificationAreaViewModel();
 
+        _account = new();
         VersionRegistry = null!;
-        _discordAccount = new();
     }
 
     public async Task<string> ShowMessageBoxAsync(string title, string message, IEnumerable<string> buttons)
@@ -64,7 +64,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
     async Task LoginWithDiscordAsync()
     {
         await SettingsViewModel.SettingsGeneralViewModel.LoginAsync();
-        SettingsViewModel.SettingsGeneralViewModel.DiscordLoginActive = false;
+        SettingsViewModel.SettingsGeneralViewModel.LoginActive = false;
     }
 
     public async void OnLoaded()

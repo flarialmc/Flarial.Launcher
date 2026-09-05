@@ -4,31 +4,31 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using Flarial.Runtime.Discord;
+using Flarial.Runtime.Identity;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.Models;
 
-public sealed partial class DiscordAccountModel : ReactiveObject
+public sealed partial class AccountModel : ReactiveObject
 {
     [Reactive] Bitmap _avatar;
     [Reactive] string _username;
-    [Reactive] DiscordRoleModel _role;
+    [Reactive] EntitlementModel _entitlement;
 
     const string DefaultUserName = "Guest";
     const string ProfileImageUri = "avares://Flarial.Launcher/Resources/avatar.webp";
 
     readonly Bitmap _defaultAvatar;
 
-    internal DiscordAccountModel()
+    internal AccountModel()
     {
         Uri uri = new(ProfileImageUri);
 
         using var stream = AssetLoader.Open(uri);
         _defaultAvatar = new(stream);
 
-        Role = new();
+        _entitlement = new();
         Avatar = _defaultAvatar;
         Username = DefaultUserName;
     }
@@ -42,15 +42,15 @@ public sealed partial class DiscordAccountModel : ReactiveObject
 
         if (hasBetaAccess && !hasFlarialPlus)
         {
-            Role.Name = "Tester";
-            Role.Border = Brushes.DarkGray;
-            Role.Background = Brushes.DimGray;
+            Entitlement.Name = "Tester";
+            Entitlement.Border = Brushes.DarkGray;
+            Entitlement.Background = Brushes.DimGray;
         }
         else if (hasBetaAccess)
         {
-            Role.Name = "Flarial+";
-            Role.Border = Brushes.IndianRed;
-            Role.Background = Brushes.DarkRed;
+            Entitlement.Name = "Flarial+";
+            Entitlement.Border = Brushes.IndianRed;
+            Entitlement.Background = Brushes.DarkRed;
         }
 
         if (await account.GetAvatarAsync() is { } avatar)
@@ -63,7 +63,7 @@ public sealed partial class DiscordAccountModel : ReactiveObject
 
     public void Logout() => Dispatcher.UIThread.Post(() =>
     {
-        Role.Logout();
+        Entitlement.Logout();
         Avatar = _defaultAvatar;
         Username = DefaultUserName;
     }, DispatcherPriority.Background);

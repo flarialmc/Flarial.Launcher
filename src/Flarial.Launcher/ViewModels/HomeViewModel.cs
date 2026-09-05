@@ -7,13 +7,12 @@ using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
 using Flarial.Launcher.Types;
 using Flarial.Runtime.Core;
-using Flarial.Runtime.Discord;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
-using Windows.Services.Maps;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -26,20 +25,20 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
     [Reactive] string _gameVersion = "0.0.0";
     [Reactive] IImmutableSolidColorBrush _gameVersionColor = Brushes.Gray;
 
-    UnsupportedVersionDialog UnsupportedVersionDialog => field ??= new(_model.VersionRegistry);
+    UnsupportedVersionDialog UnsupportedVersionDialog => field ??= new(_mainWindowViewModel.VersionRegistry);
 
-    public DiscordAccountModel DiscordAccount => _model._discordAccount;
+    public AccountModel Account => _mainWindowViewModel._account;
 
-    readonly MainWindowViewModel _model;
+    readonly MainWindowViewModel _mainWindowViewModel;
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
     public ReactiveCommand<RxVoid, RxVoid> Launch { get; }
     public ReactiveCommand<RxVoid, RxVoid> CloseWindow { get; }
     public ReactiveCommand<RxVoid, RxVoid> MinimizeWindow { get; }
 
-    public HomeViewModel(MainWindowViewModel model)
+    public HomeViewModel(MainWindowViewModel mainWindowViewModel)
     {
-        _model = model;
+        _mainWindowViewModel = mainWindowViewModel;
 
         Launch = ReactiveCommand.CreateFromTask(OnLaunchAsync);
         CloseWindow = ReactiveCommand.Create(static () => MessageBus.Current.SendMessage(WindowStateArgs.Close));
@@ -76,7 +75,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                         return;
                 }
 
-                if (release && !_model.VersionRegistry.IsSupported)
+                if (release && !_mainWindowViewModel.VersionRegistry.IsSupported)
                 {
                     await UnsupportedVersionDialog.ShowAsync();
                     return;
@@ -150,6 +149,6 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
         }
 
         GameVersion = VersionRegistry.InstalledVersion;
-        GameVersionColor = _model.VersionRegistry.IsSupported ? Brushes.DarkGreen : Brushes.DarkRed;
+        GameVersionColor = _mainWindowViewModel.VersionRegistry.IsSupported ? Brushes.DarkGreen : Brushes.DarkRed;
     }
 }

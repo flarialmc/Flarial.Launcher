@@ -55,22 +55,22 @@
                             Height="{Binding RelativeSource={RelativeSource Self}, Path=Bounds.Width}"
                             RenderOptions.BitmapInterpolationMode="HighQuality">
                         <Border.Background>
-                            <ImageBrush Source="{Binding DiscordAccount.Avatar}" Stretch="UniformToFill"/>
+                            <ImageBrush Source="{Binding Account.Avatar}" Stretch="UniformToFill"/>
                         </Border.Background>
                     </Border>
 
                     <WrapPanel Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,15,0">
-                        <TextBlock Text="{Binding DiscordAccount.Username}"
+                        <TextBlock Text="{Binding Account.Username}"
                                    FontSize="18" TextWrapping="Wrap"
                                    Foreground="{StaticResource ForegroundColor}"/>
                         <Border BorderThickness="1"
                                 CornerRadius="20"
                                 VerticalAlignment="Center"
-                                Background="{Binding DiscordAccount.Role.Background}"
-                                BorderBrush="{Binding DiscordAccount.Role.Border}"
+                                Background="{Binding Account.Entitlement.Background}"
+                                BorderBrush="{Binding Account.Entitlement.Border}"
                                 Padding="7.5,2.5,7.5,2.5"
                                 Margin="5,0,0,0">
-                            <TextBlock Text="{Binding DiscordAccount.Role.Name}"
+                            <TextBlock Text="{Binding Account.Entitlement.Name}"
                                        FontSize="14"
                                        Foreground="{StaticResource ForegroundColor}"/>
                         </Border>

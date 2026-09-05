@@ -9,7 +9,7 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Runtime.Identity;
 
-static class AuthenticationManager
+public static class AuthenticationManager
 {
     static readonly ReadOnlyMemory<byte> s_response = "You may close this window now."u8.ToArray();
 
@@ -17,24 +17,22 @@ static class AuthenticationManager
     const string RefreshToken = "refresh_token";
     const string AuthorizationCode = "authorization_code";
 
-    const string ClientId = "flarial-desktop";
-    const string Resource = "https://flarial.xyz/api";
-    const string Scope = "openid profile offline_access entitlements";
+    const string ClientId = "1058426966602174474";
+    const string Scope = "identify guilds.members.read";
 
-    const string TokenUri = $"{Resource}/auth/oauth2/token";
-    const string RevokeUri = $"{Resource}/auth/oauth2/revoke";
-    const string AuthorizeUri = $"{Resource}/auth/oauth2/authorize?response_type=code&code_challenge_method=S256&client_id={ClientId}&scope={Scope}&resource={Resource}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
+    const string TokenUri = "https://discord.com/api/oauth2/token";
+    const string AuthorizeUri = $"https://discord.com/oauth2/authorize?response_type=code&code_challenge_method=S256&client_id={ClientId}&scope={Scope}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
 
     static async Task<(string AuthorizationCode, string CodeVerifier, string RedirectUri)?> GetAuthorizationAsync()
     {
         var state = RequestHelper.CreateApplicationState();
         var (verifier, challenge) = RequestHelper.CreateCodeExchange();
 
-        var redirectUri = $"{RequestHelper.CreateRedirectUri()}/oauth/callback";
+        var redirectUri = $"{RequestHelper.CreateRedirectUri()}/";
         var requestUri = string.Format(AuthorizeUri, state, challenge, redirectUri);
 
         using HttpListener listener = new();
-        listener.Prefixes.Add($"{redirectUri}/");
+        listener.Prefixes.Add(redirectUri);
 
         listener.Start(); try
         {
@@ -84,38 +82,36 @@ static class AuthenticationManager
 
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
-            ["resource"] = Resource,
             ["client_id"] = ClientId,
             ["grant_type"] = AuthorizationCode,
             ["code"] = tuple.AuthorizationCode,
             ["redirect_uri"] = tuple.RedirectUri,
-            ["code_verifier"] = tuple.CodeVerifier,
+            ["code_verifier"] = tuple.CodeVerifier
         });
 
         using var response = await HttpService.PostAsync(TokenUri, content);
-        if (!response.IsSuccessStatusCode) return null;
+        response.EnsureSuccessStatusCode();
 
         return await ParseTokensAsync(response);
     }
 
     public static async Task<bool> AuthenticateAsync()
     {
-        if (await GetTokensAsync() is { } tuple)
+        if (await GetTokensAsync() is { } token)
         {
-            RefreshTokenManager._.Set(tuple.RefreshToken);
+            RefreshTokenManager._.Set(token.RefreshToken);
             return true;
         }
         return false;
     }
 
-    internal static async Task<string?> GetAccessTokenAsync()
+    internal static async Task<string?> AuthenticateSilentlyAsync()
     {
         if (RefreshTokenManager._.Get() is not { } refreshToken)
             return null;
 
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
-            ["resource"] = Resource,
             ["client_id"] = ClientId,
             ["grant_type"] = RefreshToken,
             ["refresh_token"] = refreshToken
@@ -134,23 +130,5 @@ static class AuthenticationManager
 
         RefreshTokenManager._.Set(tuple.RefreshToken);
         return tuple.AccessToken;
-    }
-
-    internal static async Task RevokeRefreshTokenAsync()
-    {
-        if (RefreshTokenManager._.Get() is { } refreshToken)
-        {
-            RefreshTokenManager._.Remove();
-
-            using FormUrlEncodedContent content = new(new Dictionary<string, string>
-            {
-                ["token"] = refreshToken,
-                ["resource"] = Resource,
-                ["client_id"] = ClientId,
-                ["token_type_hint"] = RefreshToken
-            });
-
-            using (await HttpService.PostAsync(RevokeUri, content)) { }
-        }
     }
 }
