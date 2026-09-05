@@ -11,7 +11,7 @@ namespace Flarial.Runtime.Core;
 partial class FlarialClient
 {
     const string UserAgent = "Samsung Smart Fridge";
-    const string AnalyticsUri = "https://api.flarial.xyz/launcher/events/launch";
+    const string AnalyticsUri = "https://api.flarial.xyz/api/v2/service/launcher/events/launch";
 
     static readonly Uri s_uri;
     static readonly string s_identifier;
