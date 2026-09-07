@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Flarial.Runtime.Identity;
+namespace Flarial.Runtime.Identity.Discord;
 
 sealed class AccountMetadata
 {

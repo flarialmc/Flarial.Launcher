@@ -8,7 +8,7 @@ using Avalonia.Platform.Storage;
 using Flarial.Launcher.Controls.SegmentedBar;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
-using Flarial.Runtime.Identity;
+using Flarial.Runtime.Identity.Discord;
 using Flarial.Runtime.Unmanaged;
 using ReactiveUI;
 using ReactiveUI.Primitives;
@@ -20,6 +20,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 {
     [Reactive] string? _customDllPath = null;
     [Reactive] bool _customDllSelected = false;
+    
     [Reactive] bool _loginActive = true;
     [Reactive] bool _loginAvailable = false;
     [Reactive] bool _accountAvailable = false;

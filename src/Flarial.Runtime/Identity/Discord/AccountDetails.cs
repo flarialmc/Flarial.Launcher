@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 
-namespace Flarial.Runtime.Identity;
+namespace Flarial.Runtime.Identity.Discord;
 
 public sealed class AccountDetails
 {

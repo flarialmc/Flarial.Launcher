@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 
-namespace Flarial.Runtime.Identity;
+namespace Flarial.Runtime.Identity.Discord;
 
 public static class AccountManager
 {

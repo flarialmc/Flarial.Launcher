@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 
-namespace Flarial.Runtime.Identity;
+namespace Flarial.Runtime.Identity.Discord;
 
 public static class AuthenticationManager
 {
@@ -114,7 +114,7 @@ public static class AuthenticationManager
         {
             ["client_id"] = ClientId,
             ["grant_type"] = RefreshToken,
-            ["refresh_token"] = refreshToken
+            [RefreshToken] = refreshToken
         });
 
         using var response = await HttpService.PostAsync(TokenUri, content);
