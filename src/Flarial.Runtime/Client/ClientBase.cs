@@ -29,7 +29,6 @@ public abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
     private protected override string DownloadUri { get; }
 }
 
-
 public abstract class ClientBase : FlarialClient
 {
     private protected ClientBase() { }
