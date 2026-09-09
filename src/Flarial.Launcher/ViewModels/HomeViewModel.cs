@@ -13,6 +13,7 @@ using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
+using Flarial.Runtime.Client;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -55,8 +56,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             var release = _settings.BuildType is BuildType.Release;
 
             FlarialClient? client = null;
-            if (beta) client = FlarialClientBeta._;
-            if (release) client = FlarialClientRelease._;
+            if (beta) client = BetaClient._;
+            if (release) client = ReleaseClient._;
 
             if (!GamingServices.IsInstalled)
             {

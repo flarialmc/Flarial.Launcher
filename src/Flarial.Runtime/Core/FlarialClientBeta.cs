@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Text;
@@ -10,7 +11,7 @@ using static Windows.Win32.System.LibraryLoader.LOAD_LIBRARY_FLAGS;
 
 namespace Flarial.Runtime.Core;
 
-public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
+sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
 {
     const string DownloadUri = "https://api.flarial.xyz/api/v2/beta/dll";
 
