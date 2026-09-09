@@ -8,11 +8,11 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Client;
 
-public abstract class BaseClient<T> : BaseClient where T : BaseClient<T>, new()
+public abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
 {
     public static readonly T _ = new();
 
-    private protected BaseClient()
+    private protected ClientBase()
     {
         if (_ is null)
         {
@@ -30,9 +30,9 @@ public abstract class BaseClient<T> : BaseClient where T : BaseClient<T>, new()
 }
 
 
-public abstract class BaseClient : FlarialClient
+public abstract class ClientBase : FlarialClient
 {
-    private protected BaseClient() { }
+    private protected ClientBase() { }
 
     private protected abstract string DownloadUri { get; }
     private protected override string HashesUri => "https://cdn.flarial.xyz/dll_hashes.json";
