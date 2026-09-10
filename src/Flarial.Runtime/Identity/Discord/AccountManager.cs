@@ -31,7 +31,6 @@ public static class AccountManager
             using var stream = await response.Content.ReadAsStreamAsync();
             var metadata = await JsonService.Default.ReadAsync<AccountMetadata>(stream);
 
-            FlarialClientBeta._.AccessToken = accessToken;
             return new(metadata);
         }
         finally { s_semaphore.Release(); }
@@ -41,7 +40,6 @@ public static class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            FlarialClientBeta._.AccessToken = null;
             RefreshTokenManager._.Remove();
         }
         finally { s_semaphore.Release(); }
