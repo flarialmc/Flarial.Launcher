@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> Please submit pull requests when contributing!
+
 # Flarial Launcher
 
 The official launcher for Flarial Client.
