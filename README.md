@@ -1,5 +1,5 @@
-> [!IMPORTANT]
-> Please submit pull requests when contributing!
+> [!CAUTION]
+> ### Please submit pull requests when contributing!
 
 # Flarial Launcher
 
