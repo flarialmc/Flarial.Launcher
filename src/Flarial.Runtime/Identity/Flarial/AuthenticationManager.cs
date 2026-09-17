@@ -7,33 +7,35 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 
-namespace Flarial.Runtime.Identity.Discord;
+namespace Flarial.Runtime.Identity.Flarial;
 
-[Obsolete("Discord Authentication is deprecated.", true)]
 public static class AuthenticationManager
 {
-    static readonly ReadOnlyMemory<byte> s_response = "You may close this window now."u8.ToArray();
+    static readonly byte[] s_response = [.. "You may close this window now."u8];
 
     const string AccessToken = "access_token";
     const string RefreshToken = "refresh_token";
     const string AuthorizationCode = "authorization_code";
 
-    const string ClientId = "1058426966602174474";
-    const string Scope = "identify guilds.members.read";
+    const string ClientId = "flarial-desktop";
+    const string Scope = "openid profile entitlements offline_access";
 
-    const string TokenUri = "https://discord.com/api/oauth2/token";
-    const string AuthorizeUri = $"https://discord.com/oauth2/authorize?response_type=code&code_challenge_method=S256&client_id={ClientId}&scope={Scope}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
+    const string ResourceUri = "https://flarial.xyz/api";
+    const string AuthenticateUri = $"{ResourceUri}/auth/oauth2";
+
+    const string TokenUri = $"{AuthenticateUri}/token";
+    const string AuthorizeUri = $"{AuthenticateUri}/authorize?response_type=code&code_challenge_method=S256&client_id={ClientId}&scope={Scope}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
 
     static async Task<(string AuthorizationCode, string CodeVerifier, string RedirectUri)?> GetAuthorizationAsync()
     {
         var state = RequestHelper.CreateApplicationState();
         var (verifier, challenge) = RequestHelper.CreateCodeExchange();
 
-        var redirectUri = $"{RequestHelper.CreateRedirectUri()}/";
+        var redirectUri = $"{RequestHelper.CreateRedirectUri()}/oauth/callback";
         var requestUri = string.Format(AuthorizeUri, state, challenge, redirectUri);
 
         using HttpListener listener = new();
-        listener.Prefixes.Add(redirectUri);
+        listener.Prefixes.Add($"{redirectUri}/");
 
         listener.Start(); try
         {
@@ -91,7 +93,7 @@ public static class AuthenticationManager
         });
 
         using var response = await HttpService.PostAsync(TokenUri, content);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode) return null;
 
         return await ParseTokensAsync(response);
     }
@@ -122,7 +124,7 @@ public static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            RefreshTokenManager._.Remove();
+            _ = AccountManager.LogoutAsync();
             return null;
         }
 

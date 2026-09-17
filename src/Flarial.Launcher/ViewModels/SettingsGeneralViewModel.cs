@@ -8,7 +8,7 @@ using Avalonia.Platform.Storage;
 using Flarial.Launcher.Controls.SegmentedBar;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
-using Flarial.Runtime.Identity.Discord;
+using Flarial.Runtime.Identity.Flarial;
 using Flarial.Runtime.Unmanaged;
 using ReactiveUI;
 using ReactiveUI.Primitives;
