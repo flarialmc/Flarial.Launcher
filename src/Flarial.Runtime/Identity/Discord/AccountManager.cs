@@ -2,12 +2,10 @@ using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-[Obsolete("Discord Authentication is deprecated.", true)]
 public static class AccountManager
 {
     const string UserAgent = "Samsung AI-Powered Washing Machine";

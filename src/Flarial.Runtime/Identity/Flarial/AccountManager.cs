@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -7,6 +8,7 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
+[Experimental("Flarial_Runtime_Identity_Flarial")]
 public static class AccountManager
 {
     const string AccountUri = "https://api.flarial.xyz/api/v2/account";

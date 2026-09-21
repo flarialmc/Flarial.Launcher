@@ -9,7 +9,6 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-[Obsolete("Discord Authentication is deprecated.", true)]
 public static class AuthenticationManager
 {
     static readonly ReadOnlyMemory<byte> s_response = "You may close this window now."u8.ToArray();

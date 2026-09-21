@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -9,6 +10,7 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
+[Experimental("Flarial_Runtime_Identity_Flarial")]
 public static class AuthenticationManager
 {
     static readonly byte[] s_response = [.. "You may close this window now."u8];

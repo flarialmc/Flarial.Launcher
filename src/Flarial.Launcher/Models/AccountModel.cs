@@ -4,8 +4,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Threading;
-using Flarial.Runtime.Identity;
-using Flarial.Runtime.Identity.Flarial;
+using Flarial.Runtime.Identity.Discord;
 using ReactiveUI;
 using ReactiveUI.SourceGenerators;
 

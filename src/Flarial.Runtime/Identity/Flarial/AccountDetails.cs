@@ -1,9 +1,10 @@
-using System.Text.Json.Serialization;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
+[Experimental("Flarial_Runtime_Identity_Flarial")]
 sealed class AccountMetadata
 {
     internal required string? AvatarUrl { get; init; }
@@ -12,6 +13,7 @@ sealed class AccountMetadata
     internal required bool HasFlarialPlus { get; init; }
 }
 
+[Experimental("Flarial_Runtime_Identity_Flarial")]
 public sealed class AccountDetails
 {
     static readonly Task<byte[]?> s_avatarTask = Task.FromResult<byte[]?>(null);
