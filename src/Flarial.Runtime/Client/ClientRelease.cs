@@ -1,6 +1,9 @@
+using System;
+
 namespace Flarial.Runtime.Client;
 
-public sealed class ClientRelease : ClientBase<ClientRelease>
+[Obsolete("Discord authentication is deprecated.", true)]
+sealed class ClientRelease : ClientBase<ClientRelease>
 {
     private protected override string BlobName => "latest";
     private protected override string HashName => "Release";

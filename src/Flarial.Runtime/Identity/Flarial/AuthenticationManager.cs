@@ -1,17 +1,16 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
+using Windows.Graphics.Display;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
-[Experimental("Flarial_Runtime_Identity_Flarial")]
-public static class AuthenticationManager
+static class AuthenticationManager
 {
     static readonly byte[] s_response = [.. "You may close this window now."u8];
 
@@ -26,7 +25,8 @@ public static class AuthenticationManager
     const string AuthenticateUri = $"{ResourceUri}/auth/oauth2";
 
     const string TokenUri = $"{AuthenticateUri}/token";
-    const string AuthorizeUri = $"{AuthenticateUri}/authorize?response_type=code&code_challenge_method=S256&client_id={ClientId}&scope={Scope}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
+    const string RevokeUri = $"{AuthenticateUri}/revoke";
+    const string AuthorizeUri = $"{AuthenticateUri}/authorize?response_type=code&code_challenge_method=S256&resource={ResourceUri}&client_id={ClientId}&scope={Scope}&state={{0}}&code_challenge={{1}}&redirect_uri={{2}}";
 
     static async Task<(string AuthorizationCode, string CodeVerifier, string RedirectUri)?> GetAuthorizationAsync()
     {
@@ -88,6 +88,7 @@ public static class AuthenticationManager
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
             ["client_id"] = ClientId,
+            ["resource"] = ResourceUri,
             ["grant_type"] = AuthorizationCode,
             ["code"] = tuple.AuthorizationCode,
             ["redirect_uri"] = tuple.RedirectUri,
@@ -100,7 +101,7 @@ public static class AuthenticationManager
         return await ParseTokensAsync(response);
     }
 
-    public static async Task<bool> AuthenticateAsync()
+    internal static async Task<bool> AuthenticateAsync()
     {
         if (await GetTokensAsync() is { } token)
         {
@@ -108,6 +109,24 @@ public static class AuthenticationManager
             return true;
         }
         return false;
+    }
+
+    internal static async Task RevokeAsync()
+    {
+        if (RefreshTokenManager._.Get() is { } refreshToken)
+        {
+            RefreshTokenManager._.Remove();
+            FlarialClientBeta._.AccessToken = null;
+
+            using FormUrlEncodedContent content = new(new Dictionary<string, string>
+            {
+                ["client_id"] = ClientId,
+                ["token"] = refreshToken,
+                ["token_type_hint"] = RefreshToken,
+            });
+
+            using (await HttpService.PostAsync(RevokeUri, content)) { }
+        }
     }
 
     internal static async Task<string?> AuthenticateSilentlyAsync()
@@ -118,6 +137,7 @@ public static class AuthenticationManager
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
             ["client_id"] = ClientId,
+            ["resource"] = ResourceUri,
             ["grant_type"] = RefreshToken,
             [RefreshToken] = refreshToken
         });
@@ -134,6 +154,8 @@ public static class AuthenticationManager
             return null;
 
         RefreshTokenManager._.Set(tuple.RefreshToken);
+        FlarialClientBeta._.AccessToken = tuple.AccessToken;
+
         return tuple.AccessToken;
     }
 }

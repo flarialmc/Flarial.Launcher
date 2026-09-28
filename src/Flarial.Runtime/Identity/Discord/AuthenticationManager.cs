@@ -9,7 +9,8 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-public static class AuthenticationManager
+[Obsolete("Discord authentication is deprecated.", true)]
+static class AuthenticationManager
 {
     static readonly ReadOnlyMemory<byte> s_response = "You may close this window now."u8.ToArray();
 
@@ -94,7 +95,6 @@ public static class AuthenticationManager
 
         return await ParseTokensAsync(response);
     }
-
     public static async Task<bool> AuthenticateAsync()
     {
         if (await GetTokensAsync() is { } token)

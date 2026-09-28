@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -8,12 +7,20 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
-[Experimental("Flarial_Runtime_Identity_Flarial")]
 public static class AccountManager
 {
     const string AccountUri = "https://api.flarial.xyz/api/v2/account";
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
+
+    public static async Task<bool> AuthenticateAsync()
+    {
+        await s_semaphore.WaitAsync(); try
+        {
+            return await AuthenticationManager.AuthenticateAsync();
+        }
+        finally { s_semaphore.Release(); }
+    }
 
     public static async Task<AccountDetails?> LoginAsync()
     {
@@ -26,9 +33,7 @@ public static class AccountManager
             request.Headers.Authorization = new("Bearer", accessToken);
 
             using var response = await HttpService.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-                throw new(await response.Content.ReadAsStringAsync());
+            if (!response.IsSuccessStatusCode) return null;
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var document = await JsonDocument.ParseAsync(stream);
@@ -58,7 +63,7 @@ public static class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            RefreshTokenManager._.Remove();
+            await AuthenticationManager.RevokeAsync();
         }
         finally { s_semaphore.Release(); }
     }

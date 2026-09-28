@@ -6,7 +6,8 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-public static class AccountManager
+[Obsolete("Discord authentication is deprecated.", true)]
+static class AccountManager
 {
     const string UserAgent = "Samsung AI-Powered Washing Machine";
     const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";

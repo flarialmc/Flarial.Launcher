@@ -8,7 +8,8 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Client;
 
-public abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
+[Obsolete("Discord authentication is deprecated.", true)]
+abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
 {
     public static readonly T _ = new();
 
@@ -24,7 +25,6 @@ public abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
     }
 
     private protected abstract string BlobName { get; }
-
     private protected override string FileName { get; }
     private protected override string DownloadUri { get; }
 }

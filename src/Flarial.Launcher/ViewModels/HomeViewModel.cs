@@ -56,8 +56,8 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             var release = _settings.BuildType is BuildType.Release;
 
             FlarialClient? client = null;
-            if (beta) client = ClientBeta._;
-            if (release) client = ClientRelease._;
+            if (beta) client = FlarialClientBeta._;
+            if (release) client = FlarialClientRelease._;
 
             if (!GamingServices.IsInstalled)
             {
