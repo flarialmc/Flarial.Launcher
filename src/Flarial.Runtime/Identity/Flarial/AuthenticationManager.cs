@@ -146,7 +146,7 @@ static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            _ = AccountManager.LogoutAsync();
+            await AccountManager.LogoutAsync();
             return null;
         }
 
