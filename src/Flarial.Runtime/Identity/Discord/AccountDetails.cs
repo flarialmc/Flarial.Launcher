@@ -4,8 +4,7 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-[Obsolete("Discord authentication is deprecated.", true)]
-sealed class AccountDetails
+public sealed class AccountDetails
 {
     const string AvatarUri = "https://cdn.discordapp.com/avatars/{0}/{1}";
 

@@ -6,14 +6,22 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Discord;
 
-[Obsolete("Discord authentication is deprecated.", true)]
-static class AccountManager
+public static class AccountManager
 {
     const string UserAgent = "Samsung AI-Powered Washing Machine";
     const string PremiumUri = "https://api.flarial.xyz/android/premium/discord";
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
 
+    public static async Task<bool> AuthenticateAsync()
+    {
+        await s_semaphore.WaitAsync(); try
+        {
+            return await AuthenticationManager.AuthenticateAsync();
+        }
+        finally { s_semaphore.Release(); }
+    }
+    
     public static async Task<AccountDetails?> LoginAsync()
     {
         await s_semaphore.WaitAsync(); try

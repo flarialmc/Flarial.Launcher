@@ -8,6 +8,7 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
 
+[Experimental("Flarial_Runtime_Identity_Flarial")]
 public sealed class FlarialClientRelease : FlarialClient<FlarialClientRelease>
 {
     const string DownloadUri = "https://cdn.flarial.xyz/dll/latest.dll";
