@@ -47,7 +47,7 @@ public abstract partial class FlarialClient
 
     public bool Launch()
     {
-        if (!IsRunning && Injector.Launch(new(FileName)))
+        if (!IsRunning && InjectionSession.Launch(new(FileName)))
         {
             _ = PostAnalyticsAsync();
             return true;

@@ -9,7 +9,7 @@ using static Windows.Win32.System.LibraryLoader.LOAD_LIBRARY_FLAGS;
 
 namespace Flarial.Runtime.Game;
 
-public unsafe sealed class Library(string? path)
+public unsafe sealed class ModificationLibrary(string? path)
 {
     public bool IsLoadable
     {

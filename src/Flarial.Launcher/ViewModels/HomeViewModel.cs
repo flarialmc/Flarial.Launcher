@@ -90,7 +90,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 
             if (client is null)
             {
-                Library library = new(path);
+                ModificationLibrary library = new(path);
 
                 if (!library.IsLoadable)
                 {
