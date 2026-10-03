@@ -45,9 +45,15 @@ public abstract partial class FlarialClient
         }
     }
 
-    public bool Launch()
+    private protected virtual Task<string?> PrepareLaunchAsync() => Task.FromResult<string?>(null);
+
+    public bool Launch() => Task.Run(LaunchAsync).GetAwaiter().GetResult();
+
+    public async Task<bool> LaunchAsync()
     {
-        if (!IsRunning && InjectionSession.Launch(new(FileName)))
+        if (IsRunning) return false;
+        var accessToken = await PrepareLaunchAsync().ConfigureAwait(false);
+        if (InjectionSession.Launch(new(FileName), accessToken))
         {
             _ = PostAnalyticsAsync();
             return true;
@@ -61,7 +67,7 @@ public abstract partial class FlarialClient
         return json[HashName];
     }
 
-    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
+    public virtual async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
     {
         if (await VerifyClientAsync())
             return true;

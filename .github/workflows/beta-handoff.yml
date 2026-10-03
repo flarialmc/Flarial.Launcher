@@ -1,0 +1,15 @@
+name: Beta launcher handoff
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build src/Flarial.Runtime/Flarial.Runtime.csproj
+      - run: dotnet run --project tests/BetaTokenHandoff/BetaTokenHandoff.csproj
