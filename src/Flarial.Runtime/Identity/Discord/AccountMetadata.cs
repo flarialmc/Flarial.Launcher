@@ -1,0 +1,24 @@
+using System;
+using System.Text.Json.Serialization;
+
+namespace Flarial.Runtime.Identity.Discord;
+
+[Obsolete(" ", true)]
+sealed class AccountMetadata
+{
+    [JsonConstructor]
+    internal AccountMetadata(string? avatar, string username, string discordId, bool hasTesterRole, bool hasFlarialPlus)
+    {
+        Avatar = avatar;
+        Username = username;
+        DiscordId = discordId;
+        HasTesterRole = hasTesterRole;
+        HasFlarialPlus = hasFlarialPlus;
+    }
+
+    [JsonPropertyName("avatar")] public string? Avatar { get; }
+    [JsonPropertyName("username")] public string Username { get; }
+    [JsonPropertyName("discordId")] public string DiscordId { get; }
+    [JsonPropertyName("hasTesterRole")] public bool HasTesterRole { get; }
+    [JsonPropertyName("hasFlarialPlus")] public bool HasFlarialPlus { get; }
+}
