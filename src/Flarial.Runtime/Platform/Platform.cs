@@ -42,7 +42,11 @@ public interface IGameService
 /// <summary>Injects a DLL into the running game process.</summary>
 public interface IInjector
 {
-    bool Inject(string dllPath, uint processId);
+    /// <summary>Loads each library into the process in order (dependencies first, the modification last); true when the last one loaded.</summary>
+    bool Inject(System.Collections.Generic.IReadOnlyList<string> libraries, uint processId);
+
+    /// <summary>The game's system directory in its own path syntax (e.g. C:\windows\system32); DLL imports are resolved against it.</summary>
+    string SystemDirectory { get; }
 
     /// <summary>True when the Flarial client is already loaded in the game.</summary>
     bool IsClientRunning { get; }

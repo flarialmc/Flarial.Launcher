@@ -4,7 +4,9 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Unmanaged;
+using ReactiveUI.Primitives.Extensions;
 
 [assembly: System.Runtime.Versioning.SupportedOSPlatform("linux")]
 [assembly: AssemblyCompany("Flarial")]
@@ -37,8 +39,7 @@ Exception: {1}
 
     static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var version = $"{assembly.GetName().Version}";
+        var version = FlarialLauncher.Version;
 
         var exception = (Exception)args.ExceptionObject;
         var information = exception.StackTrace?.Trim();
@@ -53,7 +54,15 @@ Exception: {1}
         nint handle = new(lifetime?.MainWindow?.TryGetPlatformHandle()?.Handle ?? 0);
 
         var content = string.Format(Content, version, type, message);
-        NativeMethods.TaskDialog(handle, Title, Instruction, content, information);
+
+        new NativeDialog
+        {
+            Handle = handle,
+            Title = Title,
+            Content = content,
+            Instruction = Instruction,
+            Information = information,
+        }.Show();
 
         Environment.Exit(1);
     }

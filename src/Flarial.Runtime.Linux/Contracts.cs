@@ -162,10 +162,10 @@ namespace Flarial.Runtime.Linux.Injection
 
         /// <summary>
         /// Validate dll (.dll, exists), game alive, no winedbg; sleep <paramref name="delay"/> (aborting if the game exits);
-        /// run engine wine + Paths.Injector Z:\...dll Minecraft.Windows.exe (WINEPREFIX, outside the container, 60 s timeout), log to
+        /// run engine wine + Paths.Injector Minecraft.Windows.exe <libraries> (host paths become Z:\... ones; Windows-style paths pass through; dependencies first, the DLL last) (WINEPREFIX, outside the container, 60 s timeout), log to
         /// Paths.Logs/injector.log; then 3 s post-check that the game did not exit/enter winedbg.
         /// </summary>
-        Task<InjectResult> InjectAsync(string dllPath, uint gamePid, TimeSpan delay, CancellationToken ct);
+        Task<InjectResult> InjectAsync(IReadOnlyList<string> libraries, uint gamePid, TimeSpan delay, CancellationToken ct);
 
         /// <summary>True if /proc/pid/maps lists a mapped file whose name matches (case-insensitive file-name contains).</summary>
         bool IsModuleLoaded(uint gamePid, string fileNameContains);

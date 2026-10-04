@@ -9,7 +9,7 @@ static partial class HttpService
 {
     internal static Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
     {
-        return s_client.SendAsync(request);
+        return s_client.SendAsync(request, ResponseHeadersRead);
     }
 
     internal static Task<HttpResponseMessage> PostAsync(string uri, HttpContent content)

@@ -2,35 +2,40 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
-using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Versions;
 
 public sealed class VersionItem
 {
-    public override string ToString() => _string;
-
-    internal VersionItem(string version, string[] downloadUris, byte[] gameLaunchHelper)
+    internal VersionItem(GameVersion version, string[] downloadUris, byte[] gameLaunchHelper)
     {
         _version = version;
+        _string = version.ToString();
+
         _downloadUris = downloadUris;
         _gameLaunchHelper = gameLaunchHelper;
-        _string = new GameVersion(version).ToString();
     }
 
     readonly string _string;
     readonly string[] _downloadUris;
     readonly byte[] _gameLaunchHelper;
-    internal readonly string _version;
+
+    internal readonly GameVersion _version;
+    public override string ToString() => _string;
 
     /// <summary>Canonical "major.minor.build" string.</summary>
-    public string Version => _version;
+    public string Version => $"{_version._major}.{_version._minor}.{_version._build}";
     public IReadOnlyList<string> DownloadUris => _downloadUris;
     /// <summary>gamelaunchhelper.dll to place in the game folder after install.</summary>
     public byte[] GameLaunchHelper => _gameLaunchHelper;
 
-    public async Task<Task?> InstallAsync(Action<int, bool> callback)
+    readonly struct OnInstall<T>(T progress) where T : IProgress<(int, bool)>
+    {
+        internal void Report(int percentage, bool installing) => progress.Report((percentage, installing));
+    }
+
+    public async Task<Task?> InstallAsync<T>(T progress) where T : IProgress<(int, bool)>
     {
         var game = Platform.Platform.Game;
 
@@ -46,6 +51,7 @@ public sealed class VersionItem
         if (await HttpService.ProbeAsync(_downloadUris) is not { } uri)
             return null;
 
-        return game.InstallAsync(this, uri, callback);
+        OnInstall<T> callback = new(progress);
+        return game.InstallAsync(this, uri, callback.Report);
     }
-}
+}

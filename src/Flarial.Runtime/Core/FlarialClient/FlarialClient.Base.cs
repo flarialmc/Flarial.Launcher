@@ -1,30 +1,33 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
-using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
 
 public abstract class FlarialClient<T> : FlarialClient where T : FlarialClient<T>, new()
 {
+    public static readonly T _ = new();
+
     private protected FlarialClient()
     {
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
-    public static readonly T _ = new();
 }
 
 public abstract partial class FlarialClient
 {
-    private protected abstract string Build { get; }
+    const string ClassName = "Flarial Client";
+
+    private protected abstract string HashName { get; }
     private protected abstract string FileName { get; }
-    private protected abstract string DownloadUri { get; }
+    private protected abstract string HashesUri { get; }
+
+    private protected abstract Task<bool> VerifyClientAsync();
+    private protected abstract Task<bool> DownloadClientAsync<T>(T progress) where T : IProgress<int>;
 
     private protected FlarialClient() { }
 
@@ -32,7 +35,7 @@ public abstract partial class FlarialClient
 
     public bool Launch()
     {
-        if (!IsRunning && Injector.Launch(new(FileName)))
+        if (!IsRunning && InjectionSession.Launch(new(FileName)))
         {
             _ = PostAnalyticsAsync();
             return true;
@@ -40,41 +43,20 @@ public abstract partial class FlarialClient
         return false;
     }
 
-    const string HashesUri = "https://cdn.flarial.xyz/dll_hashes.json";
-
-    async Task<string> GetRemoteHashAsync()
+    private protected async Task<string> GetRemoteHashAsync()
     {
         var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
-        return json[Build];
+        return json[HashName];
     }
 
-    async Task<string> GetLocalHashAsync()
+    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
     {
-        try
-        {
-            using var stream = File.OpenRead(FileName);
-            var array = await SHA256.HashDataAsync(stream);
-            return Convert.ToHexString(array);
-        }
-        catch { return string.Empty; }
-    }
-
-    public async Task<bool> DownloadAsync(Action<int> callback)
-    {
-        var localHashTask = GetLocalHashAsync();
-        var remoteHashTask = GetRemoteHashAsync();
-        await Task.WhenAll(localHashTask, remoteHashTask);
-
-        var localHash = await localHashTask;
-        var remoteHash = await remoteHashTask;
-
-        if (localHash.Equals(remoteHash, OrdinalIgnoreCase))
+        if (await VerifyClientAsync())
             return true;
 
         try { File.Delete(FileName); }
         catch { return false; }
 
-        await HttpService.DownloadAsync(DownloadUri, FileName, callback);
-        return true;
+        return await DownloadClientAsync(progress);
     }
 }

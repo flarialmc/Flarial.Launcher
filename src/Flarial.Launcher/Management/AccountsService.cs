@@ -13,8 +13,8 @@ public sealed record XboxStatus(bool SignedIn, bool OnlineReady, string? Gamerta
 public sealed record XboxDeviceCode(string UserCode, string VerificationUri, TimeSpan ExpiresIn);
 
 /// <summary>
-/// UI-facing backend for the Settings > Accounts page (Microsoft + Xbox Live). The Flarial/Discord account does not
-/// go through this: the page binds to the existing SettingsGeneralViewModel/DiscordAccountManager.
+/// UI-facing backend for the Settings > Accounts page (Microsoft + Xbox Live). The Flarial account does not
+/// go through this: the page binds to the existing SettingsGeneralViewModel/the Flarial account manager.
 /// Integrator: map to IXodus (IsLoggedIn/GetAccountAsync/LoginAsync/LogoutAsync) and IXboxAuth
 /// (Begin/PollDeviceCodeAsync, SignOutAsync, RefreshAsync for gamertag) and set <see cref="AccountsService.Current"/> at startup.
 /// </summary>

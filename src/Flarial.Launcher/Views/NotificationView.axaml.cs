@@ -1,6 +1,4 @@
 using System;
-using System.Reactive.Disposables.Fluent;
-using System.Reactive.Linq;
 using Avalonia.Animation;
 using Avalonia.Animation.Easings;
 using Avalonia.Controls;
@@ -11,10 +9,12 @@ using Flarial.Launcher.Controls.AcrylicBlur;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Extensions;
 
 namespace Flarial.Launcher.Views;
 
-public partial class NotificationView : ReactiveUserControl<NotificationViewModel>
+public sealed partial class NotificationView : ReactiveUserControl<NotificationViewModel>
 {
     public NotificationView()
     {
@@ -25,8 +25,8 @@ public partial class NotificationView : ReactiveUserControl<NotificationViewMode
             Dispatcher.UIThread.Post(PlayEnterAnimation, DispatcherPriority.Render);
 
             this.WhenAnyValue(x => x.ViewModel)
-                .WhereNotNull()
-                .SelectMany(vm => vm.CloseRequested.Select(_ => vm))
+                .WhereIsNotNull()
+                .SelectMany(vm => vm!.CloseRequested.Select(_ => vm))
                 .Subscribe(PlayExitAnimation)
                 .DisposeWith([.. disposables]);
         });

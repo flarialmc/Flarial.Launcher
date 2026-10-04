@@ -3,7 +3,7 @@
  * Copyright (c) 2026 BedrockOnLinux contributors
  * SPDX-License-Identifier: MIT
  * (full MIT text: src/Flarial.Runtime.Linux/Native/LICENSE-BedrockOnLinux)
- * Unmodified apart from this header and the build line below.
+ * Modified: loads a list of libraries (dependencies first) and takes the process name first.
  *
  * Build (msvc-wine): see build-injector.sh in this directory.
  */
@@ -15,7 +15,7 @@
  * reports no name for it. Returns 0 on success.
  *
  * Build: x86_64-w64-mingw32-gcc -O2 -municode -s injector.c -o ../bol/injector.exe
- * Usage: injector.exe <dll-path> [process.exe]   (default Minecraft.Windows.exe)
+ * Usage: injector.exe <process.exe> <dll> [<dll>...]   (dependencies first, the modification last)
  */
 #include <windows.h>
 #include <winternl.h>
@@ -92,30 +92,19 @@ static DWORD find_pid(const wchar_t *name)
     return pid;
 }
 
-int wmain(int argc, wchar_t **argv)
+/* Loads one library into the target through LoadLibraryW on a remote thread.
+ * Returns 0 on success or the exit code to report. */
+static int load_library(HANDLE h, const wchar_t *dll)
 {
-    if (argc < 2) { fwprintf(stderr, L"usage: injector <dll> [process.exe]\n"); return 2; }
-    const wchar_t *dll  = argv[1];
-    const wchar_t *proc = argc > 2 ? argv[2] : L"Minecraft.Windows.exe";
-
-    DWORD pid = find_pid(proc);
-    if (!pid) { fwprintf(stderr, L"ERR process not found: %ls\n", proc); return 3; }
-
-    HANDLE h = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
-                           PROCESS_VM_WRITE | PROCESS_VM_READ |
-                           PROCESS_QUERY_INFORMATION, FALSE, pid);
-    if (!h) { fwprintf(stderr, L"ERR OpenProcess: %lu\n", GetLastError()); return 4; }
-
     SIZE_T n = (wcslen(dll) + 1) * sizeof(wchar_t);
     void *rem = VirtualAllocEx(h, NULL, n, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
     if (!rem) {
         fwprintf(stderr, L"ERR allocate process memory: %lu\n", GetLastError());
-        CloseHandle(h); return 5;
+        return 5;
     }
     if (!WriteProcessMemory(h, rem, dll, n, NULL)) {
         fwprintf(stderr, L"ERR write process memory: %lu\n", GetLastError());
         VirtualFreeEx(h, rem, 0, MEM_RELEASE);
-        CloseHandle(h);
         return 5;
     }
 
@@ -127,7 +116,8 @@ int wmain(int argc, wchar_t **argv)
                                    rem, 0, NULL);
     if (!th) {
         fwprintf(stderr, L"ERR CreateRemoteThread: %lu\n", GetLastError());
-        VirtualFreeEx(h, rem, 0, MEM_RELEASE); CloseHandle(h); return 6;
+        VirtualFreeEx(h, rem, 0, MEM_RELEASE);
+        return 6;
     }
 
     DWORD wait = WaitForSingleObject(th, 15000);
@@ -143,7 +133,6 @@ int wmain(int argc, wchar_t **argv)
          * target; Wine will reclaim the tiny buffer when Minecraft exits.
          */
         CloseHandle(th);
-        CloseHandle(h);
         return 8;
     }
     DWORD mod = 0;                       /* low 32 bits of the loaded HMODULE */
@@ -151,18 +140,46 @@ int wmain(int argc, wchar_t **argv)
         fwprintf(stderr, L"ERR GetExitCodeThread: %lu\n", GetLastError());
         VirtualFreeEx(h, rem, 0, MEM_RELEASE);
         CloseHandle(th);
-        CloseHandle(h);
         return 9;
     }
     VirtualFreeEx(h, rem, 0, MEM_RELEASE);
     CloseHandle(th);
-    CloseHandle(h);
 
     if (!mod) {
         fwprintf(stderr, L"ERR LoadLibrary returned 0 (bad DLL / 32-bit / missing "
                          L"deps): %ls\n", dll);
         return 7;
     }
-    fwprintf(stderr, L"OK injected %ls into %ls (pid %lu)\n", dll, proc, pid);
+    return 0;
+}
+
+/* Usage: injector.exe <process.exe> <dll> [<dll> ...]
+ * The libraries are loaded in order: every one but the last is a dependency of
+ * the last (a failure there is only reported), the last is the actual
+ * modification and decides the exit code. */
+int wmain(int argc, wchar_t **argv)
+{
+    if (argc < 3) { fwprintf(stderr, L"usage: injector <process.exe> <dll> [<dll>...]\n"); return 2; }
+    const wchar_t *proc = argv[1];
+
+    DWORD pid = find_pid(proc);
+    if (!pid) { fwprintf(stderr, L"ERR process not found: %ls\n", proc); return 3; }
+
+    HANDLE h = OpenProcess(PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION |
+                           PROCESS_VM_WRITE | PROCESS_VM_READ |
+                           PROCESS_QUERY_INFORMATION, FALSE, pid);
+    if (!h) { fwprintf(stderr, L"ERR OpenProcess: %lu\n", GetLastError()); return 4; }
+
+    int last = argc - 1;
+    for (int i = 2; i < last; ++i) {
+        int dep = load_library(h, argv[i]);
+        if (dep) fwprintf(stderr, L"WARN dependency not loaded (%d): %ls\n", dep, argv[i]);
+    }
+
+    int code = load_library(h, argv[last]);
+    CloseHandle(h);
+    if (code) return code;
+
+    fwprintf(stderr, L"OK injected %ls into %ls (pid %lu)\n", argv[last], proc, pid);
     return 0;
 }

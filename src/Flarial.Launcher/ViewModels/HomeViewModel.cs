@@ -1,5 +1,4 @@
-using System.Reactive;
-using System.Reflection;
+using System;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Media;
@@ -11,38 +10,35 @@ using Flarial.Runtime.Core;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
+using Flarial.Runtime.Client;
 
 namespace Flarial.Launcher.ViewModels;
 
-public partial class HomeViewModel : ViewModelBase
+public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 {
-    [Reactive] bool _showPromotions = true;
     [Reactive] bool _isLaunching = true;
-
-    [Reactive] string _launcherVersion;
     [Reactive] string _launcherStatus = "Preparing...";
+    [Reactive] string _launcherVersion = FlarialLauncher.Version;
 
     [Reactive] string _gameVersion = "0.0.0";
     [Reactive] IImmutableSolidColorBrush _gameVersionColor = Brushes.Gray;
 
-    UnsupportedVersionDialog UnsupportedVersionDialog => field ??= new(_model.VersionRegistry);
+    UnsupportedVersionDialog UnsupportedVersionDialog => field ??= new(_mainWindowViewModel.VersionRegistry);
 
-    public DiscordAccountModel DiscordAccount => _model._discordAccount;
+    public AccountModel Account => _mainWindowViewModel._account;
 
-    readonly MainWindowViewModel _model;
+    readonly MainWindowViewModel _mainWindowViewModel;
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Launch { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> CloseWindow { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> MinimizeWindow { get; }
+    public ReactiveCommand<RxVoid, RxVoid> Launch { get; }
+    public ReactiveCommand<RxVoid, RxVoid> CloseWindow { get; }
+    public ReactiveCommand<RxVoid, RxVoid> MinimizeWindow { get; }
 
-    public HomeViewModel(MainWindowViewModel model)
+    public HomeViewModel(MainWindowViewModel mainWindowViewModel)
     {
-        _model = model;
-
-        var assembly = Assembly.GetExecutingAssembly();
-        _launcherVersion = $"{assembly.GetName().Version}";
+        _mainWindowViewModel = mainWindowViewModel;
 
         Launch = ReactiveCommand.CreateFromTask(OnLaunchAsync);
         CloseWindow = ReactiveCommand.Create(static () => MessageBus.Current.SendMessage(WindowStateArgs.Close));
@@ -79,7 +75,7 @@ public partial class HomeViewModel : ViewModelBase
                         return;
                 }
 
-                if (release && !_model.VersionRegistry.IsSupported)
+                if (release && !_mainWindowViewModel.VersionRegistry.IsSupported)
                 {
                     await UnsupportedVersionDialog.ShowAsync();
                     return;
@@ -93,7 +89,7 @@ public partial class HomeViewModel : ViewModelBase
 
             if (client is null)
             {
-                Library library = new(path);
+                ModificationLibrary library = new(path);
 
                 if (!library.IsLoadable)
                 {
@@ -115,7 +111,7 @@ public partial class HomeViewModel : ViewModelBase
                 return;
 
             LauncherStatus = "Verifying...";
-            if (!await client.DownloadAsync(OnDownload))
+            if (!await client.DownloadAsync(this))
             {
                 await ClientUpdateFailureDialog._.ShowAsync();
                 return;
@@ -141,7 +137,7 @@ public partial class HomeViewModel : ViewModelBase
         }
     }
 
-    void OnDownload(int value) => LauncherStatus = $"Downloading... {value}%";
+    public void Report(int value) => LauncherStatus = $"Downloading... {value}%";
 
     public void OnPackageStatusChanged()
     {
@@ -153,6 +149,6 @@ public partial class HomeViewModel : ViewModelBase
         }
 
         GameVersion = VersionRegistry.InstalledVersion;
-        GameVersionColor = _model.VersionRegistry.IsSupported ? Brushes.DarkGreen : Brushes.DarkRed;
+        GameVersionColor = _mainWindowViewModel.VersionRegistry.IsSupported ? Brushes.DarkGreen : Brushes.DarkRed;
     }
 }

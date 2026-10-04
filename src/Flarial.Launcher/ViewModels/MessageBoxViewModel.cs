@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using System.Reactive;
-using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using ReactiveUI;
+using ReactiveUI.Primitives;
+using ReactiveUI.Primitives.Signals;
 
 namespace Flarial.Launcher.ViewModels;
 
-public class MessageBoxViewModel : ReactiveObject
+public sealed class MessageBoxViewModel : ReactiveObject
 {
     private readonly TaskCompletionSource<string> _tcs = new();
     private string? _pendingResult;
@@ -14,9 +14,9 @@ public class MessageBoxViewModel : ReactiveObject
     public string Title { get; }
     public string Message { get; }
     public IEnumerable<string> Buttons { get; }
-    public Subject<Unit> CloseRequested { get; } = new();
+    public Signal<RxVoid> CloseRequested { get; } = new();
 
-    public ReactiveCommand<string, ReactiveUI.Primitives.RxVoid> SelectButtonCommand { get; }
+    public ReactiveCommand<string, RxVoid> SelectButtonCommand { get; }
 
     public Task<string> Result => _tcs.Task;
 
@@ -29,7 +29,7 @@ public class MessageBoxViewModel : ReactiveObject
         SelectButtonCommand = ReactiveCommand.Create<string>(button =>
         {
             _pendingResult = button;
-            CloseRequested.OnNext(Unit.Default);
+            CloseRequested.OnNext(RxVoid.Default);
         });
     }
 

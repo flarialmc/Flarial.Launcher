@@ -35,9 +35,12 @@ sealed class InjectorCore(IEngine engine) : IInjectorCore
         return true;
     }
 
-    public async Task<InjectResult> InjectAsync(string dllPath, uint gamePid, TimeSpan delay, CancellationToken ct)
+    static string ToWine(string path) => path.Length > 2 && path[1] == ':' && path[2] == '\\' ? path : "Z:" + Path.GetFullPath(path).Replace('/', '\\');
+
+    public async Task<InjectResult> InjectAsync(IReadOnlyList<string> libraries, uint gamePid, TimeSpan delay, CancellationToken ct)
     {
-        var dll = Path.GetFullPath(dllPath);
+        if (libraries.Count == 0) return new(false, -1, "No library to inject.");
+        var dll = Path.GetFullPath(libraries[^1]);
         if (!dll.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || !File.Exists(dll)) return new(false, -1, "The DLL is missing or not a .dll file.");
         var pid = (int)gamePid;
         if (!ProcScan.Alive(pid)) return new(false, -1, "Minecraft is not running.");
@@ -47,8 +50,8 @@ sealed class InjectorCore(IEngine engine) : IInjectorCore
         if (!await GameSurvives(pid, delay, ct)) return new(false, -1, "Minecraft exited before injection.");
 
         var env = new Dictionary<string, string?> { ["WINEPREFIX"] = Paths.Prefix, ["WINEESYNC"] = "1", ["WINEFSYNC"] = "1", ["WINEDEBUG"] = "-all" };
-        var info = Proc.Info(engine.Wine, [Paths.Injector, "Z:" + dll.Replace('/', '\\'), "Minecraft.Windows.exe"], env);
-        var code = await Proc.RunAsync(info, Path.Combine(Paths.Logs, "injector.log"), TimeSpan.FromSeconds(60));
+        var info = Proc.Info(engine.Wine, [Paths.Injector, "Minecraft.Windows.exe", .. libraries.Select(ToWine)], env);
+        var code = await Proc.RunAsync(info, Path.Combine(Paths.Logs, "injector.log"), TimeSpan.FromSeconds(60 + 5 * libraries.Count));
         if (code != 0) return new(false, code, Describe(code));
         return await GameSurvives(pid, TimeSpan.FromSeconds(3), ct) ? new(true, 0, "Injected.") : new(false, 0, "Minecraft exited or crashed after injection.");
     }

@@ -35,22 +35,22 @@
                     Height="{Binding RelativeSource={RelativeSource Self}, Path=Bounds.Width}"
                     RenderOptions.BitmapInterpolationMode="HighQuality">
                 <Border.Background>
-                    <ImageBrush Source="{Binding General.DiscordAccount.Avatar}" Stretch="UniformToFill"/>
+                    <ImageBrush Source="{Binding General.Account.Avatar}" Stretch="UniformToFill"/>
                 </Border.Background>
             </Border>
 
             <WrapPanel Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
-                <TextBlock Text="{Binding General.DiscordAccount.Username}"
+                <TextBlock Text="{Binding General.Account.Username}"
                            FontSize="22" TextWrapping="Wrap"
                            Foreground="{StaticResource ForegroundColor}"/>
                 <Border BorderThickness="1"
                         CornerRadius="20"
                         VerticalAlignment="Center"
-                        Background="{Binding General.DiscordAccount.Role.Background}"
-                        BorderBrush="{Binding General.DiscordAccount.Role.Border}"
+                        Background="{Binding General.Account.Entitlement.Background}"
+                        BorderBrush="{Binding General.Account.Entitlement.Border}"
                         Padding="7.5,2.5,7.5,2.5"
                         Margin="5,0,0,0">
-                    <TextBlock Text="{Binding General.DiscordAccount.Role.Name}"
+                    <TextBlock Text="{Binding General.Account.Entitlement.Name}"
                                FontSize="14"
                                Foreground="{StaticResource ForegroundColor}"/>
                 </Border>
@@ -59,8 +59,8 @@
             <VisualLayerManager Grid.Column="2" VerticalAlignment="Top">
                 <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
                     <UniformGrid Rows="1">
-                        <Button Content="Sign out" FontSize="16" Classes="GenericButton" IsVisible="{Binding General.DiscordAccountAvailable}" Command="{Binding General.Logout}"/>
-                        <Button Content="Sign in" FontSize="16" IsEnabled="{Binding General.DiscordLoginAvailable}" Classes="GenericButton" Command="{Binding General.Login}" IsVisible="{Binding !General.DiscordAccountAvailable}"/>
+                        <Button Content="Sign out" FontSize="16" Classes="GenericButton" IsVisible="{Binding General.AccountAvailable}" Command="{Binding General.Logout}"/>
+                        <Button Content="Sign in" FontSize="16" IsEnabled="{Binding General.LoginAvailable}" Classes="GenericButton" Command="{Binding General.Login}" IsVisible="{Binding !General.AccountAvailable}"/>
                     </UniformGrid>
                 </spotlightDecorator:SpotlightDecorator>
             </VisualLayerManager>
