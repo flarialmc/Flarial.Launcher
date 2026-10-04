@@ -27,7 +27,7 @@ static class Download
     }
 
     /// <summary>Downloads to <paramref name="dest"/> (via .part, resuming). progress(done,total).</summary>
-    public static async Task FileAsync(string url, string dest, string? sha256, Action<long, long>? progress = null)
+    public static async Task FileAsync(string url, string dest, string? sha256, Action<long, long>? progress = null, CancellationToken ct = default)
     {
         if (File.Exists(dest) && (sha256 is null || await Sha256Async(dest) == sha256)) { var n = new FileInfo(dest).Length; progress?.Invoke(n, n); return; }
         Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
@@ -40,20 +40,20 @@ static class Download
                 long have = File.Exists(part) ? new FileInfo(part).Length : 0;
                 using var req = new HttpRequestMessage(HttpMethod.Get, url);
                 if (have > 0) req.Headers.Range = new(have, null);
-                using var res = await Http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+                using var res = await Http.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, ct);
 
                 if (res.StatusCode == HttpStatusCode.RequestedRangeNotSatisfiable) { File.Delete(part); continue; }
                 res.EnsureSuccessStatusCode();
                 if (res.StatusCode != HttpStatusCode.PartialContent) have = 0;
                 var total = have + (res.Content.Headers.ContentLength ?? 0);
 
-                await using (var src = await res.Content.ReadAsStreamAsync())
+                await using (var src = await res.Content.ReadAsStreamAsync(ct))
                 await using (var dst = new FileStream(part, have > 0 ? FileMode.Append : FileMode.Create, FileAccess.Write))
                 {
                     var buf = new byte[1 << 17]; int r; long done = have, lastReport = 0;
-                    while ((r = await src.ReadAsync(buf)) > 0)
+                    while ((r = await src.ReadAsync(buf, ct)) > 0)
                     {
-                        await dst.WriteAsync(buf.AsMemory(0, r)); done += r;
+                        await dst.WriteAsync(buf.AsMemory(0, r), ct); done += r;
                         if (done - lastReport >= 1 << 20 || done == total) { lastReport = done; progress?.Invoke(done, total); }
                     }
                 }
@@ -68,7 +68,7 @@ static class Download
             }
             catch (Exception e) when (attempt < 4 && e is HttpRequestException or IOException && e is not InvalidDataException)
             {
-                await Task.Delay(2000 * (attempt + 1));
+                await Task.Delay(2000 * (attempt + 1), ct);
             }
         }
     }

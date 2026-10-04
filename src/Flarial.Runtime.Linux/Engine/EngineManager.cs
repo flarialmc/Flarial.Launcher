@@ -36,8 +36,7 @@ sealed class EngineManager : IEngine
         if (IsProtonReady) { progress?.Report(1); return; }
 
         var tar = Path.Combine(Paths.Cache, $"GDK-Proton-xuser-{PinnedRevision}.tar.gz");
-        // ponytail: Download.FileAsync takes no CancellationToken; cancel is honoured between steps only.
-        await Download.FileAsync(EngineUrl, tar, EngineSha, (d, t) => progress?.Report(t > 0 ? 0.85 * d / t : 0));
+        await Download.FileAsync(EngineUrl, tar, EngineSha, (d, t) => progress?.Report(t > 0 ? 0.85 * d / t : 0), ct);
         ct.ThrowIfCancellationRequested();
 
         var tmp = Path.Combine(Paths.ProtonDir, ".extract");
@@ -61,7 +60,7 @@ sealed class EngineManager : IEngine
         if (IsUmuReady) { progress?.Report(1); return; }
 
         var tar = Path.Combine(Paths.Cache, "umu-launcher-1.4.3-zipapp.tar");
-        await Download.FileAsync(UmuUrl, tar, UmuSha, (d, t) => progress?.Report(t > 0 ? 0.8 * d / t : 0));
+        await Download.FileAsync(UmuUrl, tar, UmuSha, (d, t) => progress?.Report(t > 0 ? 0.8 * d / t : 0), ct);
         ct.ThrowIfCancellationRequested();
 
         var tmp = Path.Combine(Paths.Cache, "umu-extract");
@@ -85,7 +84,7 @@ sealed class EngineManager : IEngine
     {
         Directory.CreateDirectory(dest);
         // plain -xf: GNU tar detects gz/xz/zstd itself
-        var code = await Proc.RunAsync(Proc.Info("tar", ["-xf", tar, "-C", dest]), Path.Combine(Paths.Logs, "setup.log"), TimeSpan.FromMinutes(20));
+        var code = await Proc.RunAsync(Proc.Info("tar", ["-xf", tar, "-C", dest]), Path.Combine(Paths.Logs, "setup.log"), TimeSpan.FromMinutes(20), ct);
         ct.ThrowIfCancellationRequested();
         if (code != 0) throw new IOException($"tar failed ({code}) extracting {Path.GetFileName(tar)}");
     }

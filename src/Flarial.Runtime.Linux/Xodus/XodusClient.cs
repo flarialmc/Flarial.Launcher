@@ -40,13 +40,13 @@ internal sealed partial class XodusClient : IXodus
 
         Directory.CreateDirectory(Paths.Cache);
         var tar = Path.Combine(Paths.Cache, $"xodus-cli-{Rev}.tar.gz");
-        await Download.FileAsync(CliUrl, tar, CliSha, (d, t) => progress?.Report(t > 0 ? 0.9 * d / t : 0));
+        await Download.FileAsync(CliUrl, tar, CliSha, (d, t) => progress?.Report(t > 0 ? 0.9 * d / t : 0), ct);
         ct.ThrowIfCancellationRequested();
 
         var tmp = Paths.XodusDir + ".new";
         if (Directory.Exists(tmp)) Directory.Delete(tmp, true);
         Directory.CreateDirectory(tmp);
-        if (await Proc.RunAsync(Proc.Info("tar", ["-xzf", tar, "-C", tmp]), Log, TimeSpan.FromMinutes(2)) != 0 || !File.Exists(Path.Combine(tmp, "xodus-cli")))
+        if (await Proc.RunAsync(Proc.Info("tar", ["-xzf", tar, "-C", tmp]), Log, TimeSpan.FromMinutes(2), ct) != 0 || !File.Exists(Path.Combine(tmp, "xodus-cli")))
             throw new IOException("could not extract xodus-cli");
         File.WriteAllText(Path.Combine(tmp, ".rev"), Rev);
         File.SetUnixFileMode(Path.Combine(tmp, "xodus-cli"), UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
@@ -157,7 +157,7 @@ internal sealed partial class XodusClient : IXodus
     public async Task LogoutAsync(CancellationToken ct)
     {
         RequireBinary();
-        await Proc.RunAsync(Proc.Info(Paths.XodusBin, ["logout"], CliEnv()), Log, TimeSpan.FromMinutes(1));
+        await Proc.RunAsync(Proc.Info(Paths.XodusBin, ["logout"], CliEnv()), Log, TimeSpan.FromMinutes(1), ct);
         ResetWebviewState();
     }
 

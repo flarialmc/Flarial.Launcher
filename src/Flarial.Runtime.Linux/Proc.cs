@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Flarial.Runtime.Linux;
@@ -20,7 +21,7 @@ static class Proc
     }
 
     /// <summary>Runs to completion appending combined output to a log file; returns exit code (-1 on timeout).</summary>
-    public static async Task<int> RunAsync(ProcessStartInfo info, string? logPath, TimeSpan timeout)
+    public static async Task<int> RunAsync(ProcessStartInfo info, string? logPath, TimeSpan timeout, CancellationToken ct = default)
     {
         using var p = Process.Start(info)!;
         p.StandardInput.Close();
@@ -28,9 +29,9 @@ static class Proc
         if (logPath is { }) { Directory.CreateDirectory(Path.GetDirectoryName(logPath)!); log = new(logPath, true, Encoding.UTF8) { AutoFlush = true }; }
         async Task Pump(StreamReader r) { string? l; while ((l = await r.ReadLineAsync()) is { }) { if (log is { }) lock (log) log.WriteLine(l); } }
         var pumps = Task.WhenAll(Pump(p.StandardOutput), Pump(p.StandardError));
-        using var cts = new System.Threading.CancellationTokenSource(timeout);
+        using var cts = System.Threading.CancellationTokenSource.CreateLinkedTokenSource(ct); cts.CancelAfter(timeout);
         try { await p.WaitForExitAsync(cts.Token); await pumps; return p.ExitCode; }
-        catch (OperationCanceledException) { try { p.Kill(true); } catch { } return -1; }
+        catch (OperationCanceledException) { try { p.Kill(true); } catch { } ct.ThrowIfCancellationRequested(); return -1; }
         finally { log?.Dispose(); }
     }
 

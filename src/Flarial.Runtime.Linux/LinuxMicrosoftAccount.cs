@@ -1,15 +1,23 @@
-using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Platform;
 
 namespace Flarial.Runtime.Linux;
 
-/// <summary>SEAM: Microsoft account sign-in (device code / browser flow) used to download the game from the Store.</summary>
+/// <summary>Microsoft account used to download/license the game: xodus-cli login (webview window).</summary>
 public sealed class LinuxMicrosoftAccount : IMicrosoftAccount
 {
-    public bool IsSignedIn => false;
+    public bool IsSignedIn => Backend.Xodus.IsLoggedIn;
 
-    public Task<bool> SignInAsync() => throw new NotImplementedException("Microsoft account sign-in is not implemented yet.");
+    public async Task<bool> SignInAsync()
+    {
+        await Backend.Xodus.EnsureInstalledAsync(null, default);
+        return await Backend.Xodus.LoginAsync(default);
+    }
 
-    public Task SignOutAsync() => throw new NotImplementedException("Microsoft account sign-in is not implemented yet.");
+    public async Task SignOutAsync()
+    {
+        await Backend.Xodus.EnsureInstalledAsync(null, default);
+        await Backend.Xodus.LogoutAsync(default);
+    }
 }

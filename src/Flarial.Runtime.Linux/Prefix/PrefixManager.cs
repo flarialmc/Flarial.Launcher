@@ -77,9 +77,8 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         ["DISPLAY"] = null, ["WAYLAND_DISPLAY"] = null, ["XAUTHORITY"] = null, ["SDL_VIDEODRIVER"] = "dummy",
     };
 
-    // ponytail: cancelling stops waiting, not the child; wine children finish on their own.
     static async Task<int> Run(System.Diagnostics.ProcessStartInfo i, TimeSpan timeout, CancellationToken ct) =>
-        await Proc.RunAsync(i, Log, timeout).WaitAsync(ct);
+        await Proc.RunAsync(i, Log, timeout, ct);
 
     async Task Wine(IEnumerable<string> args, TimeSpan timeout, CancellationToken ct)
     {
