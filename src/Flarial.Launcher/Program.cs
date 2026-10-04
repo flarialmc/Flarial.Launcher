@@ -20,8 +20,7 @@ static class Program
         using Mutex mutex = new(false, "54874D29-646C-4536-B6D1-8E05053BE00E", out var created);
         if (!created) return;
 
-        var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        Environment.CurrentDirectory = Directory.CreateDirectory(Path.Combine(path, "Flarial", "Launcher")).FullName;
+        Environment.CurrentDirectory = Directory.CreateDirectory(LinuxPlatform.LauncherDataDirectory).FullName;
 
         for (var index = 0; index < args.Length; index++)
             switch (args[index])

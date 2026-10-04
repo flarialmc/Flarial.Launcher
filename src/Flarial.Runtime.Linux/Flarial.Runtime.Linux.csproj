@@ -6,12 +6,15 @@
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Flarial.Runtime\Flarial.Runtime.csproj" />
+    <EmbeddedResource Include="Resources\launch-wrapper.sh" LogicalName="launch-wrapper.sh" />
+    <EmbeddedResource Include="Native\injector.exe" LogicalName="injector.exe" />
   </ItemGroup>
 
 </Project>
