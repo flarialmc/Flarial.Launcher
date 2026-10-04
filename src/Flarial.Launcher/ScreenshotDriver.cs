@@ -51,6 +51,18 @@ static class ScreenshotDriver
         await Shot("settings-versions", 2500);
         Go(PageTransitions.SettingsConfigsPage);
         await Shot("settings-configs", 2500);
+        var a = vm.SettingsViewModel.SettingsAccountsViewModel;
+        Go(PageTransitions.SettingsAccountsPage);
+        await Shot("accounts-signed-out", 2500);
+        g.DiscordLoginAvailable = false; g.DiscordAccountAvailable = true;
+        a.MicrosoftSignedIn = true; a.MicrosoftText = "FlarialPlayer";
+        a.XboxSignedIn = true; a.XboxText = "FlarialPlayer";
+        await Shot("accounts-signed-in");
+        a.XboxSignedIn = false; a.XboxText = "Not signed in";
+        a.XboxSignIn.Execute().Subscribe();
+        await Shot("accounts-device-code", 2000);
+        vm.CurrentDialog?.SelectButtonCommand.Execute("Cancel"); await Task.Delay(1000);
+        g.DiscordLoginAvailable = true; g.DiscordAccountAvailable = false;
         Go(PageTransitions.SettingsGeneralPage);
         await Task.Delay(1500);
         File.WriteAllText(Path.Combine(dir, "state"), "t-to-home"); Go(PageTransitions.HomePage); await Task.Delay(1500);

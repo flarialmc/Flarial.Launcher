@@ -1,0 +1,109 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flarial.Launcher.ViewModels"
+             xmlns:spotlightDecorator="clr-namespace:Flarial.Launcher.Controls.SpotlightDecorator"
+             mc:Ignorable="d"
+             Width="555" Height="470"
+             x:Class="Flarial.Launcher.Views.SettingsAccountsView"
+             x:DataType="vm:SettingsAccountsViewModel"
+             Background="{StaticResource BackgroundColor}"
+             BorderThickness="{StaticResource ButtonBorderThickness}"
+             BorderBrush="{StaticResource BackgroundBorderColor}"
+             CornerRadius="20">
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </UserControl.Styles>
+    <UserControl.Clip>
+        <RectangleGeometry Rect="0,0,555,470"/>
+    </UserControl.Clip>
+    <StackPanel Margin="20" Spacing="5">
+        <Grid HorizontalAlignment="Left">
+            <TextBlock Margin="0,0,0,5" Text="Flarial" FontSize="22" FontWeight="SemiBold"/>
+            <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+        </Grid>
+
+        <Grid ColumnDefinitions="45,*,Auto" VerticalAlignment="Top">
+            <Border Grid.Column="0"
+                    CornerRadius="30"
+                    Height="{Binding RelativeSource={RelativeSource Self}, Path=Bounds.Width}"
+                    RenderOptions.BitmapInterpolationMode="HighQuality">
+                <Border.Background>
+                    <ImageBrush Source="{Binding General.DiscordAccount.Avatar}" Stretch="UniformToFill"/>
+                </Border.Background>
+            </Border>
+
+            <WrapPanel Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
+                <TextBlock Text="{Binding General.DiscordAccount.Username}"
+                           FontSize="22" TextWrapping="Wrap"
+                           Foreground="{StaticResource ForegroundColor}"/>
+                <Border BorderThickness="1"
+                        CornerRadius="20"
+                        VerticalAlignment="Center"
+                        Background="{Binding General.DiscordAccount.Role.Background}"
+                        BorderBrush="{Binding General.DiscordAccount.Role.Border}"
+                        Padding="7.5,2.5,7.5,2.5"
+                        Margin="5,0,0,0">
+                    <TextBlock Text="{Binding General.DiscordAccount.Role.Name}"
+                               FontSize="14"
+                               Foreground="{StaticResource ForegroundColor}"/>
+                </Border>
+            </WrapPanel>
+
+            <VisualLayerManager Grid.Column="2" VerticalAlignment="Top">
+                <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                    <UniformGrid Rows="1">
+                        <Button Content="Sign out" FontSize="16" Classes="GenericButton" IsVisible="{Binding General.DiscordAccountAvailable}" Command="{Binding General.Logout}"/>
+                        <Button Content="Sign in" FontSize="16" IsEnabled="{Binding General.DiscordLoginAvailable}" Classes="GenericButton" Command="{Binding General.Login}" IsVisible="{Binding !General.DiscordAccountAvailable}"/>
+                    </UniformGrid>
+                </spotlightDecorator:SpotlightDecorator>
+            </VisualLayerManager>
+        </Grid>
+
+        <Grid HorizontalAlignment="Left" Margin="0,10,0,0">
+            <TextBlock Margin="0,0,0,5" Text="Microsoft" FontSize="22" FontWeight="SemiBold"/>
+            <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Top">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                <TextBlock Text="{Binding MicrosoftText}" FontSize="20" TextWrapping="Wrap"/>
+                <TextBlock Text="Game download and license" FontSize="14" Opacity="0.6"/>
+            </StackPanel>
+            <VisualLayerManager Grid.Column="1" VerticalAlignment="Top">
+                <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                    <UniformGrid Rows="1" IsEnabled="{Binding !MicrosoftBusy}">
+                        <Button Content="Sign out" FontSize="16" Classes="GenericButton" IsVisible="{Binding MicrosoftSignedIn}" Command="{Binding MicrosoftSignOut}"/>
+                        <Button Content="Sign in" FontSize="16" Classes="GenericButton" IsVisible="{Binding !MicrosoftSignedIn}" Command="{Binding MicrosoftSignIn}"/>
+                    </UniformGrid>
+                </spotlightDecorator:SpotlightDecorator>
+            </VisualLayerManager>
+        </Grid>
+
+        <Grid HorizontalAlignment="Left" Margin="0,10,0,0">
+            <TextBlock Margin="0,0,0,5" Text="Xbox Live" FontSize="22" FontWeight="SemiBold"/>
+            <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+        </Grid>
+
+        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Top">
+            <StackPanel Grid.Column="0" VerticalAlignment="Center" Spacing="2">
+                <TextBlock Text="{Binding XboxText}" FontSize="20" TextWrapping="Wrap"/>
+                <TextBlock Text="In-game online sign in" FontSize="14" Opacity="0.6"/>
+            </StackPanel>
+            <VisualLayerManager Grid.Column="1" VerticalAlignment="Top">
+                <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                    <UniformGrid Rows="1" IsEnabled="{Binding !XboxBusy}">
+                        <Button Content="Sign out" FontSize="16" Classes="GenericButton" IsVisible="{Binding XboxSignedIn}" Command="{Binding XboxSignOut}"/>
+                        <Button Content="Sign in" FontSize="16" Classes="GenericButton" IsVisible="{Binding !XboxSignedIn}" Command="{Binding XboxSignIn}"/>
+                    </UniformGrid>
+                </spotlightDecorator:SpotlightDecorator>
+            </VisualLayerManager>
+        </Grid>
+    </StackPanel>
+</UserControl>

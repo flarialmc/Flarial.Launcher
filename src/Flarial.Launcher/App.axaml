@@ -17,6 +17,7 @@
 
         <DataTemplate DataType="{x:Type vm:VersionItemViewModel}"><views:VersionItemView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsConfigsViewModel}"><views:SettingsConfigsView/></DataTemplate>
+        <DataTemplate DataType="{x:Type vm:SettingsAccountsViewModel}"><views:SettingsAccountsView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsGeneralViewModel}"><views:SettingsGeneralView/></DataTemplate>
         <DataTemplate DataType="{x:Type vm:SettingsVersionsViewModel}"><views:SettingsVersionsView/></DataTemplate>
     </Application.DataTemplates>
