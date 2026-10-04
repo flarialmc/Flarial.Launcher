@@ -22,6 +22,7 @@ public static class LinuxPlatform
     /// <summary>Registers the Linux backend. Call once at startup.</summary>
     public static void Use()
     {
+        Paths.Ensure(); // creates the data dirs and applies the dev seed (FLARIAL_LINUX_SEED_FROM) before anything scans for installed games
         Platform.Platform.Game = new LinuxGameService();
         Platform.Platform.Injector = new LinuxInjector();
         Platform.Platform.MicrosoftAccount = new LinuxMicrosoftAccount();
