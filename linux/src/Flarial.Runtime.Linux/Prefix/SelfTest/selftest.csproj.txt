@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><Nullable>enable</Nullable><ImplicitUsings>disable</ImplicitUsings><LangVersion>latest</LangVersion></PropertyGroup>
+  <PropertyGroup><W>/run/media/bariman/url/Flarial work/Github/linux/.claude/worktrees/agent-a4e22ae9f7d1e1739/src/Flarial.Runtime.Linux</W></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(W)/Contracts.cs;$(W)/Paths.cs;$(W)/Download.cs;$(W)/Proc.cs;$(W)/Json.cs;$(W)/Settings.cs;$(W)/Prefix/*.cs" />
+  </ItemGroup>
+</Project>

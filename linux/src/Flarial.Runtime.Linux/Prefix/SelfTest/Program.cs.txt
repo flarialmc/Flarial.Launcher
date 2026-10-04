@@ -1,0 +1,25 @@
+using System; using System.IO; using System.Threading; using System.Threading.Tasks; using System.Linq;
+using Flarial.Runtime.Linux; using Flarial.Runtime.Linux.Engine; using Flarial.Runtime.Linux.Prefix;
+sealed class E : IEngine {
+  public bool IsProtonReady => true; public bool IsUmuReady => true;
+  public Task EnsureProtonAsync(IProgress<double>? p, CancellationToken c) => Task.CompletedTask;
+  public Task EnsureUmuAsync(IProgress<double>? p, CancellationToken c) => Task.CompletedTask;
+  public string ProtonDir => Paths.Engine; public string Wine => Paths.Wine; public string Wineserver => Paths.Wineserver;
+  public string UmuRun => Paths.UmuRun; public string Revision => "selftest";
+}
+static class P { static async Task Main() {
+  Paths.Ensure();
+  var m = new PrefixManager(new E());
+  Console.WriteLine("ready before: " + m.IsReady);
+  await m.EnsureSetupAsync(new Progress<double>(d => Console.WriteLine("setup " + d)), default);
+  Console.WriteLine("ready after: " + m.IsReady);
+  var src = Directory.GetDirectories(Path.Combine(Paths.Root, "games", "release")).First();
+  var real = new DirectoryInfo(src).ResolveLinkTarget(true)!.FullName;
+  var gd = Paths.GameDir("scratch", "9.9.9"); Directory.CreateDirectory(gd);
+  foreach (var e in Directory.GetFileSystemEntries(real)) { var n = Path.GetFileName(e); var to = Path.Combine(gd, n);
+    if (n is "XCurl.dll" or "libHttpClient.GDK.dll") File.Copy(e, to, true); else if (n != "etc" && !Path.Exists(to)) File.CreateSymbolicLink(to, e); }
+  await m.PrepareGameAsync(gd, null, default);
+  await m.PrepareGameAsync(gd, null, default);
+  await m.SetRefreshTokenAsync("dummy-token\\x", default);
+  await m.SetRefreshTokenAsync(null, default); await m.SetRefreshTokenAsync("tok2", default); Console.WriteLine("done " + gd);
+}}
