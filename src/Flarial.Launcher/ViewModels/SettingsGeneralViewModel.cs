@@ -102,7 +102,7 @@ public partial class SettingsGeneralViewModel : ViewModelBase
 
     void OnOpenLauncherFolder() => NativeMethods.ShellExecute(".");
 
-    void OnOpenClientFolder() => NativeMethods.ShellExecute(Directory.CreateDirectory(@"..\Client").FullName);
+    void OnOpenClientFolder() => NativeMethods.ShellExecute(Directory.CreateDirectory(Path.Combine("..", "Client")).FullName);
 
     readonly AppSettings _settings;
     readonly MainWindowViewModel _model;

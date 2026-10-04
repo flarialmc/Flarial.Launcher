@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Rendering.Composition;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Linux;
 using ReactiveUI.Avalonia;
 
 namespace Flarial.Launcher;
@@ -15,11 +16,12 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        LinuxPlatform.Use();
         using Mutex mutex = new(false, "54874D29-646C-4536-B6D1-8E05053BE00E", out var created);
         if (!created) return;
 
         var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        Environment.CurrentDirectory = Directory.CreateDirectory(Path.Combine(path, @"Flarial\Launcher")).FullName;
+        Environment.CurrentDirectory = Directory.CreateDirectory(Path.Combine(path, "Flarial", "Launcher")).FullName;
 
         for (var index = 0; index < args.Length; index++)
             switch (args[index])
@@ -33,7 +35,7 @@ static class Program
         var builder = AppBuilder.Configure<App>();
 
         builder.UseSkia();
-        builder.UseWin32();
+        builder.UseX11();
         builder.UseHarfBuzz();
         builder.UseReactiveUI(static _ => _.WithExceptionHandler(new ExceptionHandler()));
 

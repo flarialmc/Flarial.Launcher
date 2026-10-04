@@ -2,15 +2,14 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.Versioning;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Flarial.Runtime.Unmanaged;
 
+[assembly: System.Runtime.Versioning.SupportedOSPlatform("linux")]
 [assembly: AssemblyCompany("Flarial")]
 [assembly: AssemblyProduct("Launcher")]
 [assembly: AssemblyTitle("Flarial Launcher")]
-[assembly: SupportedOSPlatform("windows10.0.19041.0")]
 [assembly: AssemblyCopyright("Copyright © Flarial 2023 - 2026")]
 
 file static class AssemblyInfo

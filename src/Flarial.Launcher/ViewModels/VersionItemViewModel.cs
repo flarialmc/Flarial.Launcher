@@ -109,7 +109,7 @@ public partial class VersionItemViewModel : ViewModelBase
             return;
         }
 
-        if (!Minecraft.IsInstalled)
+        if (!Minecraft.IsInstalled && Flarial.Runtime.Platform.Platform.Game.RequiresInstalledGame)
         {
             await NotInstalledDialog._.ShowAsync();
             return;

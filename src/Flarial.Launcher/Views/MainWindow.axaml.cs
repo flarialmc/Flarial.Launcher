@@ -13,7 +13,6 @@ using Flarial.Launcher.Types;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
 using SkiaSharp;
-using Windows.Win32;
 
 namespace Flarial.Launcher.Views;
 
@@ -125,6 +124,7 @@ public partial class MainWindow : Window
     {
         Loaded -= OnLoaded;
         ((MainWindowViewModel)DataContext!).OnLoaded();
+        ScreenshotDriver.Start(this);
     }
 
 }

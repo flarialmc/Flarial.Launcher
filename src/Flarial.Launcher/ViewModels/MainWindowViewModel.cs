@@ -76,14 +76,6 @@ public sealed partial class MainWindowViewModel : ViewModelBase
             return;
         }
 
-        if (!await LauncherMigrationDialog._.ShowAsync())
-        {
-            Environment.Exit(1);
-            return;
-        }
-
-        await FlarialLauncher.DownloadAsync(OnDownload);
-
         var loginWithDiscordTask = LoginWithDiscordAsync();
         VersionRegistry = await VersionRegistry.GetAsync();
 

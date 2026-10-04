@@ -30,7 +30,7 @@ abstract class StorePage
 
     protected abstract string ProductId { get; }
 
-    internal StorePage() => _uri = $"ms-windows-store://pdp/?ProductId={ProductId}";
+    internal StorePage() => _uri = $"https://apps.microsoft.com/detail/{ProductId}";
 
     internal void Open() => NativeMethods.ShellExecute(_uri);
 }
