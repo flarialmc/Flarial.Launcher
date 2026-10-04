@@ -93,7 +93,7 @@ static class Paths
         {
             if (!File.Exists(from) || (File.Exists(to) && !overwrite)) return;
             Directory.CreateDirectory(Path.GetDirectoryName(to)!);
-            File.Copy(from, to);
+            File.Copy(from, to, true);
             File.SetUnixFileMode(to, UnixFileMode.UserRead | UnixFileMode.UserWrite);
         }
 
