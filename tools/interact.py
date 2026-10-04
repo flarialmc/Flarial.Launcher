@@ -26,8 +26,9 @@ def move(px, py):
 def button(down):
     T.XTestFakeButtonEvent(ctypes.c_void_p(d), 1, 1 if down else 0, 0); X.XFlush(ctypes.c_void_p(d))
 n = [0]
+T0 = time.time()
 def shot(name):
-    n[0] += 1; subprocess.run(['magick', 'x:%d' % win, '%s/%03d-%s.png' % (out, n[0], name)])
+    n[0] += 1; subprocess.run(['magick', 'x:%d' % win, '%s/%03d-%05d-%s.png' % (out, n[0], int((time.time()-T0)*1000), name)])
 def burst(name, secs):
     t = time.time()
     while time.time() - t < secs: shot(name)
