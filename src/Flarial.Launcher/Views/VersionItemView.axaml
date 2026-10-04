@@ -220,7 +220,7 @@
                                 </Border.Styles>
                             </Border>
                             <StackPanel IsHitTestVisible="False" Margin="10" Spacing="5" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal">
-                                <Viewbox Width="15" Height="15">
+                                <Viewbox Width="15" Height="15" IsVisible="{TemplateBinding Button.Tag, Converter={x:Static ObjectConverters.IsNotNull}}">
                                     <ContentControl Content="{TemplateBinding Button.Tag}"/>
                                 </Viewbox>
                                 <TextBlock FontSize="14" Text="{TemplateBinding Button.Content}"/>
