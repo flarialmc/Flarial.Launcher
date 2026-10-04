@@ -7,4 +7,5 @@ public enum PageTransitions
     SettingsGeneralPage,
     SettingsVersionsPage,
     SettingsConfigsPage,
+    SettingsAccountsPage,
 }

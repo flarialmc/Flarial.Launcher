@@ -30,3 +30,6 @@ Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailabl
 * Settings > Versions list is empty in both (versions load from the network after startup).
 * Transitions: frame strips (`transition-*.png`) show the same sequence/timing; mid-transition frame diffs are sampling jitter (capture is ~25 fps screen grabs, not frame-locked).
 * Not verifiable on Linux/wine: real Windows DWM acrylic/mica behind the window (the original does not use it), Minecraft-dependent states (installed version colour, supported/unsupported).
+
+## Intentional additions (user-requested)
+* Settings > **Accounts** page (sidebar entry below Versions, same slide/zoom transition at Y=1500): Flarial (Discord) account reusing `SettingsGeneralViewModel`/`DiscordAccountModel` (the Discord section on General is kept), Microsoft account (xodus) and Xbox Live device-code sign-in (code shown in the existing `MessageBoxView`). Built only from existing styles/brushes/controls. Files: `Views/SettingsAccountsView.axaml(.cs)`, `ViewModels/SettingsAccountsViewModel.cs`, `Management/AccountsService.cs` (`IAccountsService`, fake default); minimal edits to `SettingsView.axaml(.cs)` (extra row/radio/page, Return button moved to row 4), `SettingsViewModel`, `App.axaml`, `PageTransitions`, `ScreenshotDriver`. Captures: `docs/linux/accounts-*.png`.
