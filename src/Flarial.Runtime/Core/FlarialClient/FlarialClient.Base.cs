@@ -28,19 +28,7 @@ public abstract partial class FlarialClient
 
     private protected FlarialClient() { }
 
-    public static bool IsRunning
-    {
-        get
-        {
-            if (Minecraft.GetWindow(className: ClassName) is not { } clientWindow)
-                return false;
-
-            if (Minecraft.GetWindow(clientWindow._processId) is not { } minecraftWindow)
-                return false;
-
-            return minecraftWindow.IsVisible;
-        }
-    }
+    public static bool IsRunning => Platform.Platform.Injector.IsClientRunning;
 
     public bool Launch()
     {
@@ -52,7 +40,6 @@ public abstract partial class FlarialClient
         return false;
     }
 
-    const string ClassName = "Flarial Client";
     const string HashesUri = "https://cdn.flarial.xyz/dll_hashes.json";
 
     async Task<string> GetRemoteHashAsync()
@@ -90,4 +77,4 @@ public abstract partial class FlarialClient
         await HttpService.DownloadAsync(DownloadUri, FileName, callback);
         return true;
     }
-}
+}

@@ -1,5 +1,4 @@
 using System;
-using Windows.ApplicationModel;
 
 namespace Flarial.Runtime.Versions;
 
@@ -35,14 +34,7 @@ unsafe readonly ref struct GameVersion
         _build = segments[2];
     }
 
-    internal GameVersion(PackageVersion version)
-    {
-        _major = version.Major;
-        _minor = version.Minor;
-        _build = version.Build / 100;
-    }
-
     internal readonly int _major, _minor, _build;
 
     public override string ToString() => _minor >= 26 ? $"{_minor}.{_build}" : $"{_major}.{_minor}.{_build}";
-}
+}

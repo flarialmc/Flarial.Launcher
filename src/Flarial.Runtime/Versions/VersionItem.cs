@@ -1,5 +1,5 @@
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
@@ -9,8 +9,6 @@ namespace Flarial.Runtime.Versions;
 
 public sealed class VersionItem
 {
-    static readonly string s_path = Path.GetTempPath();
-
     public override string ToString() => _string;
 
     internal VersionItem(string version, string[] downloadUris, byte[] gameLaunchHelper)
@@ -26,45 +24,28 @@ public sealed class VersionItem
     readonly byte[] _gameLaunchHelper;
     internal readonly string _version;
 
-    async Task InstallAsync(string uri, Action<int, bool> callback)
-    {
-        var packagePath = Path.Combine(s_path, Path.GetRandomFileName());
-
-        try
-        {
-            await HttpService.DownloadAsync(uri, packagePath, OnDownload);
-            await Task.Run(() => PackageService.Add(new(packagePath), OnInstall));
-
-            var installedPath = Minecraft.Package.InstalledPath;
-            var gameLaunchHelperPath = Path.Combine(installedPath, "gamelaunchhelper.dll");
-
-            await File.WriteAllBytesAsync(gameLaunchHelperPath, _gameLaunchHelper);
-        }
-        finally
-        {
-            try { File.Delete(packagePath); }
-            catch { }
-        }
-
-
-        void OnInstall(int value) => callback(value, true);
-        void OnDownload(int value) => callback(value, false);
-    }
+    /// <summary>Canonical "major.minor.build" string.</summary>
+    public string Version => _version;
+    public IReadOnlyList<string> DownloadUris => _downloadUris;
+    /// <summary>gamelaunchhelper.dll to place in the game folder after install.</summary>
+    public byte[] GameLaunchHelper => _gameLaunchHelper;
 
     public async Task<Task?> InstallAsync(Action<int, bool> callback)
     {
-        if (!GamingServices.IsInstalled)
+        var game = Platform.Platform.Game;
+
+        if (!game.IsGamingServicesInstalled)
             throw new GamingServicesNotInstalledException();
 
-        if (!Minecraft.IsInstalled)
+        if (game.RequiresInstalledGame && !game.IsInstalled)
             throw new MinecraftNotInstalledException();
 
-        if (Minecraft.IsSideloaded)
+        if (game.IsSideloaded)
             throw new MinecraftSideloadedException();
 
         if (await HttpService.ProbeAsync(_downloadUris) is not { } uri)
             return null;
 
-        return InstallAsync(uri, callback);
+        return game.InstallAsync(this, uri, callback);
     }
-}
+}

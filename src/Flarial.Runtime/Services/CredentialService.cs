@@ -1,5 +1,5 @@
 using System;
-using Windows.Security.Credentials;
+using Flarial.Runtime.Platform;
 
 namespace Flarial.Runtime.Services;
 
@@ -21,38 +21,7 @@ abstract class CredentialService
     private protected abstract string Resource { get; }
     private protected abstract string Username { get; }
 
-    static readonly PasswordVault s_vault = new();
-
-    PasswordCredential? Retrieve()
-    {
-
-        try { return s_vault.Retrieve(Resource, Username); }
-        catch { return null; }
-    }
-
-    internal void Remove()
-    {
-        if (Retrieve() is { } credential)
-            s_vault.Remove(credential);
-    }
-
-    internal string? Get()
-    {
-        if (Retrieve() is { } credential)
-        {
-            credential.RetrievePassword();
-            return credential.Password;
-        }
-        return null;
-    }
-
-    internal void Set(string value)
-    {
-        s_vault.Add(new()
-        {
-            Password = value,
-            Resource = Resource,
-            UserName = Username
-        });
-    }
+    internal void Remove() => Platform.Platform.Credentials.Remove(Resource, Username);
+    internal string? Get() => Platform.Platform.Credentials.Get(Resource, Username);
+    internal void Set(string value) => Platform.Platform.Credentials.Set(Resource, Username, value);
 }

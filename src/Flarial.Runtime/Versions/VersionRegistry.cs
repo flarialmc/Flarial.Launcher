@@ -35,8 +35,7 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
     {
         get
         {
-            var version = Minecraft.Package.Id.Version;
-            return new GameVersion(version).ToString();
+            return new GameVersion(Platform.Platform.Game.InstalledVersion!).ToString();
         }
     }
 
@@ -62,8 +61,7 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
     {
         get
         {
-            var packageVersion = Minecraft.Package.Id.Version;
-            GameVersion gameVersion = new(packageVersion);
+            GameVersion gameVersion = new(Platform.Platform.Game.InstalledVersion!);
 
             var roundedVersion = RoundVersionBuild(gameVersion);
             return _supportedVersions.Contains(roundedVersion);
@@ -106,4 +104,4 @@ public sealed class VersionRegistry : IEnumerable<VersionItem>
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
     public IEnumerator<VersionItem> GetEnumerator() => _versionItems.GetEnumerator();
-}
+}

@@ -1,43 +1,37 @@
-using Windows.Win32;
-using Windows.Win32.UI.Controls;
-using static Windows.Win32.PInvoke;
-using static Windows.Win32.UI.Controls.TASKDIALOG_COMMON_BUTTON_FLAGS;
-using static Windows.Win32.UI.Controls.TASKDIALOG_FLAGS;
-using static Windows.Win32.UI.WindowsAndMessaging.SHOW_WINDOW_CMD;
+using System;
+using System.Diagnostics;
 
 namespace Flarial.Runtime.Unmanaged;
 
-public unsafe static class NativeMethods
+public static class NativeMethods
 {
+    /// <summary>Opens a URL or file with the desktop's default handler (xdg-open).</summary>
     public static void ShellExecute(string file)
     {
-        fixed (char* filePtr = file)
-            PInvoke.ShellExecute(lpFile: filePtr, nShowCmd: SW_NORMAL);
+        try
+        {
+            using (Process.Start(new ProcessStartInfo("xdg-open") { ArgumentList = { file }, UseShellExecute = false })) { }
+        }
+        catch { }
     }
 
+    /// <summary>Fatal error dialog: zenity/kdialog when present, always echoed to stderr.</summary>
     public static void TaskDialog(nint handle, string title, string? instruction, string content, string? information)
     {
-        fixed (char* titlePtr = title)
-        fixed (char* instructionPtr = instruction)
-        fixed (char* contentPtr = content)
-        fixed (char* informationPtr = information)
+        var text = $"{instruction}\n\n{content}\n\n{information}";
+        Console.Error.WriteLine($"{title}\n{text}");
+
+        foreach (var (tool, args) in new[] { ("zenity", new[] { "--error", "--title", title, "--text", text }), ("kdialog", new[] { "--title", title, "--error", text }) })
         {
-            TASKDIALOGCONFIG config = new()
+            try
             {
-                pszWindowTitle = titlePtr,
-                pszMainInstruction = instructionPtr,
-
-                pszContent = contentPtr,
-                pszExpandedInformation = informationPtr,
-
-                hwndParent = new(handle),
-                cbSize = (uint)sizeof(TASKDIALOGCONFIG),
-
-                dwCommonButtons = TDCBF_CLOSE_BUTTON,
-                Anonymous1 = new() { pszMainIcon = TD_ERROR_ICON },
-                dwFlags = TDF_SIZE_TO_CONTENT | TDF_ALLOW_DIALOG_CANCELLATION | TDF_POSITION_RELATIVE_TO_WINDOW
-            };
-            TaskDialogIndirect(&config);
+                ProcessStartInfo info = new(tool) { UseShellExecute = false };
+                foreach (var arg in args) info.ArgumentList.Add(arg);
+                using var process = Process.Start(info);
+                process?.WaitForExit();
+                return;
+            }
+            catch { }
         }
     }
 }

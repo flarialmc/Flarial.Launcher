@@ -1,57 +1,31 @@
+using System;
 using System.IO;
 using Flarial.Runtime.Exceptions;
-using Windows.Win32.Foundation;
-using Windows.Win32.System.Diagnostics.Debug;
-using Windows.Win32.System.SystemServices;
-using static Windows.Win32.PInvoke;
-using static Windows.Win32.System.Diagnostics.Debug.IMAGE_FILE_CHARACTERISTICS;
-using static Windows.Win32.System.LibraryLoader.LOAD_LIBRARY_FLAGS;
 
 namespace Flarial.Runtime.Game;
 
-public unsafe sealed class Library(string? path)
+public sealed class Library(string? path)
 {
-    /*
-        - A caller should apply `SEM_FAILCRITICALERRORS` via `SetErrorMode()`.
-        - This will prevent `Library.IsLoadable` from blocking the caller.
-    */
-
+    /// <summary>Validates the file is a PE image with the DLL characteristic by reading its headers (no code is loaded).</summary>
     public bool IsLoadable
     {
         get
         {
-            if (_path is { })
+            if (_path is null) return false;
+            try
             {
-                HMODULE module = new();
-                try
-                {
-                    /*
-                        - Use `DONT_RESOLVE_DLL_REFERENCES` to load the library as stub.
-                        - This is done to perform load validation and to ensure no code is executed.
-                    */
+                using var stream = File.OpenRead(_path);
+                Span<byte> dos = stackalloc byte[64];
+                if (stream.Read(dos) != 64 || dos[0] != 'M' || dos[1] != 'Z') return false;
 
-                    fixed (char* path = _path)
-                        module = LoadLibraryEx(path, new(), DONT_RESOLVE_DLL_REFERENCES);
+                stream.Position = BitConverter.ToInt32(dos[60..]);
+                Span<byte> nt = stackalloc byte[24];
+                if (stream.Read(nt) != 24 || nt[0] != 'P' || nt[1] != 'E' || nt[2] != 0 || nt[3] != 0) return false;
 
-                    if (module.IsNull)
-                        return false;
-
-                    /*
-                        - Ensure the loaded library is actually a DLL.
-                        - This can be done by inspecting the image header.
-                    */
-
-                    var dos = (IMAGE_DOS_HEADER*)(void*)module;
-                    var nt = (IMAGE_NT_HEADERS64*)((nint)dos + dos->e_lfanew);
-
-                    return (nt->FileHeader.Characteristics & IMAGE_FILE_DLL) != 0;
-                }
-                finally
-                {
-                    FreeLibrary(module);
-                }
+                const ushort IMAGE_FILE_DLL = 0x2000;
+                return (BitConverter.ToUInt16(nt[22..]) & IMAGE_FILE_DLL) != 0;
             }
-            return false;
+            catch { return false; }
         }
     }
 

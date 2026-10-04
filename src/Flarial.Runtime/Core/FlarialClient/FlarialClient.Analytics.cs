@@ -1,10 +1,10 @@
 using System;
+using System.IO;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
-using Windows.Security.Cryptography;
-using Windows.System.Profile;
 
 namespace Flarial.Runtime.Core;
 
@@ -18,8 +18,15 @@ partial class FlarialClient
 
     static FlarialClient()
     {
-        var info = SystemIdentification.GetSystemIdForPublisher();
-        var identifier = CryptographicBuffer.EncodeToHexString(info.Id);
+        // Windows used SystemIdentification; here a random id persisted in the launcher data directory.
+        const string file = "install-id";
+        string identifier;
+        try { identifier = File.ReadAllText(file).Trim(); }
+        catch
+        {
+            identifier = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+            try { File.WriteAllText(file, identifier); } catch { }
+        }
 
         s_uri = new(AnalyticsUri);
         s_identifier = identifier;
