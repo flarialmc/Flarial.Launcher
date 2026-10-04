@@ -8,7 +8,6 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Flarial;
 
-[Experimental("Flarial_Runtime_Identity_Flarial")]
 public static class AccountManager
 {
     const string AccountUri = "https://api.flarial.xyz/api/v2/account";

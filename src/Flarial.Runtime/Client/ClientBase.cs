@@ -8,6 +8,7 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Client;
 
+[Obsolete(" ", true)]
 public abstract class ClientBase<T> : ClientBase where T : ClientBase<T>, new()
 {
     public static readonly T _ = new();

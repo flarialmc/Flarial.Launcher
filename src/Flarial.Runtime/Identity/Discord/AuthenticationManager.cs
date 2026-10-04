@@ -9,6 +9,7 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Runtime.Identity.Discord;
 
+[Obsolete(" ", true)]
 public static class AuthenticationManager
 {
     static readonly byte[] s_response = [.. "You may close this window now."u8];

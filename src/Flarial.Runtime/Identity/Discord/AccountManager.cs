@@ -6,6 +6,7 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity.Discord;
 
+[Obsolete(" ", true)]
 public static class AccountManager
 {
     const string UserAgent = "Samsung AI-Powered Washing Machine";

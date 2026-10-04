@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Flarial.Runtime.Identity.Discord;
 
+[Obsolete(" ", true)]
 sealed class AccountMetadata
 {
     [JsonConstructor]
