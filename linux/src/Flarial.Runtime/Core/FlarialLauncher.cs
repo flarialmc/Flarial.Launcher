@@ -4,7 +4,7 @@ using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Core;
 
-// Self-update/migration removed on Linux (original downloaded a replacement package and restarted); see Flarial.Runtime.Windows.
+// Self-update/migration removed on Linux (original downloaded a replacement package and restarted); see windows/src/Flarial.Runtime.
 public static class FlarialLauncher
 {
     public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";

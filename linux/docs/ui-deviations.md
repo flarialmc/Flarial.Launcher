@@ -4,7 +4,7 @@ No `.axaml`, style, animation, converter, control, font or image file was modifi
 
 | File | Change | Reason |
 |---|---|---|
-| `Flarial.Launcher.csproj` | TFM `net10.0-windows10.0.19041.0` -> `net10.0`; `Avalonia.Win32` -> `Avalonia.X11`; added `SkiaSharp.NativeAssets.Linux 4.153.1` (matches managed SkiaSharp); dropped the MSIX tooling (`Microsoft.Windows.SDK.BuildTools*`, Release MSIX properties, `Package.appxmanifest`/`Assets`, kept in `Flarial.Runtime.Windows/Package`); ProjectReference to `Flarial.Runtime.Linux`; dropped `ApplicationManifest` and its `AvaloniaResource Remove` | Windows-only |
+| `Flarial.Launcher.csproj` | TFM `net10.0-windows10.0.19041.0` -> `net10.0`; `Avalonia.Win32` -> `Avalonia.X11`; added `SkiaSharp.NativeAssets.Linux 4.153.1` (matches managed SkiaSharp); dropped the MSIX tooling (`Microsoft.Windows.SDK.BuildTools*`, Release MSIX properties, `Package.appxmanifest`/`Assets`, kept in `windows/src/Flarial.Launcher`); ProjectReference to `Flarial.Runtime.Linux`; dropped `ApplicationManifest` and its `AvaloniaResource Remove` | Windows-only |
 | `Resources/app.manifest` | deleted | Windows manifest |
 | `Program.cs` | `UseWin32()` -> `UseX11()`; `LinuxPlatform.Use()` registers backend; data dir `Flarial\Launcher` -> `Path.Combine("Flarial","Launcher")` (=`~/.local/share/Flarial/Launcher`) | Windows-only / path separator |
 | `AssemblyInfo.cs` | `SupportedOSPlatform("windows...")` -> `linux`; crash dialog (`TaskDialog`) now zenity/kdialog + stderr (same title/text) | Windows-only API |

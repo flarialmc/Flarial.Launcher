@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace Flarial.Runtime.Unmanaged;
 
-/// <summary>Fatal error dialog: zenity/kdialog when present, always echoed to stderr (Windows: TaskDialogIndirect, see Flarial.Runtime.Windows).</summary>
+/// <summary>Fatal error dialog: zenity/kdialog when present, always echoed to stderr (Windows: TaskDialogIndirect, see windows/src/Flarial.Runtime).</summary>
 public readonly struct NativeDialog
 {
     public required nint Handle { get; init; }
