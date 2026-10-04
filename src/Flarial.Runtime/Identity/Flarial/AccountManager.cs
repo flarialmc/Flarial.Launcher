@@ -24,6 +24,15 @@ public static class AccountManager
         finally { s_semaphore.Release(); }
     }
 
+    internal static async Task<string?> RefreshAccessTokenAsync()
+    {
+        await s_semaphore.WaitAsync(); try
+        {
+            return await AuthenticationManager.AuthenticateSilentlyAsync();
+        }
+        finally { s_semaphore.Release(); }
+    }
+
     public static async Task<AccountDetails?> LoginAsync()
     {
         await s_semaphore.WaitAsync(); try

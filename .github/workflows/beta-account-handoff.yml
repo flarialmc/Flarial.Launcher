@@ -1,0 +1,26 @@
+name: Beta account handoff tests
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handoff:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: Build native handoff fixture
+        shell: pwsh
+        run: |
+          cl /nologo /LD /W4 /WX tests/BetaTokenHandoff/Fixture.cpp /link /OUT:BetaHandoffFixture.dll
+          if ($LASTEXITCODE -ne 0) { throw 'Handoff fixture compilation failed' }
+      - name: Test writes to the loaded target module
+        run: dotnet run --project tests/BetaTokenHandoff/BetaTokenHandoff.Tests.csproj --configuration Release -- BetaHandoffFixture.dll

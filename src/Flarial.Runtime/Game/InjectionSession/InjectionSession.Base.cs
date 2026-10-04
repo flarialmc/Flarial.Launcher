@@ -20,7 +20,7 @@ sealed partial class InjectionSession
         }
     }
 
-    internal static bool Launch(ModificationLibrary library)
+    internal static bool Launch(ModificationLibrary library, string? betaAccessToken = null)
     {
         if (Create(library) is not { } session)
             return false;
@@ -28,6 +28,8 @@ sealed partial class InjectionSession
         if (Minecraft.Launch() is not { } processId)
             return false;
 
-        return session.Inject(processId);
+        if (!session.Inject(processId)) return false;
+        return betaAccessToken is null ||
+            BetaTokenHandoff.Deliver(processId, session._paths[session._paths.Count - 1], betaAccessToken);
     }
 }

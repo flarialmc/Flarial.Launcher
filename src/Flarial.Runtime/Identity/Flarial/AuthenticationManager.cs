@@ -106,7 +106,7 @@ static class AuthenticationManager
     {
         if (await GetTokensAsync() is { } token)
         {
-            RefreshTokenManager._.Set(token.RefreshToken);
+            AccountRefreshTokenManager._.Set(token.RefreshToken);
             return true;
         }
         return false;
@@ -114,9 +114,9 @@ static class AuthenticationManager
 
     internal static async Task RevokeAsync()
     {
-        if (RefreshTokenManager._.Get() is { } refreshToken)
+        if (AccountRefreshTokenManager._.Get() is { } refreshToken)
         {
-            RefreshTokenManager._.Remove();
+            AccountRefreshTokenManager._.Remove();
             FlarialClientBeta._.AccessToken = null;
 
             using FormUrlEncodedContent content = new(new Dictionary<string, string>
@@ -132,7 +132,7 @@ static class AuthenticationManager
 
     internal static async Task<string?> AuthenticateSilentlyAsync()
     {
-        if (RefreshTokenManager._.Get() is not { } refreshToken)
+        if (AccountRefreshTokenManager._.Get() is not { } refreshToken)
             return null;
 
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
@@ -147,14 +147,14 @@ static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            await AccountManager.LogoutAsync();
+            await RevokeAsync();
             return null;
         }
 
         if (await ParseTokensAsync(response) is not { } tuple)
             return null;
 
-        RefreshTokenManager._.Set(tuple.RefreshToken);
+        AccountRefreshTokenManager._.Set(tuple.RefreshToken);
         FlarialClientBeta._.AccessToken = tuple.AccessToken;
 
         return tuple.AccessToken;

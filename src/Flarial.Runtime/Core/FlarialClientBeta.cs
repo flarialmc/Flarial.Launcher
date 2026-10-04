@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
+using Flarial.Runtime.Game;
 using Flarial.Runtime.Unmanaged;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.System.LibraryLoader.LOAD_LIBRARY_FLAGS;
@@ -24,6 +25,19 @@ public sealed class FlarialClientBeta : FlarialClient<FlarialClientBeta>
     {
         set => Interlocked.Exchange(ref field, value);
         get => Interlocked.CompareExchange(ref field, null, null);
+    }
+
+    public override async Task<bool> DownloadAsync<T>(T progress)
+    {
+        if (await Identity.Flarial.AccountManager.RefreshAccessTokenAsync() is null)
+            return false;
+        return await base.DownloadAsync(progress);
+    }
+
+    private protected override bool InjectClient()
+    {
+        var token = AccessToken;
+        return !string.IsNullOrEmpty(token) && InjectionSession.Launch(new(FileName), token);
     }
 
     private protected override async Task<bool> VerifyClientAsync()
