@@ -4,6 +4,8 @@
 # fds, so each one is copied to a private 0600 file in RAM (the engine unlinks it as soon as it opens it), the
 # PE stack reserve is raised to 16 MiB (settings/pause stack overflow) and the map is rewritten to those paths.
 # Env: FLARIAL_UMU_RUN (umu-run path), FLARIAL_REAL_HOME, FLARIAL_STAGE_DIR (default /dev/shm), FLARIAL_EXE_NAME.
+ts() { [[ -n "${FLARIAL_LAUNCH_LOG:-}" ]] && echo "$(date +%FT%T.%3N)               wrapper: $1" >> "$FLARIAL_LAUNCH_LOG"; }
+ts "started (xodus decrypt + licence check done)"
 stage="${FLARIAL_STAGE_DIR:-/dev/shm}"
 exe="${FLARIAL_EXE_NAME:-Minecraft.Windows.exe}"
 mkdir -p -m 700 "$stage"
@@ -29,6 +31,7 @@ for e in "${entries[@]}"; do
 done
 [[ -n "$target" ]] || { echo "flarial: no executable passed by xodus-cli run" >&2; exit 1; }
 [[ -n "$new" ]] && export WINE_DLL_FILE_MAP="${new%|}"
+ts "staged decrypted exe, exec umu-run"
 export HOME="${FLARIAL_REAL_HOME:-$HOME}"
 for v in CONFIG_HOME CACHE_HOME DATA_HOME STATE_HOME; do
   r="FLARIAL_REAL_XDG_$v"

@@ -34,30 +34,47 @@ sealed class LauncherCore(IEngine engine, IXodus xodus, IPrefix prefix, IXboxAut
         if (IsRunning) throw new InvalidOperationException("Minecraft is already running.");
         if (!File.Exists(Path.Combine(gameDir, Exe))) throw new FileNotFoundException("Game executable not found.", Path.Combine(gameDir, Exe));
 
-        await prefix.EnsureSetupAsync(null, ct);
-        await prefix.PrepareGameAsync(gameDir, null, ct);
-        LinkContent(gameDir);
+        LaunchLog.Begin("launch " + gameDir);
+        var mlog = Path.Combine(Paths.Logs, "minecraft.log");
+        LaunchLog.GameLogOffset = File.Exists(mlog) ? new FileInfo(mlog).Length : 0;
+        LaunchLog.Phase("settings loaded (diagnostics=" + settings.Diagnostics + ")");
 
-        XboxSession session;
-        try { session = await xbox.RefreshAsync(ct); }
-        catch (OperationCanceledException) { throw; }
-        catch { session = new(false, null, null, null); }
-        await prefix.SetRefreshTokenAsync(session.RefreshToken, ct);
+        // the Xbox refresh is network only and independent of the prefix work: run both at once
+        var xboxTask = Task.Run(async () =>
+        {
+            try { return await xbox.RefreshAsync(ct); }
+            catch (OperationCanceledException) { throw; }
+            catch { return new XboxSession(false, null, null, null); }
+        }, ct);
+        var prep = Task.Run(async () =>
+        {
+            await LaunchLog.Time("prefix ensure setup", prefix.EnsureSetupAsync(null, ct));
+            await LaunchLog.Time("prefix prepare game (cacert/gdk deps/gameinput)", prefix.PrepareGameAsync(gameDir, null, ct));
+            LinkContent(gameDir);
+            LaunchLog.Phase("content link");
+        }, ct);
+        var session = await LaunchLog.Time("xbox refresh (parallel)", xboxTask);
+        await prep;
+        await LaunchLog.Time($"set refresh token (online={session.Online})", prefix.SetRefreshTokenAsync(session.RefreshToken, ct));
 
         WriteWrapper();
         var env = BuildEnv(session, settings);
+        env["FLARIAL_LAUNCH_LOG"] = Path.Combine(Paths.Logs, "launch.log");
         Directory.CreateDirectory(Paths.Logs);
         using var chain = xodus.StartRun(gameDir, Paths.Wrapper, env, Paths.Content, Path.Combine(Paths.Logs, "minecraft.log"));
+        LaunchLog.Phase("xodus-cli run started (decrypt + licence check, then wrapper, then umu)");
 
         var deadline = DateTime.UtcNow + GameWait;
+        DateTime? exited = null;
         while (DateTime.UtcNow < deadline)
         {
             ct.ThrowIfCancellationRequested();
-            if (FindGamePid() is { } pid) return pid;
+            if (FindGamePid() is { } pid) { LaunchLog.Phase($"game process found (pid {pid})"); return pid; }
             // umu may hand off and exit while wine keeps starting; give it a moment before giving up.
-            if (chain.HasExited) { await Task.Delay(3000, ct); return FindGamePid(); }
-            await Task.Delay(500, ct);
+            if (chain.HasExited) { exited ??= DateTime.UtcNow; if (DateTime.UtcNow - exited > TimeSpan.FromSeconds(3)) { LaunchLog.Phase("chain exited, no game process"); return null; } }
+            await Task.Delay(150, ct);
         }
+        LaunchLog.Phase("timed out waiting for the game process");
         return null;
     }
 

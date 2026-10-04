@@ -214,6 +214,8 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
 
     public async Task SetRefreshTokenAsync(string? token, CancellationToken ct)
     {
+        // no wineserver holds the prefix right now: patch system.reg directly (saves ~4 s of wine spawn + wineserver linger)
+        if (Valid && Launch.ProcScan.PrefixPids().Count == 0 && HiveEdit.SetString(Path.Combine(Pfx, "system.reg"), @"Software\\Wine\\WineGDK", "RefreshToken", token)) return;
         var value = token is null ? "-" : "\"" + token.Replace("\\", "\\\\").Replace("\"", "\\\"") + "\"";
         await ImportRegAsync($"Windows Registry Editor Version 5.00\n\n[{WineGdkKey}]\n\"RefreshToken\"={value}\n", ct);
     }
@@ -227,6 +229,7 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         {
             var crt = Path.Combine(b, "etc", "ssl", "certs", "ca-bundle.crt");
             Directory.CreateDirectory(Path.GetDirectoryName(crt)!);
+            if (File.Exists(crt) && new FileInfo(crt).Length == new FileInfo(cacert).Length && File.ReadAllBytes(crt).AsSpan().SequenceEqual(File.ReadAllBytes(cacert))) continue;
             File.Copy(cacert, crt, true);
         }
         progress?.Report(0.2);
@@ -235,8 +238,10 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         foreach (var (name, sha) in GdkDeps)
         {
             var cached = Path.Combine(Paths.Cache, "gdkdeps-" + name);
-            await Download.FileAsync($"{GdkDepsUrl}/{name}", cached, sha);
             var dst = Path.Combine(gameDir, name);
+            // both files already verified (size+mtime unchanged since): nothing to hash, download or swap
+            if (File.Exists(cached) && File.Exists(dst) && await HashCache.Sha256Async(cached) == sha && await HashCache.Sha256Async(dst) == sha) continue;
+            await Download.FileAsync($"{GdkDepsUrl}/{name}", cached, sha);
             if (File.Exists(dst) && await Download.Sha256Async(dst) == sha) continue;
             if (File.Exists(dst) && !File.Exists(dst + ".flarial-orig") && !File.Exists(dst + ".bol-orig")) File.Copy(dst, dst + ".flarial-orig");
             File.Copy(cached, dst, true);
@@ -250,7 +255,7 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
     async Task InstallGameInputAsync(string msi, CancellationToken ct)
     {
         if (!File.Exists(msi) || !Valid) return;
-        var sha = await Download.Sha256Async(msi);
+        var sha = await HashCache.Sha256Async(msi);
         var done = Path.Combine(Pfx, ".flarial-gameinput");
         var dll = Path.Combine(Pfx, "drive_c", "Program Files", "Microsoft GameInput", "x64", "GameInputRedist.dll");
         if (File.Exists(done) && File.ReadAllText(done).Trim() == sha && File.Exists(dll)) return;

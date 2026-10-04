@@ -19,6 +19,7 @@ public static class LinuxPlatform
     {
         "engine" => Engine.EngineSelfTest.RunAsync(),
         "xodus" => Xodus.XodusSelfTest.RunAsync(),
+        "hive" => System.Threading.Tasks.Task.FromResult(Prefix.HiveEdit.SetString(Environment.GetEnvironmentVariable("FLARIAL_HIVE")!, @"Software\\Wine\\WineGDK", "RefreshToken", Environment.GetEnvironmentVariable("FLARIAL_HIVE_TOKEN")) ? 0 : 1),
         _ => System.Threading.Tasks.Task.FromResult(2)
     };
 
