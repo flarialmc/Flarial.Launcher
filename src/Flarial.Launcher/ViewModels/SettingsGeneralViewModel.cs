@@ -99,7 +99,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 
     void OnOpenLauncherFolder() => NativeMethods.ShellExecute(".");
 
-    void OnOpenClientFolder() => NativeMethods.ShellExecute(Directory.CreateDirectory(Path.Combine("..", "Client")).FullName);
+    void OnOpenClientFolder() => NativeMethods.ShellExecute(Flarial.Runtime.Linux.LinuxPlatform.ClientDirectory);
 
     readonly AppSettings _settings;
     readonly MainWindowViewModel _mainWindowViewModel;
