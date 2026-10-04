@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="using:Flarial.Launcher.ViewModels"
+             xmlns:segmentedBar="clr-namespace:Flarial.Launcher.Controls.SegmentedBar"
+             xmlns:spotlightDecorator="clr-namespace:Flarial.Launcher.Controls.SpotlightDecorator"
+             mc:Ignorable="d"
+             Width="555" Height="470"
+             x:Class="Flarial.Launcher.Views.SettingsGeneralView"
+             x:DataType="vm:SettingsGeneralViewModel"
+             Background="{StaticResource BackgroundColor}"
+             BorderThickness="{StaticResource ButtonBorderThickness}"
+             BorderBrush="{StaticResource BackgroundBorderColor}"
+             CornerRadius="20">
+    <UserControl.Styles>
+        <Style Selector="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+        </Style>
+    </UserControl.Styles>
+    <UserControl.Clip>
+        <RectangleGeometry Rect="0,0,555,470"/>
+    </UserControl.Clip>
+    <StackPanel Margin="20" Spacing="5">
+        <Grid HorizontalAlignment="Left">
+            <TextBlock Margin="0,0,0,5" Text="Discord" FontSize="22" FontWeight="SemiBold"/>
+            <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+        </Grid>
+
+        <Grid ColumnDefinitions="45,*,Auto" VerticalAlignment="Top">
+            <Border Grid.Column="0"
+                    CornerRadius="30"
+                    Height="{Binding RelativeSource={RelativeSource Self}, Path=Bounds.Width}"
+                    RenderOptions.BitmapInterpolationMode="HighQuality">
+                <Border.Background>
+                    <ImageBrush Source="{Binding DiscordAccount.Avatar}" Stretch="UniformToFill"/>
+                </Border.Background>
+            </Border>
+
+            <WrapPanel Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10,0,0,0">
+                <TextBlock Text="{Binding DiscordAccount.Username}"
+                           FontSize="22" TextWrapping="Wrap"
+                           Foreground="{StaticResource ForegroundColor}"/>
+                <Border BorderThickness="1"
+                        CornerRadius="20"
+                        VerticalAlignment="Center"
+                        Background="{Binding DiscordAccount.Role.Background}"
+                        BorderBrush="{Binding DiscordAccount.Role.Border}"
+                        Padding="7.5,2.5,7.5,2.5"
+                        Margin="5,0,0,0">
+                    <TextBlock Text="{Binding DiscordAccount.Role.Name}"
+                               FontSize="14"
+                               Foreground="{StaticResource ForegroundColor}"/>
+                </Border>
+            </WrapPanel>
+
+            <VisualLayerManager Grid.Column="2" VerticalAlignment="Top">
+                <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                    <UniformGrid Rows="1">
+                        <Button Content="Logout" FontSize="16" Classes="GenericButton" IsVisible="{Binding DiscordAccountAvailable}" Command="{Binding Logout}"/>
+                        <Button Content="Login" FontSize="16" IsEnabled="{Binding DiscordLoginAvailable}" Classes="GenericButton" Command="{Binding Login}" IsVisible="{Binding !DiscordAccountAvailable}"/>
+                    </UniformGrid>
+                </spotlightDecorator:SpotlightDecorator>
+            </VisualLayerManager>
+        </Grid>
+        <VisualLayerManager>
+            <spotlightDecorator:SpotlightDecorator Height="500" SpotlightColor="#9f9f9f" SpotlightRadius="120">
+                <StackPanel Background="Transparent" Spacing="5">
+                    <Grid HorizontalAlignment="Left">
+                        <TextBlock Margin="0,0,0,5" Text="Folders" FontSize="22" FontWeight="SemiBold"/>
+                        <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+                    </Grid>
+
+                    <UniformGrid Rows="1" ColumnSpacing="10">
+                        <Button Command="{Binding OpenClientFolder}" Classes="GenericButton" CornerRadius="7.5" Content="Open Client Folder" FontSize="16" />
+                        <Button Command="{Binding OpenLauncherFolder}" Classes="GenericButton" CornerRadius="7.5" Content="Open Launcher Folder" FontSize="16" />
+                    </UniformGrid>
+
+                    <Grid HorizontalAlignment="Left">
+                        <TextBlock Margin="0,0,0,5" Text="Launcher" FontSize="22" FontWeight="SemiBold"/>
+                        <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+                    </Grid>
+
+                    <Grid>
+                        <TextBlock Text="Automatic Updates" />
+                        <ToggleButton IsChecked="{Binding AutomaticUpdates}"/>
+                    </Grid>
+
+                    <Grid>
+                        <TextBlock Text="Performance Mode" />
+                        <ToggleButton IsChecked="{Binding PerformanceMode}"/>
+                    </Grid>
+
+                    <Grid HorizontalAlignment="Left"  >
+                        <TextBlock Margin="0,0,0,5" Text="Client" FontSize="22" FontWeight="SemiBold"/>
+                        <Border Margin="0,0,0,5" VerticalAlignment="Bottom" Background="#FF2438" Height="3" />
+                    </Grid>
+
+                    <StackPanel IsEnabled="{Binding !DiscordLoginActive}">
+                        <segmentedBar:SegmentedBar Items="{Binding BuildTypes}" SelectedItem="{Binding SelectedBuild, Mode=TwoWay}" />
+                        <Expander Name="Expander1" FontSize="16" IsExpanded="{Binding CustomDllSelected}">
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,10,0,5">
+                                <TextBox Grid.Column="0" Margin="0,0,10,0" IsReadOnly="True" CaretBrush="Transparent" PlaceholderText="Custom DLL Path" Text="{Binding CustomDllPath, Mode=TwoWay}"/>
+                                <Button Classes="GenericButton" Grid.Column="1" CornerRadius="7.5" Content="Open" FontSize="16" Command="{Binding Open}"/>
+                            </Grid>
+                        </Expander>
+                    </StackPanel>
+
+                </StackPanel>
+            </spotlightDecorator:SpotlightDecorator>
+        </VisualLayerManager>
+    </StackPanel>
+</UserControl>

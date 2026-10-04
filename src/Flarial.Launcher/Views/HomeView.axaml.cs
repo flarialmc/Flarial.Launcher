@@ -1,0 +1,59 @@
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Threading;
+using Flarial.Runtime.Services;
+using Flarial.Runtime.Unmanaged;
+
+namespace Flarial.Launcher.Views;
+
+public partial class HomeView : UserControl
+{
+    static readonly Cursor s_cursor = new(StandardCursorType.Hand);
+
+    public HomeView()
+    {
+        InitializeComponent();
+    }
+
+    async void OnInitialized(object? sender, EventArgs args)
+    {
+        Initialized -= OnInitialized;
+
+        _ = Task.Run(async () =>
+        {
+            foreach (var promotion in await PromotionService.GetAsync()) Dispatcher.Post(async () =>
+            {
+                if (await promotion.GetImageAsync() is not { } bytes)
+                    return;
+
+                using MemoryStream stream = new(bytes, false);
+
+                Image image = new()
+                {
+                    Width = 320 * 0.8,
+                    Height = 50 * 0.8,
+                    Cursor = s_cursor,
+                    Tag = promotion.Uri,
+                    Source = new Bitmap(stream)
+                };
+
+                image.PointerPressed += OnPointerPressed;
+                RenderOptions.SetBitmapInterpolationMode(image, BitmapInterpolationMode.HighQuality);
+
+                Promotions.Children.Add(image);
+            }, DispatcherPriority.Background);
+        });
+    }
+
+    static void OnPointerPressed(object? sender, PointerPressedEventArgs args)
+    {
+        var file = (sender as Control)?.Tag as string;
+        if (file is { }) NativeMethods.ShellExecute(file);
+    }
+}
