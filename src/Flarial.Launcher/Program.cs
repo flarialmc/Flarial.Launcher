@@ -48,4 +48,4 @@ static class Program
 
         builder.StartWithClassicDesktopLifetime(args);
     }
-}
+}

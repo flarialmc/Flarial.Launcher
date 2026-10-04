@@ -176,4 +176,4 @@ public partial class VersionItemViewModel : ViewModelBase
     }
 
     async Task DeleteAsync() { }
-}
+}

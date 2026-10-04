@@ -96,4 +96,4 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         HomeViewModel.LauncherStatus = "Ready!";
         HomeViewModel.IsLaunching = false;
     }
-}
+}

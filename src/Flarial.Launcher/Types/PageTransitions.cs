@@ -8,4 +8,4 @@ public enum PageTransitions
     SettingsVersionsPage,
     SettingsConfigsPage,
     SettingsAccountsPage,
-}
+}

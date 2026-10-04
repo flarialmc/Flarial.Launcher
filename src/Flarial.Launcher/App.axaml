@@ -59,4 +59,4 @@
         <StyleInclude Source="Styles/Expander.axaml"/>
         <StyleInclude Source="Styles/ToolTip.axaml"/>
     </Application.Styles>
-</Application>
+</Application>
