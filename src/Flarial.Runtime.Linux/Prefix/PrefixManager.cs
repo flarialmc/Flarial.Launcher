@@ -12,7 +12,7 @@ namespace Flarial.Runtime.Linux.Prefix;
 
 internal sealed class PrefixManager(IEngine engine) : IPrefix
 {
-    const int SetupVersion = 1; // bump to re-apply registry tweaks
+    const int SetupVersion = 2; // bump to re-apply registry tweaks
     const string GdkDepsUrl = "https://github.com/minecraft-linux/mcpelauncher-gdk-dependencies/releases/download/v0.0.0";
     const string CacertUrl = "https://curl.se/ca/cacert.pem";
     const string WineGdkKey = @"HKEY_LOCAL_MACHINE\Software\Wine\WineGDK";
@@ -34,6 +34,18 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
 
         [HKEY_LOCAL_MACHINE\Software\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Storage.Pickers.FileSavePicker]
         "DllPath"="C:\\windows\\system32\\windows.storage.dll"
+
+        [HKEY_LOCAL_MACHINE\Software\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Security.Credentials.PasswordVault]
+        "DllPath"="C:\\windows\\system32\\flarial_vault.dll"
+        "ActivationType"=dword:00000000
+        "Threading"=dword:00000000
+        "TrustLevel"=dword:00000000
+
+        [HKEY_LOCAL_MACHINE\Software\Microsoft\WindowsRuntime\ActivatableClassId\Windows.Security.Credentials.PasswordCredential]
+        "DllPath"="C:\\windows\\system32\\flarial_vault.dll"
+        "ActivationType"=dword:00000000
+        "Threading"=dword:00000000
+        "TrustLevel"=dword:00000000
 
         [HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Internet Settings\WinHttp]
         "DefaultSecureProtocols"=dword:000009a0
@@ -140,6 +152,7 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         // wineboot via umu may leave the wineserver running; wait for it before we poke the registry
         await Run(Proc.Info(engine.Wineserver, ["-w"], WineEnv()), TimeSpan.FromSeconds(60), ct);
 
+        InstallVaultDll();
         await ImportRegAsync(Tweaks, ct);
         File.WriteAllText(Marker, Want);
         progress?.Report(1);
@@ -163,6 +176,16 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         var sys32 = Path.Combine(Pfx, "drive_c", "windows", "system32");
         Directory.CreateDirectory(sys32);
         File.Copy(Path.Combine(EngineDlls("x86_64-windows"), "cryptbase.dll"), Path.Combine(sys32, "cryptbase.dll"), true);
+    }
+
+    /// <summary>Fake Windows.Security.Credentials.PasswordVault (Wine has none), see Native/flarial_vault.cpp.</summary>
+    static void InstallVaultDll()
+    {
+        var sys32 = Path.Combine(Pfx, "drive_c", "windows", "system32");
+        Directory.CreateDirectory(sys32);
+        using var s = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("flarial_vault.dll")!;
+        using var f = File.Create(Path.Combine(sys32, "flarial_vault.dll"));
+        s.CopyTo(f);
     }
 
     /// <summary>Engine changed: re-copy its builtin DLLs over the prefix's (saves live elsewhere and are untouched).</summary>

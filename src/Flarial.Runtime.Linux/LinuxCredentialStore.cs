@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Flarial.Runtime.Linux.Prefix;
 using Flarial.Runtime.Platform;
 
 namespace Flarial.Runtime.Linux;
@@ -31,6 +32,15 @@ public sealed class LinuxCredentialStore : ICredentialStore
 
     public string? Get(string resource, string username)
     {
+        // the injected client may have rotated the refresh token inside the prefix vault: that copy is the newest
+        if (VaultBridge.Get(resource, username) is { Length: > 0 } rotated) return rotated;
+        var stored = GetStored(resource, username);
+        if (stored is { }) VaultBridge.Set(resource, username, stored); // prefix created after login
+        return stored;
+    }
+
+    static string? GetStored(string resource, string username)
+    {
         var (code, output) = Secret(null, "lookup", "service", resource, "account", username);
         if (code == 0 && output.Length > 0) return output;
 
@@ -39,6 +49,12 @@ public sealed class LinuxCredentialStore : ICredentialStore
     }
 
     public void Set(string resource, string username, string value)
+    {
+        SetStored(resource, username, value);
+        VaultBridge.Set(resource, username, value);
+    }
+
+    static void SetStored(string resource, string username, string value)
     {
         var (code, _) = Secret(value, "store", "--label", resource, "service", resource, "account", username);
         if (code == 0) { try { File.Delete(FilePath(resource, username)); } catch { } return; }
@@ -50,6 +66,7 @@ public sealed class LinuxCredentialStore : ICredentialStore
 
     public void Remove(string resource, string username)
     {
+        VaultBridge.Remove(resource, username);
         Secret(null, "clear", "service", resource, "account", username);
         try { File.Delete(FilePath(resource, username)); } catch { }
     }
