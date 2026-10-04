@@ -110,10 +110,33 @@
         </Style>
 
         <Style Selector="Button.installed">
+            <Setter Property="Background" Value="#FF2438"/>
+            <Setter Property="Content" Value="Select"/>
+            <Setter Property="MinWidth" Value="120"/>
+            <Setter Property="Command" Value="{Binding SelectCommand}"/>
+            <Setter Property="Tag">
+                <Setter.Value>
+                    <Template>
+                        <Grid Margin="1">
+                            <Path Fill="White"
+                                  StrokeJoin="Round"
+                                  StrokeLineCap="Round"
+                                  Stretch="Uniform"
+                                  Data="M9.074 7.7335 L3.308 11.6315 C1.903 12.5815 0 11.5835 0 9.8985 L0 2.1015 C0 0.4155 1.903 -0.5815 3.308 0.3685 L9.074 4.2665 C10.306 5.0995 10.306 6.9005 9.074 7.7335 Z"/>
+                        </Grid>
+                    </Template>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style Selector="Button.selected">
             <Setter Property="IsEnabled" Value="False"/>
             <Setter Property="Background" Value="#2d2527"/>
-            <Setter Property="Content" Value="Installed"/>
+            <Setter Property="Content" Value="Selected"/>
             <Setter Property="MinWidth" Value="120"/>
+        </Style>
+
+        <Style Selector="Button:disabled">
             <Setter Property="Opacity" Value="0.6"/>
         </Style>
 
@@ -172,6 +195,7 @@
                 Classes.not-installed="{Binding IsNotInstalled}"
                 Classes.downloading="{Binding IsDownloading}"
                 Classes.installed="{Binding IsInstalled}"
+                Classes.selected="{Binding IsSelected}"
                 Classes.installing="{Binding IsInstalling}">
             <Button.Transitions>
                 <Transitions>

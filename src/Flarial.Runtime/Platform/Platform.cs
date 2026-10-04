@@ -29,6 +29,12 @@ public interface IGameService
     /// <summary>Download (from the already probed <paramref name="uri"/>) and install a version. progress(percent, installing).</summary>
     Task InstallAsync(VersionItem version, string uri, Action<int, bool> progress);
 
+    /// <summary>Makes an already downloaded build the one the launcher starts. False when it is not installed or the game is running.</summary>
+    bool SelectVersion(string version);
+
+    /// <summary>Removes a downloaded build from disk. False when it is not installed or the game is running.</summary>
+    bool DeleteVersion(string version);
+
     /// <summary>Start the game if needed and return its process id, or null on failure.</summary>
     uint? Launch();
 }

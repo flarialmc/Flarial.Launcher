@@ -39,8 +39,48 @@ public sealed class LinuxGameService : IGameService
         return ReleaseDirs().FirstOrDefault();
     }
 
-    public string? InstalledVersion => ActiveDir() is { } d ? Path.GetFileName(d) : null;
-    public IReadOnlyList<string> InstalledVersions => ReleaseDirs().Select(Path.GetFileName).ToList()!;
+    /// <summary>"1.26.51.1" -> "1.26.51" (VersionItem.Version format).</summary>
+    static string VersionOf(string dir) => string.Join('.', Path.GetFileName(dir.TrimEnd('/')).Split('.').Take(3));
+
+    public string? InstalledVersion => ActiveDir() is { } d ? VersionOf(d) : null;
+    public IReadOnlyList<string> InstalledVersions => ReleaseDirs().Select(VersionOf).ToList();
+
+    static void PointContentAt(string? dir)
+    {
+        var link = new FileInfo(Paths.Content);
+        if (link.LinkTarget is { } || link.Exists) link.Delete();
+        if (dir is { }) File.CreateSymbolicLink(Paths.Content, dir);
+    }
+
+    public bool SelectVersion(string version)
+    {
+        var dir = Paths.GameDir("release", version);
+        if (IsRunning || !Backend.Xodus.IsInstalled(dir)) return false;
+        PointContentAt(dir);
+        Raise();
+        return true;
+    }
+
+    public bool DeleteVersion(string version)
+    {
+        var dir = Paths.GameDir("release", version);
+        if (IsRunning || !Directory.Exists(dir)) return false;
+        var wasActive = ActiveDir() is { } a && VersionOf(a) == version;
+
+        // a dev-seed entry is a symlink into another install: drop only the link, never follow it
+        if (new FileInfo(dir).LinkTarget is { }) new FileInfo(dir).Delete();
+        else
+        {
+            var games = Path.GetFullPath(Paths.Games) + Path.DirectorySeparatorChar;
+            if (!Path.GetFullPath(dir).StartsWith(games, StringComparison.Ordinal)) return false;
+            Directory.Delete(dir, true);
+        }
+
+        if (wasActive || new FileInfo(Paths.Content).LinkTarget is { } t && !Backend.Xodus.IsInstalled(t))
+            PointContentAt(ReleaseDirs().FirstOrDefault());
+        Raise();
+        return true;
+    }
 
     // ---- status events (polled: the game can start/stop outside the launcher)
     Action? _changed; SynchronizationContext? _context; Timer? _timer; string _last = "";
@@ -103,9 +143,7 @@ public sealed class LinuxGameService : IGameService
         await Backend.Prefix.PrepareGameAsync(dest, null, ct);
 
         // the installed build becomes the selected one
-        var link = new FileInfo(Paths.Content);
-        if (link.LinkTarget is { } || link.Exists) link.Delete();
-        File.CreateSymbolicLink(Paths.Content, dest);
+        PointContentAt(dest);
         progress(100, true);
         Raise();
     }

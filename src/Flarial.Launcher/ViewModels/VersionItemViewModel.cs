@@ -15,7 +15,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
-public enum VersionItemState { Downloading, Installing, Installed, NotInstalled }
+public enum VersionItemState { Downloading, Installing, Installed, NotInstalled, Selected }
 
 public partial class VersionItemViewModel : ViewModelBase
 {
@@ -33,21 +33,39 @@ public partial class VersionItemViewModel : ViewModelBase
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> DeleteCommand { get; }
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> InstallCommand { get; }
 
-    bool IsInstalledNow => Flarial.Runtime.Platform.Platform.Game.InstalledVersions.Any(v => v == _versionItem.Version);
+    static Flarial.Runtime.Platform.IGameService Game => Flarial.Runtime.Platform.Platform.Game;
 
-    /// <summary>Delete is not implemented on this platform, so its button stays hidden.</summary>
-    public bool IsDeletable => false;
+    /// <summary>Installed (downloaded) = "Select"; the one the launcher starts = "Selected".</summary>
+    VersionItemState DiskState => !Game.InstalledVersions.Any(v => v == _versionItem.Version) ? VersionItemState.NotInstalled
+        : Game.InstalledVersion == _versionItem.Version ? VersionItemState.Selected : VersionItemState.Installed;
+
+    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> SelectCommand { get; }
+
+    [Reactive]
+    bool _gameRunning;
+
+    public bool IsDeletable => State is VersionItemState.Installed or VersionItemState.Selected;
+    public bool IsSelected => State is VersionItemState.Selected;
+
+    void OnPackageStatusChanged()
+    {
+        GameRunning = Game.IsRunning;
+        if (State is VersionItemState.Downloading or VersionItemState.Installing) return;
+        State = DiskState;
+    }
 
     public bool IsInstalling => State is VersionItemState.Installing;
     public bool IsDownloading => State is VersionItemState.Downloading;
 
     public bool IsInstalled => State is VersionItemState.Installed;
+    public bool IsNotSelected => !IsSelected;
     public bool IsNotInstalled => State is VersionItemState.NotInstalled;
 
     readonly MainWindow _mainWindow;
     readonly VersionItem _versionItem;
     readonly SettingsVersionsViewModel _settingsVersionsViewModel;
 
+    readonly DeleteVersionDialog _deleteVersionDialog;
     readonly InstallVersionDialog _installVersionDialog;
     readonly InstalledVersionDialog _installedVersionDialog;
     readonly InstallingVersionDialog _installingVersionDialog;
@@ -74,6 +92,7 @@ public partial class VersionItemViewModel : ViewModelBase
         _mainWindow = (MainWindow)applicationLifetime.MainWindow!;
         _settingsVersionsViewModel = mainWindowViewModel.SettingsViewModel.SettingsVersionsViewModel;
 
+        _deleteVersionDialog = new(versionItem);
         _installVersionDialog = new(versionItem);
         _installedVersionDialog = new(versionItem);
         _installingVersionDialog = new(versionItem);
@@ -85,11 +104,20 @@ public partial class VersionItemViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(IsDownloading));
             this.RaisePropertyChanged(nameof(IsInstalled));
             this.RaisePropertyChanged(nameof(IsInstalling));
+            this.RaisePropertyChanged(nameof(IsDeletable));
+            this.RaisePropertyChanged(nameof(IsSelected));
         });
 
         Version = $"{versionItem}";
-        if (IsInstalledNow) State = VersionItemState.Installed;
-        DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.Installed));
+        State = DiskState;
+        GameRunning = Game.IsRunning;
+        Minecraft.PackageStatusChanged += OnPackageStatusChanged;
+        // changing builds is blocked while the game runs or any install is in progress
+        var idle = this.WhenAnyValue(static _ => _.GameRunning).CombineLatest(_settingsVersionsViewModel.WhenAnyValue(static _ => _.IsInstalling), static (running, installing) => !running && !installing);
+        var canDelete = this.WhenAnyValue(static _ => _.State).Select(static _ => _ is VersionItemState.Installed or VersionItemState.Selected).CombineLatest(idle, static (a, b) => a && b);
+        var canSelect = this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.Installed).CombineLatest(idle, static (a, b) => a && b);
+        DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, canDelete);
+        SelectCommand = ReactiveCommand.CreateFromTask(SelectAsync, canSelect);
         InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.NotInstalled));
     }
 
@@ -164,7 +192,7 @@ public partial class VersionItemViewModel : ViewModelBase
         finally
         {
             InstallPercentage = 0;
-            State = IsInstalledNow ? VersionItemState.Installed : VersionItemState.NotInstalled;
+            State = DiskState;
 
             IsProgressing = false;
             _settingsVersionsViewModel.IsInstalling = false;
@@ -175,5 +203,16 @@ public partial class VersionItemViewModel : ViewModelBase
         await _installedVersionDialog.ShowAsync();
     }
 
-    async Task DeleteAsync() { }
+    async Task SelectAsync()
+    {
+        if (!await Task.Run(() => Game.SelectVersion(_versionItem.Version)))
+            Flarial.Runtime.Linux.LinuxPlatform.Notify?.Invoke($"Could not select Minecraft {_versionItem}.");
+    }
+
+    async Task DeleteAsync()
+    {
+        if (!await _deleteVersionDialog.ShowAsync()) return;
+        if (!await Task.Run(() => Game.DeleteVersion(_versionItem.Version)))
+            Flarial.Runtime.Linux.LinuxPlatform.Notify?.Invoke($"Could not delete Minecraft {_versionItem}.");
+    }
 }
