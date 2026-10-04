@@ -135,8 +135,10 @@ public sealed class LinuxGameService : IGameService
         {
             LinuxPlatform.Notify?.Invoke("Preparing Wine for the first time, this can take a few minutes.");
             var t0 = DateTime.UtcNow; // no real progress from wineboot: creep towards the end of its slice
-            using var tick = new Timer(_ => Step(wPf, true, 1 - Math.Exp(-(DateTime.UtcNow - t0).TotalSeconds / 90)), null, 0, 1000);
+            var rep = Rep(wPf, true); // Progress<T> posts to the UI thread; the timer thread must not touch the view models
+            using var tick = new Timer(_ => rep.Report(1 - Math.Exp(-(DateTime.UtcNow - t0).TotalSeconds / 90)), null, 0, 1000);
             await Backend.Prefix.EnsureSetupAsync(null, ct); done += wPf;
+            LinuxPlatform.Notify?.Invoke("Wine is ready.");
         }
 
         progress((int)(done / total * 100), true);
@@ -155,6 +157,12 @@ public sealed class LinuxGameService : IGameService
         if (ActiveDir() is not { } dir) return null;
         try
         {
+            if (!Backend.Prefix.IsReady)
+            {
+                LinuxPlatform.Notify?.Invoke("Preparing Wine for the first time, this can take a few minutes.");
+                Backend.Prefix.EnsureSetupAsync(null, CancellationToken.None).GetAwaiter().GetResult();
+                LinuxPlatform.Notify?.Invoke("Wine is ready, starting Minecraft.");
+            }
             var pid = Core.LaunchAsync(dir, LaunchSettings.Current, CancellationToken.None).GetAwaiter().GetResult();
             if (pid is { }) LastLaunchUtc = DateTime.UtcNow;
             Raise();
@@ -163,6 +171,7 @@ public sealed class LinuxGameService : IGameService
         catch (Exception e)
         {
             try { File.AppendAllText(Path.Combine(Paths.Logs, "launcher.log"), $"{DateTime.Now:s} launch failed: {e}\n"); } catch { }
+            LinuxPlatform.Notify?.Invoke("Minecraft could not be started: " + e.Message);
             return null;
         }
     }
