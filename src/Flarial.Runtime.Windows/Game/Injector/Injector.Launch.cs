@@ -8,29 +8,16 @@ using static Windows.Win32.System.Threading.PROCESS_ACCESS_RIGHTS;
 
 namespace Flarial.Runtime.Game;
 
-public static class Injector
+partial class Injector
 {
-    static unsafe readonly delegate* unmanaged[Stdcall]<void*, uint> s_address;
-
-    unsafe static Injector()
-    {
-        fixed (char* moduleNamePtr = "Kernel32")
-        fixed (byte* procedureNamePtr = "LoadLibraryW"u8)
-        {
-            var module = GetModuleHandle(moduleNamePtr);
-            var address = GetProcAddress(module, new(procedureNamePtr));
-            s_address = (delegate* unmanaged[Stdcall]<void*, uint>)(nint)address;
-        }
-    }
-
-    public unsafe static bool Launch( Library library)
+    public unsafe static bool Launch(ModificationLibrary library)
     {
         var path = library.EnsureLoadable();
 
         if (Minecraft.Launch() is not { } processId)
             return false;
 
-        if (NativeProcess.Open(PROCESS_ALL_ACCESS, processId) is not { } process)
+        if (PROCESS_ALL_ACCESS.Open(processId) is not { } process)
             return false;
 
         using (process)

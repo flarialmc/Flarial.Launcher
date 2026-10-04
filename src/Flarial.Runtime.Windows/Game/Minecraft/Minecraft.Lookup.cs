@@ -34,7 +34,7 @@ unsafe partial class Minecraft
                     if (CompareStringOrdinal(processNamePtr, -1, processInfo.pProcessName, -1, true) != CSTR_EQUAL)
                         continue;
 
-                    if (NativeProcess.Open(PROCESS_QUERY_LIMITED_INFORMATION, processInfo.ProcessId) is not { } process)
+                    if (PROCESS_QUERY_LIMITED_INFORMATION.Open(processInfo.ProcessId) is not { } process)
                         continue;
 
                     using (process)
@@ -56,17 +56,16 @@ unsafe partial class Minecraft
 
     internal static NativeWindow? GetWindow(uint? processId = null, string className = ClassName)
     {
-        fixed (char* classNamePtr = className)
-        fixed (char* packageFamilyNamePtr = PackageFamilyName)
+        fixed (char* ptr = className)
         {
-            NativeWindow window = HWND.Null;
+            HWND handle = new();
 
-            while ((window = FindWindowEx(HWND.Null, window, classNamePtr, null)) != HWND.Null)
+            while ((handle = FindWindowEx(new(), handle, ptr, null)) > 0)
             {
-                if (processId is { } && processId != window._processId)
+                if (NativeWindow.Open(handle) is not { } window)
                     continue;
 
-                if (NativeProcess.Open(PROCESS_QUERY_LIMITED_INFORMATION, window._processId) is not { } process)
+                if (processId is { } && processId != window._processId)
                     continue;
 
                 return window;

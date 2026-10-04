@@ -43,16 +43,16 @@ unsafe partial class Minecraft
         if (!GamingServices.IsInstalled)
             throw new GamingServicesNotInstalledException();
 
-        if (GetWindow() is { } minecraftWindow && minecraftWindow.IsVisible)
+        if (GetWindow() is { IsVisible: true } minecraftWindow)
         {
-            minecraftWindow.Switch();
+            minecraftWindow.SetActive();
             return minecraftWindow._processId;
         }
 
         if (Activate() is not { } processId)
             return null;
 
-        if (NativeProcess.Open(PROCESS_SYNCHRONIZE, processId) is not { } process)
+        if (PROCESS_SYNCHRONIZE.Open(processId) is not { } process)
             return null;
 
         using (process)
@@ -65,14 +65,9 @@ unsafe partial class Minecraft
 
             if (IsSideloaded)
             {
-                NativeWindow? launchedWindow = null;
-
                 while (process.Wait(1))
-                {
-                    launchedWindow ??= GetWindow(processId: processId);
-                    if (launchedWindow?.IsVisible is true) return processId;
-                }
-
+                    if (GetWindow(processId) is { IsVisible: true })
+                        return processId;
                 return null;
             }
 
