@@ -1,11 +1,10 @@
-# UI deviations from upstream (flarialmc/launcher origin/main aa6b411)
+# UI deviations from upstream (flarialmc/Flarial.Launcher main d7a4264 "Use Flarial OAuth2.")
 
-No `.axaml`, style, animation, converter, control, font or image file was modified (verify:
-`git diff 9073089 HEAD --stat -- '*.axaml' '*.ttf' '*.webp'` is empty). Only the following launcher lines changed.
+No `.axaml`, style, animation, converter, control, font or image file was modified (compare with upstream: `git diff d7a4264 HEAD -- '*.axaml'` only shows the files listed below). Only the following launcher lines changed.
 
 | File | Change | Reason |
 |---|---|---|
-| `Flarial.Launcher.csproj` | TFM `net10.0-windows10.0.19041.0` -> `net10.0`; `Avalonia.Win32` -> `Avalonia.X11`; added `SkiaSharp.NativeAssets.Linux 4.150.1` (managed SkiaSharp 4.150.1 needs matching native lib; transitive one was 3.119); ProjectReference to `Flarial.Runtime.Linux`; dropped `ApplicationManifest` and its `AvaloniaResource Remove` | Windows-only |
+| `Flarial.Launcher.csproj` | TFM `net10.0-windows10.0.19041.0` -> `net10.0`; `Avalonia.Win32` -> `Avalonia.X11`; added `SkiaSharp.NativeAssets.Linux 4.153.1` (matches managed SkiaSharp); dropped the MSIX tooling (`Microsoft.Windows.SDK.BuildTools*`, Release MSIX properties, `Package.appxmanifest`/`Assets`, kept in `Flarial.Runtime.Windows/Package`); ProjectReference to `Flarial.Runtime.Linux`; dropped `ApplicationManifest` and its `AvaloniaResource Remove` | Windows-only |
 | `Resources/app.manifest` | deleted | Windows manifest |
 | `Program.cs` | `UseWin32()` -> `UseX11()`; `LinuxPlatform.Use()` registers backend; data dir `Flarial\Launcher` -> `Path.Combine("Flarial","Launcher")` (=`~/.local/share/Flarial/Launcher`) | Windows-only / path separator |
 | `AssemblyInfo.cs` | `SupportedOSPlatform("windows...")` -> `linux`; crash dialog (`TaskDialog`) now zenity/kdialog + stderr (same title/text) | Windows-only API |
@@ -20,7 +19,10 @@ No `.axaml`, style, animation, converter, control, font or image file was modifi
 | `Views/VersionItemView.axaml`, `ViewModels/VersionItemViewModel.cs`, `Dialogs/Metadata/DeleteVersionDialog.cs` (installed state) | per item: not on disk = Download; downloaded = red "Select" (the former `Button.installed` look) + the upstream trash button, now wired to a confirm dialog and delete; active = new greyed disabled `Button.selected` "Selected" + trash. `Button:disabled` dims to 0.6; the template's icon Viewbox hides when `Tag` is null so icon-less labels are centred. Select/Delete are disabled while the game runs or an install is active; `IGameService` gained `SelectVersion`/`DeleteVersion` | user-requested version management (upstream only had the Download state wired) |
 | `Dialogs/Metadata/MicrosoftSignInRequiredDialog.cs` + `VersionItemViewModel.InstallAsync` | new existing-style dialog shown instead of starting a download when no Microsoft account is signed in; "Sign In" opens Settings > Accounts | fail fast instead of hanging at 0% |
 | `Views/SettingsView.axaml.cs` | `PageTransition` also checks the matching sidebar RadioButton | pages opened from dialogs (Game Not Found, Sign In Required) left the previous sidebar button highlighted |
-| `Views/SettingsGeneralView.axaml` | removed the Discord section (header, avatar/username/role row, Login/Logout); Folders now starts the page, remaining spacing unchanged | user request: the Flarial/Discord account lives only in Settings > Accounts, which binds the same `SettingsGeneralViewModel` login/logout/account state |
+| `Views/SettingsGeneralView.axaml` | removed the Account section (upstream renamed Discord -> Account) (header, avatar/username/role row, Login/Logout); Folders now starts the page, remaining spacing unchanged | user request: the Flarial OAuth2 account lives only in Settings > Accounts, which binds the same `SettingsGeneralViewModel` login/logout/account state |
+| `ViewModels/SettingsGeneralViewModel.cs` (Open Client Folder) | opens `LinuxPlatform.ClientDirectory` (`%LOCALAPPDATA%\Flarial\Client` inside the Wine prefix, where the injected client writes) instead of `..\Client` next to the launcher data | the client runs inside Wine |
+| `AssemblyInfo.cs` / `Flarial.Runtime/Unmanaged/NativeDialog.cs` | crash dialog goes through `NativeDialog` (zenity/kdialog + stderr) instead of `TaskDialogIndirect` | Windows-only API |
+| `ViewModels/MainWindowViewModel.cs` | launcher self-update (`CheckForUpdatesAsync`/`DownloadAsync`, `IProgress<int>`) removed from `OnLoaded` | self-update disabled entirely |
 | `ScreenshotDriver.cs` | new dev tool | verification |
 
 Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailableDialog`, `AutomaticUpdates` setting (UI toggle still present, no effect).
@@ -38,4 +40,4 @@ Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailabl
 * Not verifiable on Linux/wine: real Windows DWM acrylic/mica behind the window (the original does not use it), Minecraft-dependent states (installed version colour, supported/unsupported).
 
 ## Intentional additions (user-requested)
-* Settings > **Accounts** page (sidebar entry below Versions, same slide/zoom transition at Y=1500): Flarial (Discord) account reusing `SettingsGeneralViewModel`/`DiscordAccountModel` (the Discord section on General is kept), Microsoft account (xodus) and Xbox Live device-code sign-in (code shown in the existing `MessageBoxView`). Built only from existing styles/brushes/controls. Files: `Views/SettingsAccountsView.axaml(.cs)`, `ViewModels/SettingsAccountsViewModel.cs`, `Management/AccountsService.cs` (`IAccountsService`, fake default); minimal edits to `SettingsView.axaml(.cs)` (extra row/radio/page, Return button moved to row 4), `SettingsViewModel`, `App.axaml`, `PageTransitions`, `ScreenshotDriver`. Captures: `docs/linux/accounts-*.png`.
+* Settings > **Accounts** page (sidebar entry below Versions, same slide/zoom transition at Y=1500): Flarial (OAuth2) account reusing `SettingsGeneralViewModel`/`AccountModel`, Microsoft account (xodus) and Xbox Live device-code sign-in (code shown in the existing `MessageBoxView`). Built only from existing styles/brushes/controls. Files: `Views/SettingsAccountsView.axaml(.cs)`, `ViewModels/SettingsAccountsViewModel.cs`, `Management/AccountsService.cs` (`IAccountsService`, fake default); minimal edits to `SettingsView.axaml(.cs)` (extra row/radio/page, Return button moved to row 4), `SettingsViewModel`, `App.axaml`, `PageTransitions`, `ScreenshotDriver`. Captures: `docs/linux/accounts-*.png`.
