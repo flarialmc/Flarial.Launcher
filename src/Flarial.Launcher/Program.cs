@@ -17,10 +17,14 @@ static class Program
     public static void Main(string[] args)
     {
         LinuxPlatform.Use();
+        Flarial.Launcher.Management.AccountsService.Current = new Flarial.Launcher.Management.LinuxAccountsService();
         using Mutex mutex = new(false, "54874D29-646C-4536-B6D1-8E05053BE00E", out var created);
         if (!created) return;
 
         Environment.CurrentDirectory = Directory.CreateDirectory(LinuxPlatform.LauncherDataDirectory).FullName;
+
+        if (args.Length > 0 && args[0].StartsWith("--selftest-"))
+            Environment.Exit(LinuxPlatform.SelfTestAsync(args[0]["--selftest-".Length..]).GetAwaiter().GetResult());
 
         for (var index = 0; index < args.Length; index++)
             switch (args[index])

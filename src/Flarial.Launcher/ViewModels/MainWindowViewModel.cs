@@ -40,6 +40,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         HomeViewModel = new HomeViewModel(this);
         SettingsViewModel = new SettingsViewModel(this);
         NotificationArea = new NotificationAreaViewModel();
+        Flarial.Runtime.Linux.LinuxPlatform.Notify = message => Dispatcher.UIThread.Post(() => NotificationArea.Add(message));
 
         VersionRegistry = null!;
         _discordAccount = new();

@@ -141,7 +141,12 @@ public partial class VersionItemViewModel : ViewModelBase
             }
 
             _mainWindow.Closing += OnClosing;
-            await task;
+            try { await task; }
+            catch (Exception e)
+            {
+                Flarial.Runtime.Linux.LinuxPlatform.Notify?.Invoke($"Installing Minecraft {_versionItem} failed: {e.Message}");
+                return;
+            }
         }
         finally
         {

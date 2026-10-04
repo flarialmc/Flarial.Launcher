@@ -15,6 +15,8 @@ No `.axaml`, style, animation, converter, control, font or image file was modifi
 | `ViewModels/VersionItemViewModel.cs` | "Minecraft not installed" dialog only when `Platform.Game.RequiresInstalledGame` (true on Windows, false on Linux) | on Linux installing a version creates the install |
 | `Management/StorePage.cs` | `ms-windows-store://pdp/?ProductId=X` -> `https://apps.microsoft.com/detail/X` | no Store protocol on Linux |
 | `Dialogs/Metadata/GameNotFoundDialog.cs` | button "Back" -> "Install" (closes dialog, opens Settings > Versions via the existing `PageTransitions` messages); body text no longer mentions Microsoft Store/Xbox App | intentional user-requested change (Linux installs through the Versions page) |
+| `ViewModels/VersionItemViewModel.cs` (install) | a failed install is caught and shown as a notification instead of crashing the launcher (no "installed" dialog) | backend errors (disk space, sign-in, network) are expected on Linux |
+| `ViewModels/MainWindowViewModel.cs` / `Program.cs` | register `LinuxPlatform.Notify` (-> `NotificationArea.Add`) and `AccountsService.Current` (real xodus/Xbox backend) | backend hooks |
 | `ScreenshotDriver.cs` | new dev tool | verification |
 
 Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailableDialog`, `AutomaticUpdates` setting (UI toggle still present, no effect).
