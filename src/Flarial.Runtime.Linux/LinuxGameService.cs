@@ -68,6 +68,7 @@ public sealed class LinuxGameService : IGameService
     // ---- install
     public async Task InstallAsync(VersionItem version, string uri, Action<int, bool> progress)
     {
+        if (!Backend.Xodus.IsLoggedIn) throw new InvalidOperationException("Sign in to your Microsoft account in Settings > Accounts to download Minecraft.");
         var ct = CancellationToken.None;
         var engine = Backend.Engine;
         var needProton = !engine.IsProtonReady; var needUmu = !engine.IsUmuReady; var needPrefix = !Backend.Prefix.IsReady;
@@ -80,18 +81,23 @@ public sealed class LinuxGameService : IGameService
 
         progress(0, false);
         await Backend.Xodus.EnsureInstalledAsync(Rep(wX, false), ct); done += wX;
-        if (needProton) { await engine.EnsureProtonAsync(Rep(wP, false), ct); done += wP; }
-        if (needUmu) { await engine.EnsureUmuAsync(Rep(wU, false), ct); done += wU; }
 
-        if (!Backend.Xodus.IsLoggedIn && !await new LinuxMicrosoftAccount().SignInAsync())
-            throw new InvalidOperationException("Sign in with the Microsoft account that owns Minecraft to download it.");
-
-        if (needPrefix) { await Backend.Prefix.EnsureSetupAsync(Rep(wPf, true), ct); done += wPf; }
-
+        // game first: sign-in / ownership / disk problems fail within seconds, before the multi-GB engine download and the prefix setup
         var dest = Paths.GameDir("release", version.Version);
         var urls = new[] { uri }.Concat(version.DownloadUris.Where(u => u != uri)).ToList();
         GameBuild build = new(Edition.Release, version.Version, version.Version, urls);
         await Backend.Xodus.InstallAsync(build, dest, Rep(wG, false), ct); done += wG;
+
+        if (needProton) { await engine.EnsureProtonAsync(Rep(wP, false), ct); done += wP; }
+        if (needUmu) { await engine.EnsureUmuAsync(Rep(wU, false), ct); done += wU; }
+
+        if (needPrefix)
+        {
+            LinuxPlatform.Notify?.Invoke("Preparing Wine for the first time, this can take a few minutes.");
+            var t0 = DateTime.UtcNow; // no real progress from wineboot: creep towards the end of its slice
+            using var tick = new Timer(_ => Step(wPf, true, 1 - Math.Exp(-(DateTime.UtcNow - t0).TotalSeconds / 90)), null, 0, 1000);
+            await Backend.Prefix.EnsureSetupAsync(null, ct); done += wPf;
+        }
 
         progress((int)(done / total * 100), true);
         await Backend.Prefix.PrepareGameAsync(dest, null, ct);

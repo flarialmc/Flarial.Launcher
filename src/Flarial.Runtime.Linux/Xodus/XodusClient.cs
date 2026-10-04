@@ -23,7 +23,8 @@ internal sealed partial class XodusClient : IXodus
     const string PackageCache = ".xodus-streaming.msixvc";
     const string Exe = "Minecraft.Windows.exe";
     static readonly TimeSpan GdkLinksTtl = TimeSpan.FromHours(12);
-    static readonly TimeSpan StallLimit = TimeSpan.FromMinutes(10);
+    static readonly TimeSpan StallLimit = TimeSpan.FromMinutes(3);
+    static readonly TimeSpan FirstOutputLimit = TimeSpan.FromSeconds(90); // silence before xodus-cli printed anything at all: it is waiting on something (auth) that will not come
 
     static string Log => Path.Combine(Paths.Logs, "xodus.log");
     static string Keyring => Path.Combine(Paths.XodusHome, ".xodus-keyring.ron");
@@ -334,6 +335,7 @@ internal sealed partial class XodusClient : IXodus
         using var log = new StreamWriter(Log, true, Encoding.UTF8) { AutoFlush = true };
         log.WriteLine($"== streaming {Path.GetFileName(new Uri(url).AbsolutePath)} -> {dest}");
 
+        var spoke = false;
         var pump = Task.Run(async () =>
         {
             var buf = new char[8192]; var line = new StringBuilder(); int n;
@@ -346,10 +348,12 @@ internal sealed partial class XodusClient : IXodus
                 if (s.Length == 0 || Bar().IsMatch(s)) return;
                 if (s.Length > 1000) s = s[..1000];
                 log.WriteLine(s); tail.Add(s); if (tail.Count > 40) tail.RemoveAt(0);
+                // these end the download for good (and xodus-cli may keep retrying or exit 0): stop now instead of at the stall limit
+                if (NoCreds().IsMatch(s) || NotOwned().IsMatch(s) || DeviceFull().IsMatch(s) || NoRoom().IsMatch(s)) Kill(p);
             }
             while ((n = await p.StandardOutput.ReadAsync(buf)) > 0)
             {
-                heard.Restart();
+                heard.Restart(); spoke = true;
                 foreach (var c in buf.AsSpan(0, n)) if (c is '\r' or '\n') Flush(); else line.Append(c);
             }
             Flush();
@@ -359,7 +363,8 @@ internal sealed partial class XodusClient : IXodus
         while (!p.HasExited)
         {
             await Task.WhenAny(p.WaitForExitAsync(CancellationToken.None), Task.Delay(2000));
-            if (heard.Elapsed > StallLimit && !p.HasExited) { tail.Add("Nothing reached the download for 10 minutes; attempt stopped."); Kill(p); }
+            var limit = spoke ? StallLimit : FirstOutputLimit;
+            if (heard.Elapsed > limit && !p.HasExited) { tail.Add(spoke ? "Nothing reached the download for 3 minutes; attempt stopped." : "xodus-cli did not respond (is the Microsoft account signed in?); attempt stopped."); Kill(p); }
         }
         await pump;
         ct.ThrowIfCancellationRequested();

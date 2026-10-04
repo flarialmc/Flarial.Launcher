@@ -30,6 +30,14 @@ public partial class SettingsView : UserControl
 
     private async void PageTransition(PageTransitions page)
     {
+        // keep the sidebar highlight in sync when a page is opened from code (dialogs) rather than by clicking its button
+        switch (page)
+        {
+            case PageTransitions.SettingsGeneralPage: GeneralPageButton.IsChecked = true; break;
+            case PageTransitions.SettingsVersionsPage: VersionsPageButton.IsChecked = true; break;
+            case PageTransitions.SettingsAccountsPage: AccountsPageButton.IsChecked = true; break;
+        }
+
         var selectedPageY = page switch
         {
             PageTransitions.SettingsGeneralPage => 0,
