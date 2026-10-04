@@ -110,22 +110,11 @@
         </Style>
 
         <Style Selector="Button.installed">
-            <Setter Property="Background" Value="#FF2438"/>
-            <Setter Property="Content" Value="Launch"/>
+            <Setter Property="IsEnabled" Value="False"/>
+            <Setter Property="Background" Value="#2d2527"/>
+            <Setter Property="Content" Value="Installed"/>
             <Setter Property="MinWidth" Value="120"/>
-            <Setter Property="Tag">
-                <Setter.Value>
-                    <Template>
-                        <Grid Margin="1">
-                            <Path Fill="White"
-                                  StrokeJoin="Round"
-                                  StrokeLineCap="Round"
-                                  Stretch="Uniform"
-                                  Data="M9.074 7.7335 L3.308 11.6315 C1.903 12.5815 0 11.5835 0 9.8985 L0 2.1015 C0 0.4155 1.903 -0.5815 3.308 0.3685 L9.074 4.2665 C10.306 5.0995 10.306 6.9005 9.074 7.7335 Z"/>
-                        </Grid>
-                    </Template>
-                </Setter.Value>
-            </Setter>
+            <Setter Property="Opacity" Value="0.6"/>
         </Style>
 
         <Style Selector="Button.DeleteBtn">
@@ -143,7 +132,7 @@
                 Cursor="Hand"
                 Margin="0,0,10,0"
                 Classes="DeleteBtn"
-                IsVisible="{Binding IsInstalled}"
+                IsVisible="{Binding IsDeletable}"
                 Command="{Binding DeleteCommand}">
             <Button.Transitions>
                 <Transitions>

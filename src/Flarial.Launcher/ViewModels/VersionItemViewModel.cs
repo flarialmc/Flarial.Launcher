@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -31,6 +32,11 @@ public partial class VersionItemViewModel : ViewModelBase
 
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> DeleteCommand { get; }
     public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> InstallCommand { get; }
+
+    bool IsInstalledNow => Flarial.Runtime.Platform.Platform.Game.InstalledVersions.Any(v => v == _versionItem.Version);
+
+    /// <summary>Delete is not implemented on this platform, so its button stays hidden.</summary>
+    public bool IsDeletable => false;
 
     public bool IsInstalling => State is VersionItemState.Installing;
     public bool IsDownloading => State is VersionItemState.Downloading;
@@ -82,6 +88,7 @@ public partial class VersionItemViewModel : ViewModelBase
         });
 
         Version = $"{versionItem}";
+        if (IsInstalledNow) State = VersionItemState.Installed;
         DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.Installed));
         InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.NotInstalled));
     }
@@ -121,6 +128,12 @@ public partial class VersionItemViewModel : ViewModelBase
             return;
         }
 
+        if (!Flarial.Runtime.Platform.Platform.Game.RequiresInstalledGame && !Flarial.Runtime.Platform.Platform.MicrosoftAccount.IsSignedIn)
+        {
+            await MicrosoftSignInRequiredDialog._.ShowAsync();
+            return;
+        }
+
         if (!await _installVersionDialog.ShowAsync())
             return;
 
@@ -151,7 +164,7 @@ public partial class VersionItemViewModel : ViewModelBase
         finally
         {
             InstallPercentage = 0;
-            State = VersionItemState.NotInstalled;
+            State = IsInstalledNow ? VersionItemState.Installed : VersionItemState.NotInstalled;
 
             IsProgressing = false;
             _settingsVersionsViewModel.IsInstalling = false;
