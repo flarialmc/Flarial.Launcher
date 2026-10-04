@@ -17,6 +17,9 @@ No `.axaml`, style, animation, converter, control, font or image file was modifi
 | `Dialogs/Metadata/GameNotFoundDialog.cs` | button "Back" -> "Install" (closes dialog, opens Settings > Versions via the existing `PageTransitions` messages); body text no longer mentions Microsoft Store/Xbox App | intentional user-requested change (Linux installs through the Versions page) |
 | `ViewModels/VersionItemViewModel.cs` (install) | a failed install is caught and shown as a notification instead of crashing the launcher (no "installed" dialog) | backend errors (disk space, sign-in, network) are expected on Linux |
 | `ViewModels/MainWindowViewModel.cs` / `Program.cs` | register `LinuxPlatform.Notify` (-> `NotificationArea.Add`) and `AccountsService.Current` (real xodus/Xbox backend) | backend hooks |
+| `Views/VersionItemView.axaml`, `ViewModels/VersionItemViewModel.cs` (installed state) | the (previously unreachable) `Button.installed` style is now a greyed, disabled "Installed" button (was a red "Launch" with no command) and the delete button stays hidden (delete is a no-op); items already installed at startup and after an install show it | user-requested: installed versions must not be installable again |
+| `Dialogs/Metadata/MicrosoftSignInRequiredDialog.cs` + `VersionItemViewModel.InstallAsync` | new existing-style dialog shown instead of starting a download when no Microsoft account is signed in; "Sign In" opens Settings > Accounts | fail fast instead of hanging at 0% |
+| `Views/SettingsView.axaml.cs` | `PageTransition` also checks the matching sidebar RadioButton | pages opened from dialogs (Game Not Found, Sign In Required) left the previous sidebar button highlighted |
 | `ScreenshotDriver.cs` | new dev tool | verification |
 
 Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailableDialog`, `AutomaticUpdates` setting (UI toggle still present, no effect).
