@@ -45,11 +45,9 @@ public abstract partial class FlarialClient
         }
     }
 
-    private protected virtual bool InjectClient() => InjectionSession.Launch(new(FileName));
-
     public bool Launch()
     {
-        if (!IsRunning && InjectClient())
+        if (!IsRunning && InjectionSession.Launch(new(FileName)))
         {
             _ = PostAnalyticsAsync();
             return true;
@@ -63,7 +61,7 @@ public abstract partial class FlarialClient
         return json[HashName];
     }
 
-    public virtual async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
+    public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
     {
         if (await VerifyClientAsync())
             return true;
