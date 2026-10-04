@@ -1,4 +1,4 @@
-name: Workflow
+name: Windows
 on:
   push:
     branches: ["main"]
@@ -44,7 +44,7 @@ jobs:
         run: |
           Write-Host "Bumping package version with build date."
 
-          $Path = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
+          $Path = "$(Get-Location)\windows\src\Flarial.Launcher\Package.appxmanifest"
 
           $Date = Get-Date -AsUTC -Format "yyyy.MM.dd.HHmm"
           $Version = [version]::new($Date).ToString()
@@ -63,7 +63,7 @@ jobs:
       - name: Build
         shell: pwsh
         run: |
-          dotnet publish "src\Flarial.Launcher\Flarial.Launcher.csproj"
+          dotnet publish "windows\src\Flarial.Launcher\Flarial.Launcher.csproj"
 
       - name: Sign
         shell: pwsh
@@ -75,7 +75,7 @@ jobs:
           Write-Host "Signing the launcher's MSIX package."
 
           dotnet tool install --tool-path . --prerelease sign
-          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:CERTIFICATE_FINGERPRINT" "src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
+          ./sign.exe code certificate-store -cf "$Path" -p "$ENV:PRIVATE_CERTIFICATE_PASSWORD" -cfp "$ENV:CERTIFICATE_FINGERPRINT" "windows\src\Flarial.Launcher\AppPackages\Flarial.Launcher_Test\Flarial.Launcher.msix" -o "Flarial.Launcher.msix"
 
       - name: Token
         uses: actions/create-github-app-token@v3
@@ -104,7 +104,7 @@ jobs:
           $LauncherCertificateBytes = [System.Convert]::FromBase64String($ENV:CERTIFICATE_BASE64)
           [System.IO.File]::WriteAllBytes($LauncherCertificate, $LauncherCertificateBytes)
 
-          $PackageManifest = "$(Get-Location)\src\Flarial.Launcher\Package.appxmanifest"
+          $PackageManifest = "$(Get-Location)\windows\src\Flarial.Launcher\Package.appxmanifest"
           $PackageVersion = ([xml](Get-Content "$PackageManifest")).Package.Identity.Version
           "`"$PackageVersion`"" | Set-Content -Path "$LauncherVersion"
 
