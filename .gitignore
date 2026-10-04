@@ -483,3 +483,4 @@ $RECYCLE.BIN/
 
 # stray cwd-relative settings from older builds
 /Flarial/
+/.claude/
