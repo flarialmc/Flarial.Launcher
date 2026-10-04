@@ -1,35 +1,32 @@
-using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Collections;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using Flarial.Launcher.Controls.SegmentedBar;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
-using Flarial.Runtime.Discord;
+using Flarial.Runtime.Identity.Flarial;
 using Flarial.Runtime.Unmanaged;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
-using Splat;
 
 namespace Flarial.Launcher.ViewModels;
 
-public partial class SettingsGeneralViewModel : ViewModelBase
+public sealed partial class SettingsGeneralViewModel : ViewModelBase
 {
     [Reactive] string? _customDllPath = null;
     [Reactive] bool _customDllSelected = false;
-    [Reactive] bool _discordLoginActive = true;
-    [Reactive] bool _discordLoginAvailable = false;
-    [Reactive] bool _discordAccountAvailable = false;
+    
+    [Reactive] bool _loginActive = true;
+    [Reactive] bool _loginAvailable = false;
+    [Reactive] bool _accountAvailable = false;
 
     public AvaloniaList<SegmentItem> BuildTypes { get; }
-    public DiscordAccountModel DiscordAccount => _model._discordAccount;
+    public AccountModel Account => _mainWindowViewModel._account;
 
     readonly SegmentItem _customItem = new() { Title = "Custom", Tag = BuildType.Custom };
     readonly SegmentItem _releaseItem = new() { Title = "Release", Tag = BuildType.Release };
@@ -81,11 +78,11 @@ public partial class SettingsGeneralViewModel : ViewModelBase
         FileTypeFilter = [new("Dynamic Link Libraries") { Patterns = ["*.dll"] }]
     };
 
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Open { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Login { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> Logout { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> OpenClientFolder { get; }
-    public ReactiveCommand<ReactiveUI.Primitives.RxVoid, ReactiveUI.Primitives.RxVoid> OpenLauncherFolder { get; }
+    public ReactiveCommand<RxVoid, RxVoid> Open { get; }
+    public ReactiveCommand<RxVoid, RxVoid> Login { get; }
+    public ReactiveCommand<RxVoid, RxVoid> Logout { get; }
+    public ReactiveCommand<RxVoid, RxVoid> OpenClientFolder { get; }
+    public ReactiveCommand<RxVoid, RxVoid> OpenLauncherFolder { get; }
 
     async Task OnOpenAsync()
     {
@@ -105,11 +102,11 @@ public partial class SettingsGeneralViewModel : ViewModelBase
     void OnOpenClientFolder() => NativeMethods.ShellExecute(Directory.CreateDirectory(Path.Combine("..", "Client")).FullName);
 
     readonly AppSettings _settings;
-    readonly MainWindowViewModel _model;
+    readonly MainWindowViewModel _mainWindowViewModel;
 
     public SettingsGeneralViewModel(MainWindowViewModel mainWindowViewModel)
     {
-        _model = mainWindowViewModel;
+        _mainWindowViewModel = mainWindowViewModel;
         _settings = ((App)Application.Current!).Settings;
 
         BuildTypes = [_releaseItem, _betaItem, _customItem];
@@ -134,20 +131,20 @@ public partial class SettingsGeneralViewModel : ViewModelBase
         PerformanceMode = _settings.PerformanceMode;
         AutomaticUpdates = _settings.AutomaticUpdates;
 
-        Logout = ReactiveCommand.Create(OnLogout);
         Open = ReactiveCommand.CreateFromTask(OnOpenAsync);
         Login = ReactiveCommand.CreateFromTask(OnLoginAsync);
+        Logout = ReactiveCommand.CreateFromTask(OnLogoutAsync);
         OpenClientFolder = ReactiveCommand.Create(OnOpenClientFolder);
         OpenLauncherFolder = ReactiveCommand.Create(OnOpenLauncherFolder);
     }
 
     async Task OnLoginAsync()
     {
-        DiscordLoginAvailable = false;
+        LoginAvailable = false;
 
-        if (!await DiscordAuthenticationManager.AuthenticateAsync())
+        if (!await AccountManager.AuthenticateAsync())
         {
-            OnLogout();
+            await OnLogoutAsync();
             return;
         }
 
@@ -156,31 +153,28 @@ public partial class SettingsGeneralViewModel : ViewModelBase
 
     internal async Task LoginAsync()
     {
-        DiscordLoginAvailable = false;
+        LoginAvailable = false;
 
-        if (await DiscordAccountManager.LoginAsync() is not { } account)
+        if (await AccountManager.LoginAsync() is not { } account)
         {
-            OnLogout();
+            await OnLogoutAsync();
             return;
         }
 
         HasBetaAccess = account.HasBetaAccess;
-        _model.HomeViewModel.ShowPromotions = !account.HasFlarialPlus;
+        AccountAvailable = true;
 
-        DiscordAccountAvailable = true;
-        DiscordAccount.Login(account);
+        Account.Login(account);
     }
 
-    void OnLogout()
+    async Task OnLogoutAsync()
     {
         HasBetaAccess = false;
-        _model.HomeViewModel.ShowPromotions = true;
+        await AccountManager.LogoutAsync();
 
-        DiscordAccountManager.Logout();
-        DiscordAccount.Logout();
-
-        DiscordLoginAvailable = true;
-        DiscordAccountAvailable = false;
+        Account.Logout();
+        LoginAvailable = true;
+        AccountAvailable = false;
     }
 
     private void OnBuildChanged(SegmentItem? item)

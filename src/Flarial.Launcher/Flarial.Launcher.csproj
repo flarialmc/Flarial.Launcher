@@ -26,13 +26,10 @@
     </PropertyGroup>
 
     <PropertyGroup>
+        <SelfContained>true</SelfContained>
+
         <PublishRelease>true</PublishRelease>
         <PublishTrimmed>true</PublishTrimmed>
-        <PublishSingleFile>true</PublishSingleFile>
-
-        <SelfContained>true</SelfContained>
-        <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-        <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 
         <UseSizeOptimizedLinq>true</UseSizeOptimizedLinq>
         <InvariantGlobalization>true</InvariantGlobalization>
@@ -60,17 +57,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="System.Reactive" Version="7.0.0" />
+        <PackageReference Include="SkiaSharp" Version="4.153.1" />
+        <PackageReference Include="Avalonia.Skia" Version="12.1.3" />
 
-        <PackageReference Include="SkiaSharp" Version="4.150.1" />
-        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.150.1" />
-        <PackageReference Include="Avalonia.Skia" Version="12.1.0" />
+        <PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="4.153.1" />
 
-        <PackageReference Include="Avalonia.X11" Version="12.1.0" />
-        <PackageReference Include="Avalonia.HarfBuzz" Version="12.1.0" />
+        <PackageReference Include="Avalonia.X11" Version="12.1.3" />
+        <PackageReference Include="Avalonia.HarfBuzz" Version="12.1.3" />
 
-        <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.0" />
-        <PackageReference Include="ReactiveUI.SourceGenerators" Version="3.1.0" />
+        <PackageReference Include="ReactiveUI.Avalonia" Version="12.1.6" />
+        <PackageReference Include="ReactiveUI.SourceGenerators" Version="4.2.0" />
     </ItemGroup>
 
 </Project>

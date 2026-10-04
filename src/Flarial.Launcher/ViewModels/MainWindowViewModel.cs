@@ -4,16 +4,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Threading;
-using Flarial.Launcher.Dialogs;
 using Flarial.Launcher.Dialogs.Metadata;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Models;
 using Flarial.Runtime.Core;
-using Flarial.Runtime.Discord;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
-using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -32,7 +29,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     public NotificationAreaViewModel NotificationArea { get; }
     public VersionRegistry VersionRegistry { get; private set; }
 
-    internal readonly DiscordAccountModel _discordAccount;
+    internal readonly AccountModel _account;
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
     public MainWindowViewModel()
@@ -42,8 +39,8 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         NotificationArea = new NotificationAreaViewModel();
         Flarial.Runtime.Linux.LinuxPlatform.Notify = message => Dispatcher.UIThread.Post(() => NotificationArea.Add(message));
 
+        _account = new();
         VersionRegistry = null!;
-        _discordAccount = new();
     }
 
     public async Task<string> ShowMessageBoxAsync(string title, string message, IEnumerable<string> buttons)
@@ -60,12 +57,10 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         finally { _semaphore.Release(); }
     }
 
-    void OnDownload(int value) => HomeViewModel.LauncherStatus = $"Updating... {value}%";
-
     async Task LoginWithDiscordAsync()
     {
         await SettingsViewModel.SettingsGeneralViewModel.LoginAsync();
-        SettingsViewModel.SettingsGeneralViewModel.DiscordLoginActive = false;
+        SettingsViewModel.SettingsGeneralViewModel.LoginActive = false;
     }
 
     public async void OnLoaded()

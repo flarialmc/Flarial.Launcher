@@ -6,7 +6,6 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Avalonia.Platform;
 using Avalonia.Rendering.SceneGraph;
 using Avalonia.Skia;
 using Flarial.Launcher.Management;
@@ -14,7 +13,7 @@ using SkiaSharp;
 
 namespace Flarial.Launcher.Controls.SpotlightDecorator;
 
-public class SpotlightDecorator : Decorator
+public sealed class SpotlightDecorator : Decorator
 {
     private SpotlightAdorner? _adorner;
 

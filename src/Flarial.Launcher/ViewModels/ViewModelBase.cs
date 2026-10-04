@@ -1,7 +1,6 @@
-﻿using System.Reactive;
-using System.Reactive.Linq;
-using Flarial.Launcher.Types;
+﻿using Flarial.Launcher.Types;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.ViewModels;
@@ -10,10 +9,10 @@ public abstract partial class ViewModelBase : ReactiveObject
 {
     // wtf why did i think this was going to work
     // todo: change this to be static instead
-    [Reactive] 
+    [Reactive]
     private bool _isAnimating;
 
-    public ReactiveCommand<PageTransitions, ReactiveUI.Primitives.RxVoid> NavigateCommand { get; }
+    public ReactiveCommand<PageTransitions, RxVoid> NavigateCommand { get; }
 
     protected ViewModelBase()
     {

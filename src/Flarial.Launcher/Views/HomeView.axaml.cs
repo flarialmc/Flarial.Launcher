@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -12,7 +13,7 @@ using Flarial.Runtime.Unmanaged;
 
 namespace Flarial.Launcher.Views;
 
-public partial class HomeView : UserControl
+public sealed partial class HomeView : UserControl
 {
     static readonly Cursor s_cursor = new(StandardCursorType.Hand);
 
@@ -34,13 +35,14 @@ public partial class HomeView : UserControl
 
                 using MemoryStream stream = new(bytes, false);
 
-                Image image = new()
+                Border image = new()
                 {
                     Width = 320 * 0.8,
                     Height = 50 * 0.8,
                     Cursor = s_cursor,
                     Tag = promotion.Uri,
-                    Source = new Bitmap(stream)
+                    CornerRadius = new CornerRadius(5),
+                    Background = new ImageBrush { Stretch = Stretch.UniformToFill, Source = new Bitmap(stream) }
                 };
 
                 image.PointerPressed += OnPointerPressed;

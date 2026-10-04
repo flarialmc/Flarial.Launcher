@@ -1,23 +1,20 @@
-using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Animation;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.Platform;
 using Flarial.Launcher.Management;
 using Flarial.Launcher.Types;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
-using SkiaSharp;
+using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Views;
 
 // ReSharper disable once PartialTypeWithSinglePart
-public partial class MainWindow : Window
+public sealed partial class MainWindow : Window
 {
     public static Canvas? ToolTipLayerInstance { get; private set; }
 

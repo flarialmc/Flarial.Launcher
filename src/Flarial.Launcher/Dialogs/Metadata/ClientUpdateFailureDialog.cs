@@ -8,6 +8,7 @@ sealed class ClientUpdateFailureDialog : MessageDialog<ClientUpdateFailureDialog
 
 • Try closing Minecraft & click on [Play] to update the client.
 • Try rebooting your machine & see if that resolves the issue.
+• If using client's beta, please verify if you have access to it.
 
 If you need help, join our Discord.";
 

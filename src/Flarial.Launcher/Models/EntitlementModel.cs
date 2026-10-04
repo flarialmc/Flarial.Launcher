@@ -4,7 +4,7 @@ using ReactiveUI.SourceGenerators;
 
 namespace Flarial.Launcher.Models;
 
-public sealed partial class DiscordRoleModel : ReactiveObject
+public sealed partial class EntitlementModel : ReactiveObject
 {
     [Reactive] string _name = string.Empty;
     [Reactive] IBrush _border = Brushes.Transparent;

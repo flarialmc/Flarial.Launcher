@@ -4,7 +4,7 @@ using Avalonia.Data.Converters;
 
 namespace Flarial.Launcher.Converters;
 
-public class GradientStopOffset() : IValueConverter
+public sealed class GradientStopOffset() : IValueConverter
 {
     /// <summary>
     /// How much to shift left/right from the center value.

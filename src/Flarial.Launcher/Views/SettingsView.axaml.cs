@@ -10,19 +10,17 @@ using Flarial.Launcher.Management;
 using Flarial.Launcher.Types;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
+using ReactiveUI.Primitives;
 
 namespace Flarial.Launcher.Views;
 
-public partial class SettingsView : UserControl
+public sealed partial class SettingsView : UserControl
 {
     public SettingsView()
     {
         InitializeComponent();
         MessageBus.Current.Listen<PageTransitions>().Subscribe(PageTransition);
     }
-
-    [Obsolete("", true)]
-    static bool PerformanceMode => (Application.Current as App)?.Settings?.PerformanceMode ?? false;
 
     readonly AppSettings _settings = ((App)Application.Current!).Settings;
 
