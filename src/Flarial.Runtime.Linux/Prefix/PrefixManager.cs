@@ -110,11 +110,28 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
 
         if (!Valid)
         {
-            // first wineboot can abort on advapi32.SystemFunction036 -> cryptbase; seed native cryptbase and retry once
+            // The engine's advapi32 forwards SystemFunction036 to cryptbase, which a brand-new prefix does not have yet: every wineboot
+            // service then aborts into winedbg and wineboot never returns. Seed the native cryptbase first (as BedrockOnLinux does) and
+            // stop a wineboot whose log shows that abort instead of waiting out the timeout.
+            var runtimeCached = Directory.Exists(Path.Combine(Paths.UmuDir, "steamrt3"));
+            var timeout = TimeSpan.FromMinutes(runtimeCached ? 8 : 30); // first run without the cached runtime also downloads steamrt3 (~900 MB)
             for (var attempt = 0; attempt < 2 && !Valid; attempt++)
             {
-                if (attempt == 1) SeedCryptbase();
-                await Run(Proc.Info("python3", [engine.UmuRun, "wineboot", "-u"], UmuEnv(attempt == 1), Paths.Root), TimeSpan.FromMinutes(30), ct);
+                SeedCryptbase();
+                var start = File.Exists(Log) ? new FileInfo(Log).Length : 0;
+                using var watch = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                var abort = false;
+                var guard = Task.Run(async () =>
+                {
+                    while (!watch.IsCancellationRequested)
+                    {
+                        await Task.Delay(2000);
+                        if (LogHasRngAbort(start)) { abort = true; await Kill(); watch.Cancel(); }
+                    }
+                });
+                try { await Run(Proc.Info("python3", [engine.UmuRun, "wineboot", "-u"], UmuEnv(true), Paths.Root), timeout, watch.Token); }
+                catch (OperationCanceledException) when (abort && !ct.IsCancellationRequested) { }
+                finally { watch.Cancel(); try { await guard; } catch { } }
                 progress?.Report(0.6);
             }
             if (!Valid) throw new IOException($"wineboot did not create a prefix; see {Log}");
@@ -127,6 +144,19 @@ internal sealed class PrefixManager(IEngine engine) : IPrefix
         File.WriteAllText(Marker, Want);
         progress?.Report(1);
     }
+
+    bool LogHasRngAbort(long from)
+    {
+        try
+        {
+            using var f = new FileStream(Log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            f.Seek(Math.Min(from, f.Length), SeekOrigin.Begin);
+            return new StreamReader(f).ReadToEnd().Contains("SystemFunction036");
+        }
+        catch { return false; }
+    }
+
+    Task Kill() => Run(Proc.Info(engine.Wineserver, ["-k"], WineEnv()), TimeSpan.FromSeconds(30), default);
 
     void SeedCryptbase()
     {
