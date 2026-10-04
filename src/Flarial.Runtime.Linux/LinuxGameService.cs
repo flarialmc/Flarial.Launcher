@@ -151,6 +151,27 @@ public sealed class LinuxGameService : IGameService
     }
 
     // ---- launch
+
+    /// <summary>xodus-cli run refuses before Minecraft starts (license/device/sign-in problems); say why instead of only "Launch Failure".</summary>
+    static string? LaunchError(string log, long from)
+    {
+        string text;
+        try
+        {
+            using var f = new FileStream(log, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            f.Seek(Math.Min(from, f.Length), SeekOrigin.Begin);
+            text = new StreamReader(f).ReadToEnd();
+        }
+        catch { return null; }
+
+        if (text.Contains("device group is full", StringComparison.OrdinalIgnoreCase))
+            return "Minecraft cannot start: this Microsoft account has no free Store device slot (ten maximum). Remove old devices at account.microsoft.com/devices/content, then sign in again in Settings > Accounts.";
+        if (text.Contains("not entitled to this content", StringComparison.OrdinalIgnoreCase) || text.Contains("package was not found", StringComparison.OrdinalIgnoreCase))
+            return "Minecraft cannot start: this Microsoft account does not own Minecraft Bedrock Edition.";
+        if (System.Text.RegularExpressions.Regex.IsMatch(text, "unable to initialize credentials|invalid sts token|no user token|not logged in|didn't log in|failed to get exchange ms token", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+            return "Minecraft cannot start: the Microsoft sign-in has expired. Sign in again in Settings > Accounts.";
+        return null;
+    }
     public uint? Launch()
     {
         if (Core.FindGamePid() is { } running) return running;
@@ -163,8 +184,11 @@ public sealed class LinuxGameService : IGameService
                 Backend.Prefix.EnsureSetupAsync(null, CancellationToken.None).GetAwaiter().GetResult();
                 LinuxPlatform.Notify?.Invoke("Wine is ready, starting Minecraft.");
             }
+            var log = Path.Combine(Paths.Logs, "minecraft.log");
+            var logStart = File.Exists(log) ? new FileInfo(log).Length : 0;
             var pid = Core.LaunchAsync(dir, LaunchSettings.Current, CancellationToken.None).GetAwaiter().GetResult();
             if (pid is { }) LastLaunchUtc = DateTime.UtcNow;
+            else if (LaunchError(log, logStart) is { } why) LinuxPlatform.Notify?.Invoke(why);
             Raise();
             return pid;
         }

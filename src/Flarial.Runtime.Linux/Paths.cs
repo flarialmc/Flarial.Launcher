@@ -89,9 +89,9 @@ static class Paths
             Directory.CreateDirectory(Path.GetDirectoryName(to)!);
             File.CreateSymbolicLink(to, from);
         }
-        void Copy(string from, string to)
+        void Copy(string from, string to, bool overwrite = false)
         {
-            if (!File.Exists(from) || File.Exists(to)) return;
+            if (!File.Exists(from) || (File.Exists(to) && !overwrite)) return;
             Directory.CreateDirectory(Path.GetDirectoryName(to)!);
             File.Copy(from, to);
             File.SetUnixFileMode(to, UnixFileMode.UserRead | UnixFileMode.UserWrite);
@@ -117,7 +117,7 @@ static class Paths
 
         // logins: private copies, so the source install's tokens are never touched by us
         foreach (var f in Directory.Exists(Path.Combine(src, "xodus-home")) ? Directory.GetFiles(Path.Combine(src, "xodus-home"), ".xodus*") : [])
-            Copy(f, Path.Combine(XodusHome, Path.GetFileName(f)));
+            Copy(f, Path.Combine(XodusHome, Path.GetFileName(f)), true); // seeding means "use that account": a keyring from a fresh launcher login would register a new Store device (and fail when the group is full)
         Copy(Path.Combine(src, "msa", "token.json"), MsaToken);
         foreach (var f in new[] { "device-key.pem", "device-id.txt" })
             Copy(Path.Combine(src, "winegdk-preauth", f), Path.Combine(PreauthDir, f));
