@@ -21,3 +21,6 @@ The official launcher for Flarial Client.
 - `linux/` - the native Linux launcher (see `linux/README.md`).
   - Build: `dotnet build linux/src/Flarial.Launcher -c Debug`
   - Publish: `dotnet publish linux/src/Flarial.Launcher -c Release -r linux-x64 --self-contained`
+
+### Building `windows/` on Linux
+`dotnet build windows/src/Flarial.Launcher -p:EnableWindowsTargeting=true` compiles all C# (including CsWin32) and produces `Flarial.Launcher.dll`, then fails at the MSIX tooling step: `WINAPPSDKGENERATEPROJECTPRIFILE : error : PRI193: 0x80070057 - Please provide a valid Project Root`. This is the Windows-only `makepri` PRI generation; MSIX packaging and signing only work on Windows (CI: `.github/workflows/windows.yml`).
