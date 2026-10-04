@@ -20,6 +20,7 @@ No `.axaml`, style, animation, converter, control, font or image file was modifi
 | `Views/VersionItemView.axaml`, `ViewModels/VersionItemViewModel.cs` (installed state) | the (previously unreachable) `Button.installed` style is now a greyed, disabled "Installed" button (was a red "Launch" with no command) and the delete button stays hidden (delete is a no-op); items already installed at startup and after an install show it | user-requested: installed versions must not be installable again |
 | `Dialogs/Metadata/MicrosoftSignInRequiredDialog.cs` + `VersionItemViewModel.InstallAsync` | new existing-style dialog shown instead of starting a download when no Microsoft account is signed in; "Sign In" opens Settings > Accounts | fail fast instead of hanging at 0% |
 | `Views/SettingsView.axaml.cs` | `PageTransition` also checks the matching sidebar RadioButton | pages opened from dialogs (Game Not Found, Sign In Required) left the previous sidebar button highlighted |
+| `Views/SettingsGeneralView.axaml` | removed the Discord section (header, avatar/username/role row, Login/Logout); Folders now starts the page, remaining spacing unchanged | user request: the Flarial/Discord account lives only in Settings > Accounts, which binds the same `SettingsGeneralViewModel` login/logout/account state |
 | `ScreenshotDriver.cs` | new dev tool | verification |
 
 Dead on Linux but kept as-is: `LauncherMigrationDialog`, `LauncherUpdateAvailableDialog`, `AutomaticUpdates` setting (UI toggle still present, no effect).
