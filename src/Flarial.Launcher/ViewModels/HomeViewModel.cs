@@ -12,7 +12,6 @@ using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
-using Flarial.Runtime.Client;
 
 namespace Flarial.Launcher.ViewModels;
 
