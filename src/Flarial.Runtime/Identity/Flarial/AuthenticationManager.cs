@@ -146,7 +146,8 @@ static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            await AccountManager.LogoutAsync();
+            RefreshTokenManager._.Remove();
+            FlarialClientBeta._.AccessToken = null;
             return null;
         }
 
