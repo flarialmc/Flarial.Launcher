@@ -5,6 +5,8 @@
 
 The official launcher for Flarial Client.
 
+Account integration: [launcher-owned tokens](docs/ACCOUNT_ACCESS.md).
+
 ## Notes
 - This repository only contains the source code for the launcher.
   

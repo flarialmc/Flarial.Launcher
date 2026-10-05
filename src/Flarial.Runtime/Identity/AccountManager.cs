@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -13,6 +12,7 @@ public static class AccountManager
     const string AccountUri = "https://api.flarial.xyz/api/v2/account";
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
+    static AccountManager() { _ = RenewAccessLoopAsync(); }
 
     public static async Task<bool> AuthenticateAsync()
     {
@@ -56,7 +56,7 @@ public static class AccountManager
                 HasFlarialPlus = flarialPlus.GetProperty("active").GetBoolean(),
             });
         }
-        catch { _ = LogoutAsync(); throw; }
+        catch { await AuthenticationManager.RevokeAsync(); throw; }
         finally { s_semaphore.Release(); }
     }
 
@@ -65,6 +65,29 @@ public static class AccountManager
         await s_semaphore.WaitAsync(); try
         {
             await AuthenticationManager.RevokeAsync();
+        }
+        finally { s_semaphore.Release(); }
+    }
+
+    static async Task RenewAccessLoopAsync()
+    {
+        using PeriodicTimer timer = new(TimeSpan.FromSeconds(30));
+        while (await timer.WaitForNextTickAsync())
+        {
+            try { await RenewAccessAsync(); }
+            catch { /* Retry on the next tick; transient failures leave login intact. */ }
+        }
+    }
+
+    internal static async Task RenewAccessAsync()
+    {
+        if (!await s_semaphore.WaitAsync(0)) return;
+        try
+        {
+            var expiresAt = AccessTokenManager._.ExpiresAt;
+            if (expiresAt == 0 || expiresAt > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 120) return;
+            using CancellationTokenSource timeout = new(TimeSpan.FromSeconds(10));
+            await AuthenticationManager.AuthenticateSilentlyAsync(timeout.Token);
         }
         finally { s_semaphore.Release(); }
     }

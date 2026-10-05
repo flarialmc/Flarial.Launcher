@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
@@ -65,22 +66,36 @@ static class AuthenticationManager
         finally { listener.Stop(); }
     }
 
-    static async Task<(string AccessToken, string RefreshToken)?> ParseTokensAsync(HttpResponseMessage response)
+    static async Task<(string AccessToken, string RefreshToken, long ExpiresAt)?> ParseTokensAsync(
+        HttpResponseMessage response, long requestedAt)
     {
         using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
 
         var accessToken = document.RootElement.GetProperty(AccessToken);
         var refreshToken = document.RootElement.GetProperty(RefreshToken);
+        long expiresIn = 0;
+        if (document.RootElement.TryGetProperty("expires_in", out var expiry) &&
+            expiry.ValueKind == JsonValueKind.Number)
+            expiry.TryGetInt64(out expiresIn);
+        var access = accessToken.GetString();
+        var refresh = refreshToken.GetString();
+        if (string.IsNullOrEmpty(access) || access.Length > 4096 ||
+            string.IsNullOrEmpty(refresh) || refresh.Length > 4096)
+            return null;
+        foreach (var character in access)
+            if (!char.IsAsciiLetterOrDigit(character) && character is not '-' and not '_' and not '.')
+                return null;
 
         return new()
         {
-            AccessToken = accessToken.GetString()!,
-            RefreshToken = refreshToken.GetString()!
+            AccessToken = access,
+            RefreshToken = refresh,
+            ExpiresAt = expiresIn is > 30 and <= 86400 ? requestedAt + expiresIn : 0
         };
     }
 
-    static async Task<(string AccessToken, string RefreshToken)?> GetTokensAsync()
+    static async Task<(string AccessToken, string RefreshToken, long ExpiresAt)?> GetTokensAsync()
     {
         if (await GetAuthorizationAsync() is not { } tuple)
             return null;
@@ -95,28 +110,33 @@ static class AuthenticationManager
             ["code_verifier"] = tuple.CodeVerifier
         });
 
+        var requestedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         using var response = await HttpService.PostAsync(TokenUri, content);
         if (!response.IsSuccessStatusCode) return null;
 
-        return await ParseTokensAsync(response);
+        return await ParseTokensAsync(response, requestedAt);
     }
 
     internal static async Task<bool> AuthenticateAsync()
     {
         if (await GetTokensAsync() is { } token)
         {
+            ClearAccess();
             RefreshTokenManager._.Set(token.RefreshToken);
+            if (token.ExpiresAt <= DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 30) return false;
+            AccessTokenManager._.Publish(token.AccessToken, token.ExpiresAt);
+            FlarialClientBeta._.AccessToken = token.AccessToken;
             return true;
         }
         return false;
     }
 
-    internal static async Task RevokeAsync()
+    internal static async Task RevokeAsync(CancellationToken cancellationToken = default)
     {
+        ClearAccess();
         if (RefreshTokenManager._.Get() is { } refreshToken)
         {
             RefreshTokenManager._.Remove();
-            FlarialClientBeta._.AccessToken = null;
 
             using FormUrlEncodedContent content = new(new Dictionary<string, string>
             {
@@ -125,14 +145,23 @@ static class AuthenticationManager
                 ["token_type_hint"] = RefreshToken,
             });
 
-            using (await HttpService.PostAsync(RevokeUri, content)) { }
+            using (await HttpService.PostAsync(RevokeUri, content, cancellationToken)) { }
         }
     }
 
-    internal static async Task<string?> AuthenticateSilentlyAsync()
+    internal static void ClearAccess()
+    {
+        FlarialClientBeta._.AccessToken = null;
+        AccessTokenManager._.Clear();
+    }
+
+    internal static async Task<string?> AuthenticateSilentlyAsync(CancellationToken cancellationToken = default)
     {
         if (RefreshTokenManager._.Get() is not { } refreshToken)
+        {
+            ClearAccess();
             return null;
+        }
 
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
@@ -142,18 +171,23 @@ static class AuthenticationManager
             [RefreshToken] = refreshToken
         });
 
-        using var response = await HttpService.PostAsync(TokenUri, content);
+        var requestedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        using var response = await HttpService.PostAsync(TokenUri, content, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {
-            _ = AccountManager.LogoutAsync();
+            if (response.StatusCode is HttpStatusCode.BadRequest or HttpStatusCode.Unauthorized)
+                await RevokeAsync(cancellationToken);
             return null;
         }
 
-        if (await ParseTokensAsync(response) is not { } tuple)
+        if (await ParseTokensAsync(response, requestedAt) is not { } tuple)
             return null;
 
+        ClearAccess();
         RefreshTokenManager._.Set(tuple.RefreshToken);
+        if (tuple.ExpiresAt <= DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 30) return null;
+        AccessTokenManager._.Publish(tuple.AccessToken, tuple.ExpiresAt);
         FlarialClientBeta._.AccessToken = tuple.AccessToken;
 
         return tuple.AccessToken;

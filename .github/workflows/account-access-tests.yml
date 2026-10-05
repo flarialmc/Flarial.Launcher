@@ -1,0 +1,23 @@
+name: Account access tests
+on:
+  pull_request:
+    paths:
+      - 'src/Flarial.Runtime/Identity/**'
+      - 'src/Flarial.Runtime/Services/HttpService/**'
+      - 'tests/AccountAccess/**'
+      - '.github/workflows/account-access-tests.yml'
+permissions:
+  contents: read
+jobs:
+  account-access:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build src/Flarial.Launcher/Flarial.Launcher.csproj -c ${{ matrix.configuration }} --nologo
+      - run: dotnet run --project tests/AccountAccess/AccountAccess.csproj -c ${{ matrix.configuration }} --no-launch-profile

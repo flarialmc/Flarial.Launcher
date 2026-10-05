@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../src/Flarial.Runtime/Identity/AccessTokenManager.cs" Link="AccessTokenManager.cs" />
+    <Compile Include="../../src/Flarial.Runtime/Identity/RefreshTokenManager.cs" Link="RefreshTokenManager.cs" />
+    <Compile Include="../../src/Flarial.Runtime/Identity/AuthenticationManager.cs" Link="AuthenticationManager.cs" />
+    <Compile Include="../../src/Flarial.Runtime/Identity/AccountManager.cs" Link="AccountManager.cs" />
+    <Compile Include="../../src/Flarial.Runtime/Identity/AccountDetails.cs" Link="AccountDetails.cs" />
+    <Compile Include="../../src/Flarial.Runtime/Identity/RequestHelper.cs" Link="RequestHelper.cs" />
+  </ItemGroup>
+</Project>
