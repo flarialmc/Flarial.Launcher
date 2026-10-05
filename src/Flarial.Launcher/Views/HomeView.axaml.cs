@@ -37,10 +37,10 @@ public sealed partial class HomeView : UserControl
 
                 Border image = new()
                 {
+                    Tag = promotion,
                     Width = 320 * 0.8,
                     Height = 50 * 0.8,
                     Cursor = s_cursor,
-                    Tag = promotion.Uri,
                     CornerRadius = new CornerRadius(5),
                     Background = new ImageBrush { Stretch = Stretch.UniformToFill, Source = new Bitmap(stream) }
                 };
@@ -53,9 +53,16 @@ public sealed partial class HomeView : UserControl
         });
     }
 
-    static void OnPointerPressed(object? sender, PointerPressedEventArgs args)
+    static async void OnPointerPressed(object? sender, PointerPressedEventArgs args)
     {
-        var file = (sender as Control)?.Tag as string;
-        if (file is { }) NativeMethods.ShellExecute(file);
+        if (sender is Control { Tag: Promotion promotion } control)
+        {
+            control.IsEnabled = false; try
+            {
+                NativeMethods.ShellExecute(promotion.Uri);
+                _ = promotion.OnClickAsync();
+            }
+            finally { control.IsEnabled = true; }
+        }
     }
 }
