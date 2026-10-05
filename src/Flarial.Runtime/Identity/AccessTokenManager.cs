@@ -1,4 +1,5 @@
-using System;
+using System.Buffers;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using Flarial.Runtime.Services;
@@ -15,12 +16,16 @@ sealed class AccessTokenManager : CredentialService<AccessTokenManager>
 
     internal void Publish(string accessToken, long expiresAt)
     {
-        Set(JsonSerializer.Serialize(new
+        ArrayBufferWriter<byte> buffer = new();
+        using (Utf8JsonWriter writer = new(buffer))
         {
-            version = 1,
-            access_token = accessToken,
-            expires_at = expiresAt
-        }));
+            writer.WriteStartObject();
+            writer.WriteNumber("version", 1);
+            writer.WriteString("access_token", accessToken);
+            writer.WriteNumber("expires_at", expiresAt);
+            writer.WriteEndObject();
+        }
+        Set(Encoding.UTF8.GetString(buffer.WrittenSpan));
         Interlocked.Exchange(ref _expiresAt, expiresAt);
     }
 
