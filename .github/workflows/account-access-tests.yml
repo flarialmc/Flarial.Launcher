@@ -12,6 +12,7 @@ jobs:
   account-access:
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         configuration: [Debug, Release]
     steps:

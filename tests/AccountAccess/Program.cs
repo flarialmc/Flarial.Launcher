@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
+using AuthenticationManager = Flarial.Runtime.Identity.AuthenticationManager;
 
 static class Program
 {
