@@ -5,6 +5,9 @@
 
 The official launcher for Flarial Client.
 
+Account contributors: see [credential coordination](docs/ACCOUNT_COORDINATION.md)
+for the shared DLL/launcher transaction and regression tests.
+
 ## Notes
 - This repository only contains the source code for the launcher.
   

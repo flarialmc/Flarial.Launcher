@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -101,22 +100,28 @@ static class AuthenticationManager
         return await ParseTokensAsync(response);
     }
 
-    internal static async Task<bool> AuthenticateAsync()
+    internal static async Task<bool> AuthenticateAsync(CredentialLock credentials)
     {
         if (await GetTokensAsync() is { } token)
         {
-            RefreshTokenManager._.Set(token.RefreshToken);
-            return true;
+            // Browser authorization does not consume the stored refresh token.
+            // Acquire the shared lease only when replacing the credential.
+            return await credentials.RunAsync(() =>
+            {
+                RefreshTokenManager._.Set(token.RefreshToken);
+                FlarialClientBeta._.AccessToken = null;
+                return Task.FromResult(true);
+            });
         }
         return false;
     }
 
     internal static async Task RevokeAsync()
     {
+        FlarialClientBeta._.AccessToken = null;
         if (RefreshTokenManager._.Get() is { } refreshToken)
         {
             RefreshTokenManager._.Remove();
-            FlarialClientBeta._.AccessToken = null;
 
             using FormUrlEncodedContent content = new(new Dictionary<string, string>
             {
@@ -146,7 +151,9 @@ static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            _ = AccountManager.LogoutAsync();
+            // Complete cleanup in the current credential transaction. A queued
+            // logout could otherwise remove a subsequently signed-in account.
+            await RevokeAsync();
             return null;
         }
 

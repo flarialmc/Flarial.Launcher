@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
@@ -12,20 +11,15 @@ public static class AccountManager
 {
     const string AccountUri = "https://api.flarial.xyz/api/v2/account";
 
-    static readonly SemaphoreSlim s_semaphore = new(1, 1);
+    static readonly CredentialLock s_credentials = new(CredentialLock.CurrentUserName);
+    static readonly SemaphoreSlim s_lock = new(1, 1);
 
-    public static async Task<bool> AuthenticateAsync()
-    {
-        await s_semaphore.WaitAsync(); try
-        {
-            return await AuthenticationManager.AuthenticateAsync();
-        }
-        finally { s_semaphore.Release(); }
-    }
+    public static Task<bool> AuthenticateAsync() =>
+        RunAsync(() => AuthenticationManager.AuthenticateAsync(s_credentials));
 
-    public static async Task<AccountDetails?> LoginAsync()
+    public static Task<AccountDetails?> LoginAsync() => RunAsync(() => s_credentials.RunAsync<AccountDetails?>(async () =>
     {
-        await s_semaphore.WaitAsync(); try
+        try
         {
             if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
                 return null;
@@ -56,16 +50,19 @@ public static class AccountManager
                 HasFlarialPlus = flarialPlus.GetProperty("active").GetBoolean(),
             });
         }
-        catch { _ = LogoutAsync(); throw; }
-        finally { s_semaphore.Release(); }
-    }
+        catch { await AuthenticationManager.RevokeAsync(); throw; }
+    }));
 
-    public static async Task LogoutAsync()
+    public static Task LogoutAsync() => RunAsync(async () =>
     {
-        await s_semaphore.WaitAsync(); try
-        {
-            await AuthenticationManager.RevokeAsync();
-        }
-        finally { s_semaphore.Release(); }
+        await s_credentials.RunAsync(AuthenticationManager.RevokeAsync);
+        return true;
+    });
+
+    static async Task<T> RunAsync<T>(Func<Task<T>> operation)
+    {
+        await s_lock.WaitAsync();
+        try { return await operation(); }
+        finally { s_lock.Release(); }
     }
 }

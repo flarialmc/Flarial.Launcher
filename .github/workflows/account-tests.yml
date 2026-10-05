@@ -1,0 +1,22 @@
+name: Account coordination tests
+on:
+  pull_request:
+    paths:
+      - 'src/Flarial.Runtime/Identity/**'
+      - 'tests/AccountCoordination/**'
+      - '.github/workflows/account-tests.yml'
+permissions:
+  contents: read
+jobs:
+  account-tests:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet build src/Flarial.Runtime/Flarial.Runtime.csproj -c ${{ matrix.configuration }} --nologo
+      - run: dotnet run --project tests/AccountCoordination/AccountCoordination.csproj -c ${{ matrix.configuration }} --no-launch-profile
