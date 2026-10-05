@@ -8,7 +8,7 @@ using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 
-namespace Flarial.Runtime.Identity.Flarial;
+namespace Flarial.Runtime.Identity;
 
 static class AuthenticationManager
 {

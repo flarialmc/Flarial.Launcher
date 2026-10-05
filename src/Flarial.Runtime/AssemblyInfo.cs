@@ -13,12 +13,8 @@ using static Windows.Win32.System.Diagnostics.Debug.THREAD_ERROR_MODE;
 
 namespace Flarial.Runtime;
 
-file static class AssemblyInfo
+ static class AssemblyInfo
 {
     [ModuleInitializer]
-    internal static void ModuleInitializer()
-    {
-        SetErrorMode(SEM_FAILCRITICALERRORS);
-        Task.Run(Identity.Discord.RefreshTokenManager._.Remove);
-    }
+    internal static void ModuleInitializer()=> SetErrorMode(SEM_FAILCRITICALERRORS);
 }

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
 
-namespace Flarial.Runtime.Identity.Flarial;
+namespace Flarial.Runtime.Identity;
 
 public static class AccountManager
 {
