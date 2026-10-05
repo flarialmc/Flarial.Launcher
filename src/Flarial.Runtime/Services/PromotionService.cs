@@ -20,12 +20,14 @@ public sealed class Promotion
 
     public string Uri { get; }
     public string Image { get; }
+    public string? CampaignId { get; }
 
     [JsonConstructor]
-    internal Promotion(string uri, string image)
+    internal Promotion(string uri, string image, string? campaignId = null)
     {
         Uri = uri; 
         Image = image;
+        CampaignId = campaignId;
         _task = HttpService.TryGetBytesAsync(image);
     }
 
