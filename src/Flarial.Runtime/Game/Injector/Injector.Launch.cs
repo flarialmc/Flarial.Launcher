@@ -12,7 +12,7 @@ partial class Injector
 {
     public unsafe static bool Launch(ModificationLibrary library)
     {
-        var path = library.EnsureLoadable();
+        var path = library.AsPath();
 
         if (Minecraft.Launch() is not { } processId)
             return false;
