@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
@@ -11,7 +12,7 @@ using static Windows.Win32.System.Threading.PROCESS_CREATION_FLAGS;
 
 namespace Flarial.Runtime.Core;
 
-partial class FlarialClient
+partial class FlarialClient<T>
 {
     static class Loader
     {
@@ -31,9 +32,9 @@ partial class FlarialClient
             }
         }
 
-        internal unsafe static bool Launch(ModificationLibrary library)
+        internal unsafe static bool Launch()
         {
-            var imports = library.AsImports();
+            var imports = new ModificationLibrary(_.FileName).AsImports();
 
             if (Minecraft.Launch() is not { } processId)
                 return false;
@@ -63,6 +64,9 @@ partial class FlarialClient
                         QueueUserAPC(s_apc, thread, (nuint)item);
                     }
 
+                    Dictionary<string, string?> description = new() { ["access_token"] = AccessToken };
+                    fixed (char* ptr = JsonService.Default.Write(description)) SetThreadDescription(thread, ptr);
+
                     ResumeThread(thread);
                     WaitForSingleObject(thread, INFINITE);
 
@@ -70,11 +74,8 @@ partial class FlarialClient
                 }
                 finally
                 {
-                    TerminateThread(thread, 0);
-                    CloseHandle(thread);
-
-                    foreach (var item in items)
-                        VirtualFreeEx(process, (void*)item, 0, MEM_RELEASE);
+                    TerminateThread(thread, 0); CloseHandle(thread);
+                    foreach (var item in items) VirtualFreeEx(process, (void*)item, 0, MEM_RELEASE);
                 }
             }
         }

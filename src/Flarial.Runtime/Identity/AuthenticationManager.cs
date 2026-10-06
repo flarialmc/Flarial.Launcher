@@ -116,7 +116,7 @@ static class AuthenticationManager
         if (RefreshTokenManager._.Get() is { } refreshToken)
         {
             RefreshTokenManager._.Remove();
-            FlarialClientBeta._.AccessToken = null;
+            FlarialClient.AccessToken = null;
 
             using FormUrlEncodedContent content = new(new Dictionary<string, string>
             {
@@ -154,7 +154,7 @@ static class AuthenticationManager
             return null;
 
         RefreshTokenManager._.Set(tuple.RefreshToken);
-        FlarialClientBeta._.AccessToken = tuple.AccessToken;
+        FlarialClient.AccessToken = tuple.AccessToken;
 
         return tuple.AccessToken;
     }

@@ -27,7 +27,7 @@ public sealed class FlarialClientRelease : FlarialClient<FlarialClientRelease>
         catch { return string.Empty; }
     }
 
-    private protected override async Task<bool> VerifyClientAsync()
+    private protected override async Task<bool> VerifyAsync()
     {
         var localHashTask = GetLocalHashAsync();
         var remoteHashTask = GetRemoteHashAsync();
@@ -39,7 +39,7 @@ public sealed class FlarialClientRelease : FlarialClient<FlarialClientRelease>
         return localHash.Equals(remoteHash, OrdinalIgnoreCase);
     }
 
-    private protected override async Task<bool> DownloadClientAsync<T>(T progress)
+    private protected override async Task<bool> OnDownloadAsync<T>(T progress)
     {
         await HttpService.DownloadAsync(DownloadUri, FileName, progress);
         return true;

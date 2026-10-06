@@ -25,6 +25,8 @@ partial class FlarialClient
         s_identifier = identifier;
     }
 
+    protected static void PostAnalytics() => _ = PostAnalyticsAsync();
+
     static async Task PostAnalyticsAsync()
     {
         var timestamp = $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
