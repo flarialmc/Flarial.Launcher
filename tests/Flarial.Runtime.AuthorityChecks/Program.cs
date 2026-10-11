@@ -1,15 +1,58 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Flarial.Runtime.Core;
+using Flarial.Runtime.Identity;
 
 if (args.Length is not (2 or 4) || !File.Exists(args[0]) ||
     args[1] is not ("production" or "preproduction") ||
     (args.Length == 4 && args[1] != "preproduction"))
     throw new ArgumentException("Expected a local PE DLL fixture, trusted authority, and optional canary pins.");
+
+var preproduction = args[1] == "preproduction";
+using (var request = AccountManager.CreateAccountRequest("local-account-sentinel"))
+{
+    var expectedUrl = preproduction
+        ? "https://flarial-api-site-preprod.ashanksundaram2.workers.dev/api/v1/launcher/account"
+        : "https://api.flarial.xyz/api/v2/account";
+    Require(request.RequestUri?.AbsoluteUri == expectedUrl,
+        "Launcher account request used the wrong trusted route.");
+    Require(request.Method == HttpMethod.Get && request.Content is null &&
+            request.Headers.Authorization is { Scheme: "Bearer", Parameter: "local-account-sentinel" },
+        "Launcher account request lost its bearer GET contract.");
+}
+
+var accessKey = preproduction ? "tester" : "beta";
+foreach (var (active, plus, expectedAccess) in new[]
+         { ("true", false, true), ("false", true, false) })
+{
+    var account = ReadAccountSnapshot(accessKey, active, plus);
+    Require(account.Username == "Account contract" && account.HasBetaAccess == expectedAccess &&
+            account.HasFlarialPlus == plus && await account.GetAvatarAsync() is null,
+        "Launcher account response lost its name or independent entitlement decisions.");
+}
+if (preproduction)
+{
+    AccountDetails account;
+    try { account = ReadAccountSnapshot("tester", "null", true); }
+    catch (Exception exception)
+    {
+        throw new InvalidOperationException(
+            "Unavailable preproduction tester decision rejected account login.", exception);
+    }
+    Require(account.Username == "Account contract" && !account.HasBetaAccess && account.HasFlarialPlus,
+        "Unavailable preproduction tester decision granted access or lost account data.");
+}
+else RequireAccountRejected("beta", "null");
+foreach (var malformed in new[] { "\"true\"", "1", "{}" })
+    RequireAccountRejected(accessKey, malformed);
+RequireAccountRejected(preproduction ? "beta" : "tester", "true");
+Console.WriteLine("Launcher account request and response contracts PASS.");
 
 var description = FlarialClient.CreateLaunchDescription("local-sentinel");
 using (var json = JsonDocument.Parse(description))
@@ -87,4 +130,29 @@ finally
 static void Require(bool condition, string message)
 {
     if (!condition) throw new InvalidOperationException(message);
+}
+
+static AccountDetails ReadAccountSnapshot(string accessKey, string active, bool plus)
+{
+    var plusJson = plus ? "true" : "false";
+    using var document = JsonDocument.Parse($$"""
+        {
+          "user": { "display_name": "Account contract", "avatar_url": null },
+          "entitlements": {
+            "{{accessKey}}": { "active": {{active}} },
+            "flarial_plus": { "active": {{plusJson}} }
+          }
+        }
+        """);
+    return AccountManager.ReadAccountResponse(document.RootElement);
+}
+
+static void RequireAccountRejected(string accessKey, string active)
+{
+    try { _ = ReadAccountSnapshot(accessKey, active, true); }
+    catch (Exception exception) when (exception is KeyNotFoundException or InvalidOperationException or JsonException)
+    {
+        return;
+    }
+    throw new InvalidOperationException("A missing or malformed selected account entitlement was accepted.");
 }

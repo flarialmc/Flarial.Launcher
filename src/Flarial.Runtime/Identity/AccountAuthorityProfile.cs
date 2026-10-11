@@ -9,7 +9,7 @@ public static class AccountAuthorityProfile
     public const string Name = "preproduction";
     public const string OAuthResource = "https://flarial-api-site-preprod.ashanksundaram2.workers.dev/api";
     public const string OAuthBase = "https://flarial-api-site-preprod.ashanksundaram2.workers.dev/api/auth/oauth2";
-    public const string AccountUrl = "https://flarial-api-site-preprod.ashanksundaram2.workers.dev/api/v2/account";
+    public const string AccountUrl = "https://flarial-api-site-preprod.ashanksundaram2.workers.dev/api/v1/launcher/account";
     public const string CredentialResource = "Flarial Launcher Preproduction";
 #else
     public static readonly bool IsPreproduction = false;
