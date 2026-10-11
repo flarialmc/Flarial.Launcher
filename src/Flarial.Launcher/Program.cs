@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Rendering.Composition;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using ReactiveUI.Avalonia;
 
 namespace Flarial.Launcher;
@@ -15,16 +16,25 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        using Mutex mutex = new(false, "54874D29-646C-4536-B6D1-8E05053BE00E", out var created);
+        var mutexName = AccountAuthorityProfile.IsPreproduction
+            ? "70E1D7E1-9BBF-4F69-9C03-6B378E0BEF16"
+            : "54874D29-646C-4536-B6D1-8E05053BE00E";
+        using Mutex mutex = new(false, mutexName, out var created);
         if (!created) return;
 
         var path = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        Environment.CurrentDirectory = Directory.CreateDirectory(Path.Combine(path, @"Flarial\Launcher")).FullName;
+        var profileDirectory = AccountAuthorityProfile.IsPreproduction
+            ? @"Flarial\Launcher.PreproductionCanary"
+            : @"Flarial\Launcher";
+        Environment.CurrentDirectory = Directory.CreateDirectory(Path.Combine(path, profileDirectory)).FullName;
 
         for (var index = 0; index < args.Length; index++)
             switch (args[index])
             {
                 case "--inject":
+                    // The legacy custom injector does not carry an account
+                    // authority marker or enforce a pinned DLL identity.
+                    if (AccountAuthorityProfile.IsPreproduction) return;
                     if (!(index + 1 < args.Length)) continue;
                     Injector.Launch(new(args[index + 1]));
                     return;

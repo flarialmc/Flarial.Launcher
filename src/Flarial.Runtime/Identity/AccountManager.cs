@@ -10,7 +10,7 @@ namespace Flarial.Runtime.Identity;
 
 public static class AccountManager
 {
-    const string AccountUri = "https://api.flarial.xyz/api/v2/account";
+    const string AccountUri = AccountAuthorityProfile.AccountUrl;
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
 

@@ -31,6 +31,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     readonly SegmentItem _customItem = new() { Title = "Custom", Tag = BuildType.Custom };
     readonly SegmentItem _releaseItem = new() { Title = "Release", Tag = BuildType.Release };
     readonly SegmentItem _betaItem = new() { Title = "Beta", Tag = BuildType.Beta, IsEnabled = false };
+    readonly SegmentItem _canaryItem = new() { Title = "Private canary", Tag = BuildType.PreproductionCanary };
 
     internal bool HasBetaAccess
     {
@@ -109,7 +110,9 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         _mainWindowViewModel = mainWindowViewModel;
         _settings = ((App)Application.Current!).Settings;
 
-        BuildTypes = [_releaseItem, _betaItem, _customItem];
+        BuildTypes = AccountAuthorityProfile.IsPreproduction
+            ? [_canaryItem]
+            : [_releaseItem, _betaItem, _customItem];
 
         switch (_settings.BuildType)
         {
@@ -124,6 +127,9 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
             case BuildType.Custom:
                 SelectedBuild = _customItem;
                 CustomDllSelected = true;
+                break;
+            case BuildType.PreproductionCanary when AccountAuthorityProfile.IsPreproduction:
+                SelectedBuild = _canaryItem;
                 break;
         }
 
@@ -181,6 +187,9 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     {
         if (item == null) return;
         var buildType = (BuildType)item.Tag!;
+
+        if (AccountAuthorityProfile.IsPreproduction != (buildType == BuildType.PreproductionCanary))
+            return;
 
         _settings.BuildType = buildType;
         CustomDllSelected = buildType is BuildType.Custom;

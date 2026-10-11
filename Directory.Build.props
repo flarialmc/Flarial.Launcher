@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <FlarialAccountAuthority Condition="'$(FlarialAccountAuthority)' == ''">Production</FlarialAccountAuthority>
+    <!-- The SDK otherwise excludes only the currently selected output tree.
+         Both profile trees must be excluded from default source globs. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);bin/**;obj/**</DefaultItemExcludes>
+    <BaseIntermediateOutputPath Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">obj/preproduction/</BaseIntermediateOutputPath>
+    <BaseOutputPath Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">bin/preproduction/</BaseOutputPath>
+  </PropertyGroup>
+</Project>

@@ -2,12 +2,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Launcher.Management;
 
 [JsonConverter(typeof(JsonStringEnumConverter<BuildType>))]
-public enum BuildType { Beta, Custom, Release }
+public enum BuildType { Beta, Custom, Release, PreproductionCanary }
 
 public sealed class AppSettings
 {
@@ -15,7 +16,8 @@ public sealed class AppSettings
 
     public bool PerformanceMode { get; set; } = false;
 
-    public BuildType BuildType { get; set; } = BuildType.Release;
+    public BuildType BuildType { get; set; } = AccountAuthorityProfile.IsPreproduction
+        ? BuildType.PreproductionCanary : BuildType.Release;
 
     public string? CustomDllPath
     {

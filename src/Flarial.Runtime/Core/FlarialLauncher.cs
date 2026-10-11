@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
+using Flarial.Runtime.Identity;
 using Windows.ApplicationModel;
 using Windows.Management.Deployment;
 using static Windows.Win32.PInvoke;
@@ -40,6 +41,7 @@ public static class FlarialLauncher
 
     public static async Task<bool> CheckForUpdatesAsync()
     {
+        if (AccountAuthorityProfile.IsPreproduction) return false;
         var version = await HttpService.GetJsonAsync<string>(LauncherVersionUri);
         return s_version is { } && version != s_version;
     }
@@ -59,6 +61,7 @@ public static class FlarialLauncher
 
     public static async Task DownloadAsync<T>(T progress) where T : IProgress<int>
     {
+        if (AccountAuthorityProfile.IsPreproduction) return;
         if (s_version is null) return;
         await HttpService.DownloadAsync(LauncherPackageUri, s_path, progress);
 

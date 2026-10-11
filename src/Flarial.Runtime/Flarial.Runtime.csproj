@@ -17,7 +17,35 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DeterministicSourcePaths>true</DeterministicSourcePaths>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <DefineConstants Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">$(DefineConstants);FLARIAL_ACCOUNT_PREPRODUCTION</DefineConstants>
   </PropertyGroup>
+
+  <Target Name="ValidateFlarialAccountAuthority" BeforeTargets="CoreCompile">
+    <Error Condition="'$(FlarialAccountAuthority)' != 'Production' and '$(FlarialAccountAuthority)' != 'Preproduction'"
+           Text="FlarialAccountAuthority must be Production or Preproduction." />
+  </Target>
+
+  <!-- These properties come only from a trusted build, never launcher settings. Empty values
+       deliberately leave the preproduction artifact gate closed. -->
+  <ItemGroup Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">
+    <_FlarialCanaryMetadata Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Flarial.PreproductionDllPath</_Parameter1>
+      <_Parameter2>$(FlarialPreproductionDllPath)</_Parameter2>
+    </_FlarialCanaryMetadata>
+    <_FlarialCanaryMetadata Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Flarial.PreproductionDllSha256</_Parameter1>
+      <_Parameter2>$(FlarialPreproductionDllSha256)</_Parameter2>
+    </_FlarialCanaryMetadata>
+  </ItemGroup>
+
+  <Target Name="GenerateFlarialCanaryMetadata" BeforeTargets="CoreCompile"
+          Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">
+    <WriteCodeFragment Language="C#"
+                       OutputFile="$(IntermediateOutputPath)FlarialCanaryMetadata.g.cs"
+                       AssemblyAttributes="@(_FlarialCanaryMetadata)">
+      <Output TaskParameter="OutputFile" ItemName="Compile" />
+    </WriteCodeFragment>
+  </Target>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.346" />

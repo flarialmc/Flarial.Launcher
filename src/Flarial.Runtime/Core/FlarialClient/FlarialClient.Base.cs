@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Core;
@@ -20,7 +21,8 @@ public abstract partial class FlarialClient<T> : FlarialClient where T : Flarial
 
     public override bool Launch()
     {
-        if (!IsRunning && Loader.Launch())
+        if (AccountAuthorityProfile.IsPreproduction) return false;
+        if (!IsRunning && LaunchTrusted(new ModificationLibrary(FileName)))
         {
             PostAnalytics();
             return true;
@@ -71,6 +73,7 @@ public abstract partial class FlarialClient
 
     public async Task<bool> DownloadAsync<T>(T progress) where T : IProgress<int>
     {
+        if (AccountAuthorityProfile.IsPreproduction) return false;
         if (await VerifyAsync())
             return true;
 

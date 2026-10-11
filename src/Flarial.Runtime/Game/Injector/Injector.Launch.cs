@@ -1,4 +1,5 @@
 using Flarial.Runtime.Unmanaged;
+using Flarial.Runtime.Identity;
 using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.System.Memory.PAGE_PROTECTION_FLAGS;
@@ -12,6 +13,7 @@ partial class Injector
 {
     public unsafe static bool Launch(ModificationLibrary library)
     {
+        if (AccountAuthorityProfile.IsPreproduction) return false;
         var path = library.AsPath();
 
         if (Minecraft.Launch() is not { } processId)

@@ -21,8 +21,8 @@ static class AuthenticationManager
     const string ClientId = "flarial-desktop";
     const string Scope = "openid profile entitlements offline_access";
 
-    const string ResourceUri = "https://flarial.xyz/api";
-    const string AuthenticateUri = $"{ResourceUri}/auth/oauth2";
+    const string ResourceUri = AccountAuthorityProfile.OAuthResource;
+    const string AuthenticateUri = AccountAuthorityProfile.OAuthBase;
 
     const string TokenUri = $"{AuthenticateUri}/token";
     const string RevokeUri = $"{AuthenticateUri}/revoke";

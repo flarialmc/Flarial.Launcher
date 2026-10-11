@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 using Windows.Win32.Foundation;
@@ -12,8 +13,22 @@ using static Windows.Win32.System.Threading.PROCESS_CREATION_FLAGS;
 
 namespace Flarial.Runtime.Core;
 
-partial class FlarialClient<T>
+partial class FlarialClient
 {
+    internal static bool LaunchTrusted(ModificationLibrary library) => Loader.Launch(library);
+
+    // Keep the token and its trusted authority marker in one production-owned
+    // handoff payload. The launcher never takes this marker from player settings.
+    internal static string CreateLaunchDescription(string? accessToken)
+    {
+        Dictionary<string, string?> description = new()
+        {
+            ["access_token"] = accessToken,
+            ["account_authority"] = AccountAuthorityProfile.Name,
+        };
+        return JsonService.Default.Write(description);
+    }
+
     static class Loader
     {
         static unsafe readonly delegate* unmanaged[Stdcall]<nuint, void> s_apc;
@@ -32,9 +47,9 @@ partial class FlarialClient<T>
             }
         }
 
-        internal unsafe static bool Launch()
+        internal unsafe static bool Launch(ModificationLibrary library)
         {
-            var imports = new ModificationLibrary(_.FileName).AsImports();
+            var imports = library.AsImports();
 
             if (Minecraft.Launch() is not { } processId)
                 return false;
@@ -64,8 +79,7 @@ partial class FlarialClient<T>
                         QueueUserAPC(s_apc, thread, (nuint)item);
                     }
 
-                    Dictionary<string, string?> description = new() { ["access_token"] = AccessToken };
-                    fixed (char* ptr = JsonService.Default.Write(description)) SetThreadDescription(thread, ptr);
+                    fixed (char* ptr = CreateLaunchDescription(AccessToken)) SetThreadDescription(thread, ptr);
 
                     ResumeThread(thread);
                     WaitForSingleObject(thread, INFINITE);

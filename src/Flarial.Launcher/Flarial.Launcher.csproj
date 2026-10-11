@@ -59,6 +59,21 @@
         <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
     </PropertyGroup>
 
+    <!-- A preproduction canary is an isolated, unpackaged local build. It must
+         never reuse the production MSIX identity or output directories. -->
+    <PropertyGroup Condition="'$(FlarialAccountAuthority)' == 'Preproduction'">
+        <WindowsPackageType>None</WindowsPackageType>
+        <PublishAppxPackage>false</PublishAppxPackage>
+        <GenerateAppxPackageOnBuild>false</GenerateAppxPackageOnBuild>
+    </PropertyGroup>
+
+    <Target Name="ValidateFlarialLauncherAuthority" BeforeTargets="CoreCompile">
+        <Error Condition="'$(FlarialAccountAuthority)' != 'Production' and '$(FlarialAccountAuthority)' != 'Preproduction'"
+               Text="FlarialAccountAuthority must be Production or Preproduction." />
+        <Error Condition="'$(FlarialAccountAuthority)' == 'Preproduction' and ('$(PublishAppxPackage)' == 'true' or '$(GenerateAppxPackageOnBuild)' == 'true')"
+               Text="Preproduction launcher must remain an unpackaged private build." />
+    </Target>
+
     <ItemGroup>
         <AvaloniaResource Include="Resources\**" />
         <Content Include="Assets\**\*.png" CopyToOutputDirectory="PreserveNewest" />

@@ -8,6 +8,7 @@ using Flarial.Launcher.Models;
 using Flarial.Launcher.Types;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
@@ -49,6 +50,15 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
         IsLaunching = true;
         try
         {
+            // BuildType is persisted user state, not an authority selector.
+            // A preproduction launcher can launch only its build-pinned canary.
+            if (AccountAuthorityProfile.IsPreproduction !=
+                (_settings.BuildType is BuildType.PreproductionCanary))
+            {
+                await LaunchFailureDialog._.ShowAsync();
+                return;
+            }
+
             var path = _settings.CustomDllPath;
             var beta = _settings.BuildType is BuildType.Beta;
             var release = _settings.BuildType is BuildType.Release;
@@ -83,6 +93,14 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             else if (!isRunning)
             {
                 await GameNotFoundDialog._.ShowAsync();
+                return;
+            }
+
+            if (AccountAuthorityProfile.IsPreproduction)
+            {
+                LauncherStatus = "Verifying private canary...";
+                if (!await Task.Run(PreproductionCanary.Launch))
+                    await LaunchFailureDialog._.ShowAsync();
                 return;
             }
 
