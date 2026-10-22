@@ -3,7 +3,6 @@ using Windows.Security.Credentials;
 
 namespace Flarial.Runtime.Services;
 
-[Obsolete("Use 'CredentialService' instead.", true)]
 abstract class PasswordVaultService<T> : PasswordVaultService where T : PasswordVaultService<T>, new()
 {
     private protected PasswordVaultService()
@@ -14,7 +13,6 @@ abstract class PasswordVaultService<T> : PasswordVaultService where T : Password
     internal static readonly T _ = new();
 }
 
-[Obsolete("Use 'CredentialService' instead.", true)]
 abstract class PasswordVaultService
 {
     private protected PasswordVaultService() { }
@@ -35,6 +33,7 @@ abstract class PasswordVaultService
             s_vault.Remove(credential);
     }
 
+    [Obsolete("Use 'CredentialService' instead.", true)]
     internal string? Get()
     {
         if (Retrieve() is { } credential)
@@ -45,6 +44,7 @@ abstract class PasswordVaultService
         return null;
     }
 
+    [Obsolete("Use 'CredentialService' instead.", true)]
     internal void Set(string value)
     {
         s_vault.Add(new()
