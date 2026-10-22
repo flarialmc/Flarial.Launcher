@@ -1,11 +1,20 @@
 using System;
 using Windows.Win32.Security.Credentials;
 using static Windows.Win32.PInvoke;
-using static Windows.Win32.Security.Credentials.CRED_FLAGS;
 using static Windows.Win32.Security.Credentials.CRED_PERSIST;
 using static Windows.Win32.Security.Credentials.CRED_TYPE;
 
 namespace Flarial.Runtime.Services;
+
+static class CredentialServiceExtensions
+{
+    extension(CredentialService @this)
+    {
+        internal void Remove() => @this.Delete();
+        internal string? Get() => @this.Read();
+        internal void Set(string value) => @this.Write(value);
+    }
+}
 
 abstract class CredentialService<T> : CredentialService where T : CredentialService<T>, new()
 {
@@ -23,7 +32,7 @@ unsafe abstract class CredentialService
     private protected abstract string UserName { get; }
     private protected abstract string TargetName { get; }
 
-    private protected void Write(string value)
+    internal void Write(string value)
     {
         fixed (char* blob = value)
         fixed (char* user = UserName)
@@ -45,7 +54,7 @@ unsafe abstract class CredentialService
         }
     }
 
-    private protected string? Read()
+    internal string? Read()
     {
         fixed (char* target = TargetName)
         {
@@ -65,7 +74,7 @@ unsafe abstract class CredentialService
         }
     }
 
-    private protected void Delete()
+    internal void Delete()
     {
         fixed (char* target = TargetName)
             CredDelete(target, CRED_TYPE_GENERIC, 0);
