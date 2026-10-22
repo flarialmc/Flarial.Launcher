@@ -3,29 +3,27 @@ using Windows.Security.Credentials;
 
 namespace Flarial.Runtime.Services;
 
-abstract class CredentialService<T> : CredentialService where T : CredentialService<T>, new()
+abstract class PasswordVaultService<T> : PasswordVaultService where T : PasswordVaultService<T>, new()
 {
-    internal static readonly T _ = new();
-
-    private protected CredentialService()
+    private protected PasswordVaultService()
     {
         if (_ is null) return;
         throw new InvalidOperationException();
     }
+    internal static readonly T _ = new();
 }
 
-abstract class CredentialService
+abstract class PasswordVaultService
 {
-    private protected CredentialService() { }
-
+    private protected PasswordVaultService() { }
     private protected abstract string Resource { get; }
-    private protected abstract string Username { get; }
+    private protected abstract string UserName { get; }
 
     static readonly PasswordVault s_vault = new();
 
     PasswordCredential? Retrieve()
     {
-        try { return s_vault.Retrieve(Resource, Username); }
+        try { return s_vault.Retrieve(Resource, UserName); }
         catch { return null; }
     }
 
@@ -45,13 +43,13 @@ abstract class CredentialService
         return null;
     }
 
-    internal void Set(string value)
+    internal void Set(string password)
     {
         s_vault.Add(new()
         {
-            Password = value,
+            Password = password,
             Resource = Resource,
-            UserName = Username
+            UserName = UserName
         });
     }
 }
