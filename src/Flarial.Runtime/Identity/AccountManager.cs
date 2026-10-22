@@ -64,7 +64,7 @@ public static class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            await AuthenticationManager.RevokeAsync();
+            AuthenticationManager.Revoke();
         }
         finally { s_semaphore.Release(); }
     }

@@ -110,18 +110,22 @@ static class AuthenticationManager
         return false;
     }
 
-    internal static async Task RevokeAsync()
+    static async Task RevokeRefreshTokenAsync(string? token)
     {
-        if (CredentialManager._.Read() is { } refreshToken)
+        using FormUrlEncodedContent content = new(new Dictionary<string, string?>
         {
-            using FormUrlEncodedContent content = new(new Dictionary<string, string>
-            {
-                ["client_id"] = ClientId,
-                ["token"] = refreshToken,
-                ["token_type_hint"] = RefreshToken,
-            });
-            using (await HttpService.PostAsync(RevokeUri, content)) { }
-        }
+            ["token"] = token,
+            ["client_id"] = ClientId,
+            ["token_type_hint"] = RefreshToken,
+        });
+        using (await HttpService.PostAsync(RevokeUri, content)) { }
+    }
+
+    internal static void Revoke()
+    {
+        var token = CredentialManager._.Read();
+        _ = RevokeRefreshTokenAsync(token);
+
         CredentialManager._.Delete();
         FlarialClient.AccessToken = null;
     }
@@ -130,7 +134,7 @@ static class AuthenticationManager
     {
         if (CredentialManager._.Read() is not { } refreshToken)
         {
-            CredentialManager._.Delete();
+            _ = AccountManager.LogoutAsync();
             return null;
         }
 
