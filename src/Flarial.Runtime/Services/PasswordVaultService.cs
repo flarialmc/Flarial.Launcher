@@ -43,11 +43,11 @@ abstract class PasswordVaultService
         return null;
     }
 
-    internal void Set(string password)
+    internal void Set(string value)
     {
         s_vault.Add(new()
         {
-            Password = password,
+            Password = value,
             Resource = Resource,
             UserName = UserName
         });

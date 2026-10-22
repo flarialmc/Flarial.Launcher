@@ -28,6 +28,10 @@ VirtualAllocEx
 VirtualFreeEx
 ResumeThread
 TerminateThread
+CredRead
+CredFree
+CredWrite
+CredDelete
 TD_ERROR_ICON
 SHOW_WINDOW_CMD
 IMAGE_DOS_HEADER
