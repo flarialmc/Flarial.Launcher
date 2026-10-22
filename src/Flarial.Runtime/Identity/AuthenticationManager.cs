@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -105,7 +104,7 @@ static class AuthenticationManager
     {
         if (await GetTokensAsync() is { } token)
         {
-            RefreshTokenManager._.Set(token.RefreshToken);
+            CredentialManager._.Write(token.RefreshToken);
             return true;
         }
         return false;
@@ -113,26 +112,27 @@ static class AuthenticationManager
 
     internal static async Task RevokeAsync()
     {
-        if (RefreshTokenManager._.Get() is { } refreshToken)
+        if (CredentialManager._.Read() is { } refreshToken)
         {
-            RefreshTokenManager._.Remove();
-            FlarialClient.AccessToken = null;
-
             using FormUrlEncodedContent content = new(new Dictionary<string, string>
             {
                 ["client_id"] = ClientId,
                 ["token"] = refreshToken,
                 ["token_type_hint"] = RefreshToken,
             });
-
             using (await HttpService.PostAsync(RevokeUri, content)) { }
         }
+        CredentialManager._.Delete();
+        FlarialClient.AccessToken = null;
     }
 
     internal static async Task<string?> AuthenticateSilentlyAsync()
     {
-        if (RefreshTokenManager._.Get() is not { } refreshToken)
+        if (CredentialManager._.Read() is not { } refreshToken)
+        {
+            CredentialManager._.Delete();
             return null;
+        }
 
         using FormUrlEncodedContent content = new(new Dictionary<string, string>
         {
@@ -153,7 +153,7 @@ static class AuthenticationManager
         if (await ParseTokensAsync(response) is not { } tuple)
             return null;
 
-        RefreshTokenManager._.Set(tuple.RefreshToken);
+        CredentialManager._.Write(tuple.RefreshToken);
         FlarialClient.AccessToken = tuple.AccessToken;
 
         return tuple.AccessToken;
