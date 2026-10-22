@@ -26,14 +26,7 @@ static class PackageService
 
     internal static Task AddAsync<T>(Uri packageUri, T progress) where T : IProgress<DeploymentProgress>
     {
-        var args = (packageUri, progress);
-
-        static void Action(in (Uri, T) args)
-        {
-            Add(args.Item1, args.Item2);
-        }
-
-        return Task.Run(Action, args);
+        return Task.Run(() => Add(packageUri, progress));
     }
 
     unsafe static void Add<T>(Uri packageUri, T progress) where T : IProgress<DeploymentProgress>
