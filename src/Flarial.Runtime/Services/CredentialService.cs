@@ -6,16 +6,6 @@ using static Windows.Win32.Security.Credentials.CRED_TYPE;
 
 namespace Flarial.Runtime.Services;
 
-static class CredentialServiceExtensions
-{
-    extension(CredentialService @this)
-    {
-        internal void Remove() => @this.Delete();
-        internal string? Get() => @this.Read();
-        internal void Set(string value) => @this.Write(value);
-    }
-}
-
 abstract class CredentialService<T> : CredentialService where T : CredentialService<T>, new()
 {
     private protected CredentialService()
