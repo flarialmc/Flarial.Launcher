@@ -20,7 +20,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 {
     [Reactive] string? _customDllPath = null;
     [Reactive] bool _customDllSelected = false;
-    
+
     [Reactive] bool _loginActive = true;
     [Reactive] bool _loginAvailable = false;
     [Reactive] bool _accountAvailable = false;
@@ -170,7 +170,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     async Task OnLogoutAsync()
     {
         HasBetaAccess = false;
-        await AccountManager.LogoutAsync();
+        AccountManager.Logout();
 
         Account.Logout();
         LoginAvailable = true;

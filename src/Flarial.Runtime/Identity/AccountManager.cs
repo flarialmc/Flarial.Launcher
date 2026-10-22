@@ -60,7 +60,7 @@ public static class AccountManager
         finally { s_semaphore.Release(); }
     }
 
-    public static async Task LogoutAsync()
+    static async Task LogoutAsync()
     {
         await s_semaphore.WaitAsync(); try
         {
@@ -68,4 +68,6 @@ public static class AccountManager
         }
         finally { s_semaphore.Release(); }
     }
+
+    public static void Logout() => _ = LogoutAsync();
 }

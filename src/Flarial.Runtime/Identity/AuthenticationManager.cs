@@ -134,7 +134,7 @@ static class AuthenticationManager
     {
         if (CredentialManager._.Read() is not { } refreshToken)
         {
-            _ = AccountManager.LogoutAsync();
+            AccountManager.Logout();
             return null;
         }
 
@@ -150,7 +150,7 @@ static class AuthenticationManager
 
         if (!response.IsSuccessStatusCode)
         {
-            _ = AccountManager.LogoutAsync();
+            AccountManager.Logout();
             return null;
         }
 
