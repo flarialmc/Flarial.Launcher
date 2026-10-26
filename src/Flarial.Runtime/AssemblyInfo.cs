@@ -1,8 +1,6 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
-using System.Threading.Tasks;
-using Flarial.Runtime.Services;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.System.Diagnostics.Debug.THREAD_ERROR_MODE;
 
@@ -14,15 +12,11 @@ using static Windows.Win32.System.Diagnostics.Debug.THREAD_ERROR_MODE;
 
 namespace Flarial.Runtime;
 
-sealed class AssemblyInfo : PasswordVaultService<AssemblyInfo>
+static class AssemblyInfo 
 {
     [ModuleInitializer]
     internal static void ModuleInitializer()
     {
         SetErrorMode(SEM_FAILCRITICALERRORS);
-        Task.Run(_.Remove);
     }
-
-    private protected override string UserName => "Discord";
-    private protected override string Resource => "Flarial Launcher";
 }
