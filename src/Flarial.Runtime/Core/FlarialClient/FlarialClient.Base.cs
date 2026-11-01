@@ -9,7 +9,6 @@ using Windows.Security.Cryptography;
 using Windows.System.Profile;
 using static Windows.Win32.PInvoke;
 
-
 namespace Flarial.Runtime.Core;
 
 public abstract partial class FlarialClient
