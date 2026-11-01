@@ -3,8 +3,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Flarial.Runtime.Services;
-using Windows.Security.Cryptography;
-using Windows.System.Profile;
 
 namespace Flarial.Runtime.Core;
 
@@ -15,15 +13,6 @@ partial class FlarialClient
 
     static readonly Uri s_uri;
     static readonly string s_identifier;
-
-    static FlarialClient()
-    {
-        var info = SystemIdentification.GetSystemIdForPublisher();
-        var identifier = CryptographicBuffer.EncodeToHexString(info.Id);
-
-        s_uri = new(AnalyticsUri);
-        s_identifier = identifier;
-    }
 
     protected static void PostAnalytics() => _ = PostAnalyticsAsync();
 

@@ -5,6 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
+using Windows.Security.Cryptography;
+using Windows.System.Profile;
+using static Windows.Win32.PInvoke;
+
 
 namespace Flarial.Runtime.Core;
 
@@ -17,27 +21,35 @@ public abstract partial class FlarialClient<T> : FlarialClient where T : Flarial
         if (_ is null) return;
         throw new InvalidOperationException();
     }
-
-    public override bool Launch()
-    {
-        if (!IsRunning && Loader.Launch())
-        {
-            PostAnalytics();
-            return true;
-        }
-        return false;
-    }
 }
 
 public abstract partial class FlarialClient
 {
+    unsafe static FlarialClient()
+    {
+        var info = SystemIdentification.GetSystemIdForPublisher();
+        var identifier = CryptographicBuffer.EncodeToHexString(info.Id);
+
+        s_uri = new(AnalyticsUri);
+        s_identifier = identifier;
+
+        fixed (char* moduleNamePtr = "Kernel32")
+        fixed (byte* procedureNamePtr = "LoadLibraryW"u8)
+        {
+            var module = GetModuleHandle(moduleNamePtr);
+            var address = GetProcAddress(module, new(procedureNamePtr));
+
+            s_apc = (delegate* unmanaged[Stdcall]<nuint, void>)(nint)address;
+            s_start = (delegate* unmanaged[Stdcall]<void*, uint>)(nint)address;
+        }
+    }
+
     const string ClassName = "Flarial Client";
 
     private protected abstract string HashName { get; }
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
 
-    public abstract bool Launch();
     private protected abstract Task<bool> VerifyAsync();
     private protected abstract Task<bool> OnDownloadAsync<T>(T progress) where T : IProgress<int>;
 
@@ -53,6 +65,16 @@ public abstract partial class FlarialClient
     {
         var json = await HttpService.GetJsonAsync<Dictionary<string, string>>(HashesUri);
         return json[HashName];
+    }
+
+    public bool Launch()
+    {
+        if (!IsRunning && Activate())
+        {
+            PostAnalytics();
+            return true;
+        }
+        return false;
     }
 
     public static bool IsRunning
