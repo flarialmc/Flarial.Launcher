@@ -61,7 +61,7 @@ public abstract partial class FlarialClient
     {
         if (!IsRunning && Activate())
         {
-            PostAnalytics();
+            _ = PostAnalyticsAsync();
             return true;
         }
         return false;

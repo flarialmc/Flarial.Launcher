@@ -13,9 +13,7 @@ partial class FlarialClient
 
     static readonly Uri s_uri;
     static readonly string s_identifier;
-
-    protected static void PostAnalytics() => _ = PostAnalyticsAsync();
-
+    
     static async Task PostAnalyticsAsync()
     {
         var timestamp = $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
