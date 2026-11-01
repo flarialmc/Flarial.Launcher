@@ -31,15 +31,16 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     readonly SegmentItem _customItem = new() { Title = "Custom", Tag = BuildType.Custom };
     readonly SegmentItem _releaseItem = new() { Title = "Release", Tag = BuildType.Release };
     readonly SegmentItem _betaItem = new() { Title = "Beta", Tag = BuildType.Beta, IsEnabled = false };
+    readonly SegmentItem _betaV3Item = new() { Title = "V3 Beta", Tag = BuildType.BetaV3, IsEnabled = false };
 
     internal bool HasBetaAccess
     {
         get;
         set
         {
-            if (SelectedBuild == _betaItem && !value)
+            if ((SelectedBuild == _betaItem || SelectedBuild == _betaV3Item) && !value)
                 SelectedBuild = _releaseItem;
-            _betaItem.IsEnabled = field = value;
+            _betaItem.IsEnabled = _betaV3Item.IsEnabled = field = value;
         }
     }
 
@@ -109,12 +110,16 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         _mainWindowViewModel = mainWindowViewModel;
         _settings = ((App)Application.Current!).Settings;
 
-        BuildTypes = [_releaseItem, _betaItem, _customItem];
+        BuildTypes = [_releaseItem, _betaItem, _betaV3Item, _customItem];
 
         switch (_settings.BuildType)
         {
             case BuildType.Beta:
                 SelectedBuild = _betaItem;
+                break;
+
+            case BuildType.BetaV3:
+                SelectedBuild = _betaV3Item;
                 break;
 
             case BuildType.Release:

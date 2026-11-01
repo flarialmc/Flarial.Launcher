@@ -50,11 +50,12 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
         try
         {
             var path = _settings.CustomDllPath;
-            var beta = _settings.BuildType is BuildType.Beta;
+            var betaV3 = _settings.BuildType is BuildType.BetaV3;
+            var beta = betaV3 || _settings.BuildType is BuildType.Beta;
             var release = _settings.BuildType is BuildType.Release;
 
             FlarialClient? client = null;
-            if (beta) client = FlarialClientBeta._;
+            if (beta) client = betaV3 ? FlarialClientBetaV3._ : FlarialClientBeta._;
             if (release) client = FlarialClientRelease._;
 
             if (!GamingServices.IsInstalled)
