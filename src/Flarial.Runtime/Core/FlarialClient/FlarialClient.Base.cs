@@ -12,17 +12,6 @@ using static Windows.Win32.PInvoke;
 
 namespace Flarial.Runtime.Core;
 
-public abstract partial class FlarialClient<T> : FlarialClient where T : FlarialClient<T>, new()
-{
-    public static readonly T _ = new();
-
-    private protected FlarialClient()
-    {
-        if (_ is null) return;
-        throw new InvalidOperationException();
-    }
-}
-
 public abstract partial class FlarialClient
 {
     unsafe static FlarialClient()

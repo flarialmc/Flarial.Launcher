@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -8,7 +7,7 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
 
-public sealed class FlarialClientRelease : FlarialClient<FlarialClientRelease>
+public sealed class FlarialClientRelease : FlarialClient.Stable<FlarialClientRelease>
 {
     const string DownloadUri = "https://cdn.flarial.xyz/dll/latest.dll";
 
