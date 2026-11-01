@@ -28,16 +28,42 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     public AvaloniaList<SegmentItem> BuildTypes { get; }
     public AccountModel Account => _mainWindowViewModel._account;
 
-    readonly SegmentItem _customItem = new() { Title = "Custom", Tag = BuildType.Custom };
-    readonly SegmentItem _releaseItem = new() { Title = "Release", Tag = BuildType.Release };
-    readonly SegmentItem _betaItem = new() { Title = "Beta", Tag = BuildType.Beta, IsEnabled = false };
+    readonly SegmentItem _customItem = new()
+    {
+        Title = "Custom",
+        Tag = BuildType.Custom
+    };
+
+    readonly SegmentItem _releaseItem = new()
+    {
+        Title = "Release",
+        Tag = BuildType.Release
+    };
+
+    readonly SegmentItem _betaItem = new()
+    {
+        Title = "Beta (v2)",
+        IsEnabled = false,
+        Tag = BuildType.Beta,
+    };
+
+    readonly SegmentItem _alphaItem = new()
+    {
+        Title = "Alpha (v3)",
+        IsEnabled = false,
+        Tag = BuildType.Beta,
+    };
 
     internal bool HasBetaAccess
     {
         get;
         set
         {
-            if (SelectedBuild == _betaItem && !value)
+            var isBeta = SelectedBuild == _betaItem;
+            var isAlpha = SelectedBuild == _alphaItem;
+            var hasBetaAccess = isBeta || isAlpha;
+
+            if (hasBetaAccess && !value)
                 SelectedBuild = _releaseItem;
             _betaItem.IsEnabled = field = value;
         }
@@ -109,12 +135,16 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         _mainWindowViewModel = mainWindowViewModel;
         _settings = ((App)Application.Current!).Settings;
 
-        BuildTypes = [_releaseItem, _betaItem, _customItem];
+        BuildTypes = [_releaseItem, _customItem, _betaItem, _alphaItem];
 
         switch (_settings.BuildType)
         {
             case BuildType.Beta:
                 SelectedBuild = _betaItem;
+                break;
+
+            case BuildType.Alpha:
+                SelectedBuild = _alphaItem;
                 break;
 
             case BuildType.Release:

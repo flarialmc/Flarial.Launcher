@@ -42,7 +42,11 @@ public sealed partial class HomeView : UserControl
                     Height = 50 * 0.8,
                     Cursor = s_cursor,
                     CornerRadius = new CornerRadius(5),
-                    Background = new ImageBrush { Stretch = Stretch.UniformToFill, Source = new Bitmap(stream) }
+                    Background = new ImageBrush
+                    {
+                        Source = new Bitmap(stream),
+                        Stretch = Stretch.UniformToFill,
+                    }
                 };
 
                 image.PointerPressed += OnPointerPressed;

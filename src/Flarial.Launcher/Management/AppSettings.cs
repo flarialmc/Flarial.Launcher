@@ -7,7 +7,7 @@ using Flarial.Runtime.Services;
 namespace Flarial.Launcher.Management;
 
 [JsonConverter(typeof(JsonStringEnumConverter<BuildType>))]
-public enum BuildType { Beta, Custom, Release }
+public enum BuildType { Beta, Alpha, Custom, Release }
 
 public sealed class AppSettings
 {
