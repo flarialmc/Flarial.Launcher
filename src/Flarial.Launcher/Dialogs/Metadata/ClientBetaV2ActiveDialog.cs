@@ -1,10 +1,10 @@
 namespace Flarial.Launcher.Dialogs.Metadata;
 
-sealed class ClientBetaActiveDialog : MessageDialog<ClientBetaActiveDialog>
+sealed class ClientBetaV2ActiveDialog : MessageDialog<ClientBetaV2ActiveDialog>
 {
-    protected override string Title => "⚠️ Client Beta Active";
+    protected override string Title => "⚠️ Client Beta (v2) Active";
 
-    protected override string Message => @"The client's beta has been selected.
+    protected override string Message => @"The client's beta (v2) has been selected.
 
 • These beta builds might be unstable and buggy.
 • The builds are only for feedback & testing purposes only.

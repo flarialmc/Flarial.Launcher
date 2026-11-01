@@ -2,7 +2,7 @@ using System;
 
 namespace Flarial.Runtime.Core;
 
-public sealed class FlarialClientAlpha : FlarialClient.Private<FlarialClientAlpha>
+public sealed class FlarialClientAlphaV3 : FlarialClient.Private<FlarialClientAlphaV3>
 {
     private protected override string FileName => "Flarial.Client.Alpha.dll";
     private protected override string HashName => throw new NotImplementedException();

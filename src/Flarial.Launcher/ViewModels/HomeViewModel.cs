@@ -50,13 +50,13 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
         try
         {
             var path = _settings.CustomDllPath;
-            var beta = _settings.BuildType is BuildType.Beta;
-            var alpha = _settings.BuildType is BuildType.Alpha;
+            var betaV2 = _settings.BuildType is BuildType.BetaV2;
+            var alphaV3 = _settings.BuildType is BuildType.AlphaV3;
             var release = _settings.BuildType is BuildType.Release;
 
             FlarialClient? client = null;
-            if (beta) client = FlarialClientBeta._;
-            if (alpha) client = FlarialClientAlpha._;
+            if (betaV2) client = FlarialClientBetaV2._;
+            if (alphaV3) client = FlarialClientAlphaV3._;
             if (release) client = FlarialClientRelease._;
 
             if (!GamingServices.IsInstalled)
@@ -108,7 +108,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
-            if (beta && !await ClientBetaActiveDialog._.ShowAsync())
+            if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
 
             LauncherStatus = "Verifying...";

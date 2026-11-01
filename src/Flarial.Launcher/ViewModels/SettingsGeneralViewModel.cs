@@ -40,18 +40,18 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         Tag = BuildType.Release
     };
 
-    readonly SegmentItem _betaItem = new()
+    readonly SegmentItem _betaV2Item = new()
     {
         Title = "Beta (v2)",
         IsEnabled = false,
-        Tag = BuildType.Beta,
+        Tag = BuildType.BetaV2,
     };
 
-    readonly SegmentItem _alphaItem = new()
+    readonly SegmentItem _alphaV3Item = new()
     {
         Title = "Alpha (v3)",
         IsEnabled = false,
-        Tag = BuildType.Alpha,
+        Tag = BuildType.AlphaV3,
     };
 
     internal bool HasBetaAccess
@@ -59,13 +59,17 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         get;
         set
         {
-            var isBeta = SelectedBuild == _betaItem;
-            var isAlpha = SelectedBuild == _alphaItem;
+            field = value;
+
+            var isBeta = SelectedBuild == _betaV2Item;
+            var isAlpha = SelectedBuild == _alphaV3Item;
             var hasBetaAccess = isBeta || isAlpha;
 
             if (hasBetaAccess && !value)
                 SelectedBuild = _releaseItem;
-            _betaItem.IsEnabled = field = value;
+
+            _betaV2Item.IsEnabled = value;
+            _alphaV3Item.IsEnabled = value;
         }
     }
 
@@ -135,16 +139,16 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         _mainWindowViewModel = mainWindowViewModel;
         _settings = ((App)Application.Current!).Settings;
 
-        BuildTypes = [_releaseItem, _customItem, _betaItem, _alphaItem];
+        BuildTypes = [_releaseItem, _customItem, _betaV2Item, _alphaV3Item];
 
         switch (_settings.BuildType)
         {
-            case BuildType.Beta:
-                SelectedBuild = _betaItem;
+            case BuildType.BetaV2:
+                SelectedBuild = _betaV2Item;
                 break;
 
-            case BuildType.Alpha:
-                SelectedBuild = _alphaItem;
+            case BuildType.AlphaV3:
+                SelectedBuild = _alphaV3Item;
                 break;
 
             case BuildType.Release:

@@ -1,6 +1,6 @@
 namespace Flarial.Runtime.Core;
 
-public sealed class FlarialClientBeta : FlarialClient.Private<FlarialClientBeta>
+public sealed class FlarialClientBetaV2 : FlarialClient.Private<FlarialClientBetaV2>
 {
     private protected override string HashName => "commitHash";
     private protected override string FileName => "Flarial.Client.Beta.dll";
