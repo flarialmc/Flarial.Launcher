@@ -17,10 +17,7 @@ public abstract partial class FlarialClient
     unsafe static FlarialClient()
     {
         var info = SystemIdentification.GetSystemIdForPublisher();
-        var identifier = CryptographicBuffer.EncodeToHexString(info.Id);
-
-        s_uri = new(AnalyticsUri);
-        s_identifier = identifier;
+        s_identifier = CryptographicBuffer.EncodeToHexString(info.Id);
 
         fixed (char* moduleNamePtr = "Kernel32")
         fixed (byte* procedureNamePtr = "LoadLibraryW"u8)

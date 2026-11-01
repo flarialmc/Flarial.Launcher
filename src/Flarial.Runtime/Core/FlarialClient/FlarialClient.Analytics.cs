@@ -11,16 +11,15 @@ partial class FlarialClient
     const string UserAgent = "Samsung Smart Fridge";
     const string AnalyticsUri = "https://api.flarial.xyz/api/v2/service/launcher/events/launch";
 
-    static readonly Uri s_uri;
     static readonly string s_identifier;
-    
+
     static async Task PostAnalyticsAsync()
     {
         var timestamp = $"{DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()}";
         var json = $"{{\"timestamp\":\"{timestamp}\",\"installId\":\"{s_identifier}\"}}";
 
         using StringContent content = new(json, Encoding.UTF8, "application/json");
-        using HttpRequestMessage request = new(HttpMethod.Post, s_uri) { Content = content };
+        using HttpRequestMessage request = new(HttpMethod.Post, AnalyticsUri) { Content = content };
 
         request.Headers.Add("User-Agent", UserAgent);
         request.Headers.Add("X-Flarial.Timestamp", timestamp);
