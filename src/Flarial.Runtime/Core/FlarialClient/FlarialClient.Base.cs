@@ -38,6 +38,7 @@ public abstract partial class FlarialClient
     private protected abstract string HashName { get; }
     private protected abstract string FileName { get; }
     private protected abstract string HashesUri { get; }
+    private protected abstract string DownloadUri { get; }
 
     private protected abstract Task<bool> VerifyAsync();
     private protected abstract Task<bool> OnDownloadAsync<T>(T progress) where T : IProgress<int>;

@@ -14,10 +14,8 @@ namespace Flarial.Runtime.Core;
 
 partial class FlarialClient
 {
-    public abstract class Unstable : FlarialClient
+    public abstract class Private : FlarialClient
     {
-        private protected abstract string DownloadUri { get; }
-
         private protected override async Task<bool> VerifyAsync()
         {
             /*

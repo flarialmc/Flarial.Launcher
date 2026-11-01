@@ -7,13 +7,12 @@ using static System.StringComparison;
 
 namespace Flarial.Runtime.Core;
 
-public sealed class FlarialClientRelease : FlarialClient.Stable<FlarialClientRelease>
+public sealed class FlarialClientRelease : FlarialClient.Public<FlarialClientRelease>
 {
-    const string DownloadUri = "https://cdn.flarial.xyz/dll/latest.dll";
-
     private protected override string HashName => "Release";
     private protected override string FileName => "Flarial.Client.Release.dll";
     private protected override string HashesUri => "https://cdn.flarial.xyz/dll_hashes.json";
+    private protected override string DownloadUri => "https://cdn.flarial.xyz/dll/latest.dll";
 
     async Task<string> GetLocalHashAsync()
     {
