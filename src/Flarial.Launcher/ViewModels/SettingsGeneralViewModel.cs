@@ -51,7 +51,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     {
         Title = "Alpha (v3)",
         IsEnabled = false,
-        Tag = BuildType.Beta,
+        Tag = BuildType.Alpha,
     };
 
     internal bool HasBetaAccess
