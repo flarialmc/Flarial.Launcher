@@ -108,6 +108,9 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
+            if (alphaV3 && !await ClientAlphaV3ActiveDialog._.ShowAsync())
+                return;
+
             if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
 

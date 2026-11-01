@@ -1,6 +1,6 @@
 namespace Flarial.Launcher.Dialogs.Metadata;
 
-sealed class ClientAlphaV2ActiveDialog : MessageDialog<ClientAlphaV2ActiveDialog>
+sealed class ClientAlphaV3ActiveDialog : MessageDialog<ClientAlphaV3ActiveDialog>
 {
     protected override string Title => "⚠️ Client Alpha (v3) Active";
 
