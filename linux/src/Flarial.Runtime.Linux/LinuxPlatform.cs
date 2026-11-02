@@ -14,6 +14,11 @@ public static class LinuxPlatform
     /// <summary>UI hook for backend messages (set by the launcher; shown as a notification).</summary>
     public static Action<string>? Notify { get; set; }
 
+    public static void Log(string message)
+    {
+        try { System.IO.Directory.CreateDirectory(Paths.Logs); System.IO.File.AppendAllText(System.IO.Path.Combine(Paths.Logs, "launcher.log"), $"{DateTime.Now:s} {message}\n"); } catch { }
+    }
+
     /// <summary>Dev checks (--selftest-engine / --selftest-xodus); returns the exit code.</summary>
     public static System.Threading.Tasks.Task<int> SelfTestAsync(string name) => name switch
     {

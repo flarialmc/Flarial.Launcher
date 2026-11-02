@@ -42,6 +42,7 @@ Exception: {1}
         var version = FlarialLauncher.Version;
 
         var exception = (Exception)args.ExceptionObject;
+        Flarial.Runtime.Linux.LinuxPlatform.Log($"launcher crashed ({version}): {exception}");
         var information = exception.StackTrace?.Trim();
 
         while (exception.InnerException is { })
@@ -66,4 +67,4 @@ Exception: {1}
 
         Environment.Exit(1);
     }
-}
+}

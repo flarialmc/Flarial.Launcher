@@ -108,6 +108,16 @@ public sealed class LinuxGameService : IGameService
     // ---- install
     public async Task InstallAsync(VersionItem version, string uri, Action<int, bool> progress)
     {
+        try { await InstallCoreAsync(version, uri, progress); }
+        catch (Exception e)
+        {
+            LinuxPlatform.Log($"install {version.Version} failed: {e}");
+            throw;
+        }
+    }
+
+    async Task InstallCoreAsync(VersionItem version, string uri, Action<int, bool> progress)
+    {
         if (!Backend.Xodus.IsLoggedIn) throw new InvalidOperationException("Sign in to your Microsoft account in Settings > Accounts to download Minecraft.");
         var ct = CancellationToken.None;
         var engine = Backend.Engine;

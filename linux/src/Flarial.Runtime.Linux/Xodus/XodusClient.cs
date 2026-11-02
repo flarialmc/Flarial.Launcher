@@ -367,6 +367,8 @@ internal sealed partial class XodusClient : IXodus
             if (heard.Elapsed > limit && !p.HasExited) { tail.Add(spoke ? "Nothing reached the download for 3 minutes; attempt stopped." : "xodus-cli did not respond (is the Microsoft account signed in?); attempt stopped."); Kill(p); }
         }
         await pump;
+        if (tail.LastOrDefault() is { } why && why.EndsWith("attempt stopped.")) log.WriteLine(why);
+        log.WriteLine($"== exit {p.ExitCode}, installed={IsInstalled(dest)}");
         ct.ThrowIfCancellationRequested();
         return (p.ExitCode, tail);
     }
