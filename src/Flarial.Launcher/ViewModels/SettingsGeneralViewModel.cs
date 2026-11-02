@@ -111,7 +111,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     public ReactiveCommand<RxVoid, RxVoid> Open { get; }
     public ReactiveCommand<RxVoid, RxVoid> Login { get; }
     public ReactiveCommand<RxVoid, RxVoid> Logout { get; }
-    public ReactiveCommand<RxVoid, RxVoid> OpenClientFolder { get; }
+    public ReactiveCommand<RxVoid, RxVoid> OpenClientV2Folder { get; }
     public ReactiveCommand<RxVoid, RxVoid> OpenLauncherFolder { get; }
 
     async Task OnOpenAsync()
@@ -129,7 +129,11 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 
     void OnOpenLauncherFolder() => NativeMethods.ShellExecute(".");
 
-    void OnOpenClientFolder() => NativeMethods.ShellExecute(Directory.CreateDirectory(@"..\Client").FullName);
+    void OnOpenClientV2Folder()
+    {
+        var directory = Directory.CreateDirectory(@"..\Client");
+        NativeMethods.ShellExecute(directory.FullName);
+    }
 
     readonly AppSettings _settings;
     readonly MainWindowViewModel _mainWindowViewModel;
@@ -168,7 +172,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         Open = ReactiveCommand.CreateFromTask(OnOpenAsync);
         Login = ReactiveCommand.CreateFromTask(OnLoginAsync);
         Logout = ReactiveCommand.CreateFromTask(OnLogoutAsync);
-        OpenClientFolder = ReactiveCommand.Create(OnOpenClientFolder);
+        OpenClientV2Folder = ReactiveCommand.Create(OnOpenClientV2Folder);
         OpenLauncherFolder = ReactiveCommand.Create(OnOpenLauncherFolder);
     }
 

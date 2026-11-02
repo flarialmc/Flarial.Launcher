@@ -75,7 +75,7 @@
                     </Grid>
 
                     <UniformGrid Rows="1" ColumnSpacing="10">
-                        <Button Command="{Binding OpenClientFolder}" Classes="GenericButton" CornerRadius="7.5" Content="Open Client Folder" FontSize="16" />
+                        <Button Command="{Binding OpenClientV2Folder}" Classes="GenericButton" CornerRadius="7.5" Content="Open Client (v2) Folder" FontSize="16" />
                         <Button Command="{Binding OpenLauncherFolder}" Classes="GenericButton" CornerRadius="7.5" Content="Open Launcher Folder" FontSize="16" />
                     </UniformGrid>
 
