@@ -7,6 +7,7 @@ sealed class ClientAlphaV3ActiveDialog : MessageDialog<ClientAlphaV3ActiveDialog
     protected override string Message => @"The client's alpha (v3) has been selected.
 
 • These alpha builds might be unstable and buggy.
+• Please note, only 26.52 is supported at the moment.
 • The builds are only for feedback & testing purposes only.
 
 If you need help, join our Discord.";
