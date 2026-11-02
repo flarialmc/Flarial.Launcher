@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ using Flarial.Runtime.Unmanaged;
 using ReactiveUI;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
+using static System.Environment;
+using static System.Environment.SpecialFolder;
 
 namespace Flarial.Launcher.ViewModels;
 
@@ -36,7 +39,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
 
     readonly SegmentItem _releaseItem = new()
     {
-        Title = "Release",
+        Title = "Release (v2)",
         Tag = BuildType.Release
     };
 
@@ -112,6 +115,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     public ReactiveCommand<RxVoid, RxVoid> Login { get; }
     public ReactiveCommand<RxVoid, RxVoid> Logout { get; }
     public ReactiveCommand<RxVoid, RxVoid> OpenClientV2Folder { get; }
+    public ReactiveCommand<RxVoid, RxVoid> OpenClientV3Folder { get; }
     public ReactiveCommand<RxVoid, RxVoid> OpenLauncherFolder { get; }
 
     async Task OnOpenAsync()
@@ -132,6 +136,14 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
     void OnOpenClientV2Folder()
     {
         var directory = Directory.CreateDirectory(@"..\Client");
+        NativeMethods.ShellExecute(directory.FullName);
+    }
+
+    static readonly string s_alpha = Path.Combine(GetFolderPath(ApplicationData), "flarial");
+
+    void OnOpenClientV3Folder()
+    {
+        var directory = Directory.CreateDirectory(s_alpha);
         NativeMethods.ShellExecute(directory.FullName);
     }
 
@@ -173,6 +185,7 @@ public sealed partial class SettingsGeneralViewModel : ViewModelBase
         Login = ReactiveCommand.CreateFromTask(OnLoginAsync);
         Logout = ReactiveCommand.CreateFromTask(OnLogoutAsync);
         OpenClientV2Folder = ReactiveCommand.Create(OnOpenClientV2Folder);
+        OpenClientV3Folder = ReactiveCommand.Create(OnOpenClientV3Folder);
         OpenLauncherFolder = ReactiveCommand.Create(OnOpenLauncherFolder);
     }
 
