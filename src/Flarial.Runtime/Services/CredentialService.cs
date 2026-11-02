@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel;
+using System.Runtime.InteropServices;
 using Windows.Win32.Security.Credentials;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.Security.Credentials.CRED_PERSIST;
@@ -40,7 +42,8 @@ unsafe abstract class CredentialService
                 Persist = CRED_PERSIST_LOCAL_MACHINE,
             };
 
-            CredWrite(&credential, 0);
+            if (!CredWrite(&credential, 0))
+                throw new Win32Exception(Marshal.GetLastWin32Error());
         }
     }
 
