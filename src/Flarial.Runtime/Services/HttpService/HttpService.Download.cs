@@ -22,29 +22,40 @@ static partial class HttpService
                 response.EnsureSuccessStatusCode();
 
                 using var destination = File.Create(path);
-                using var source = await response.Content.ReadAsStreamAsync();
-
-                int count = 0;
-                double value = 0;
-
-                var buffer = new byte[s_length];
-                var length = response.Content.Headers.ContentLength ?? 0;
-
-                while ((count = await source.ReadAsync(buffer)) != 0)
-                {
-                    var memory = buffer.AsMemory(0, count);
-                    await destination.WriteAsync(memory);
-
-                    if (length <= 0)
-                        continue;
-
-                    var arg = value += count;
-                    arg = arg / length * 100;
-
-                    progress.Report((int)arg);
-                }
+                await response.CopyToAsync(destination, long.MaxValue, progress);
             }
             catch { try { File.Delete(path); } catch { } throw; }
+        }
+
+        internal async Task CopyToAsync(Stream destination, long maximum, IProgress<int>? progress = null)
+        {
+            var length = response.Content.Headers.ContentLength ?? 0;
+
+            if (length > maximum)
+                throw new InvalidDataException("Response exceeds the download limit.");
+
+            using var source = await response.Content.ReadAsStreamAsync();
+
+            int count = 0;
+            long received = 0;
+
+            var buffer = new byte[s_length];
+
+            while ((count = await source.ReadAsync(buffer)) != 0)
+            {
+                if (count > maximum - received)
+                    throw new InvalidDataException("Response exceeds the download limit.");
+
+                var memory = buffer.AsMemory(0, count);
+                await destination.WriteAsync(memory);
+
+                received += count;
+
+                if (length <= 0 || progress is null)
+                    continue;
+
+                progress.Report((int)((double)received / length * 100));
+            }
         }
     }
 }

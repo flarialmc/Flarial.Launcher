@@ -20,18 +20,18 @@ partial class FlarialClient
                 - Somewhat "efficient" over an actual hash when updating.
             */
 
-            var hash = $"_{await GetRemoteHashAsync()}_"; unsafe
+            return HasCommitExport(FileName, await GetRemoteHashAsync());
+        }
+
+        private protected static unsafe bool HasCommitExport(string path, string hash)
+        {
+            fixed (byte* ptr = Encoding.UTF8.GetBytes($"_{hash}_\0"))
             {
-                fixed (byte* ptr = Encoding.UTF8.GetBytes(hash))
-                {
-                    var path = Path.GetFullPath(FileName);
+                if (DONT_RESOLVE_DLL_REFERENCES.Open(Path.GetFullPath(path)) is not { } module)
+                    return false;
 
-                    if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
-                        return false;
-
-                    using (module)
-                        return !GetProcAddress(module, new(ptr)).IsNull;
-                }
+                using (module)
+                    return !GetProcAddress(module, new(ptr)).IsNull;
             }
         }
 
