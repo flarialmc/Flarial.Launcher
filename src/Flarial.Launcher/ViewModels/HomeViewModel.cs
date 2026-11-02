@@ -108,6 +108,12 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
+            if (alphaV3 && !_mainWindowViewModel.SettingsViewModel.SettingsGeneralViewModel.HasBetaAccess)
+            {
+                await ClientAlphaV3AccessDialog._.ShowAsync();
+                return;
+            }
+
             if (alphaV3 && !await ClientAlphaV3ActiveDialog._.ShowAsync())
                 return;
 
@@ -117,7 +123,15 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             LauncherStatus = "Verifying...";
             if (!await client.DownloadAsync(this))
             {
-                await ClientUpdateFailureDialog._.ShowAsync();
+                var failure = alphaV3 ? FlarialClientAlphaV3._.Failure : default;
+
+                if (failure is FlarialClientAlphaV3Failure.Unavailable)
+                    await ClientAlphaV3UnavailableDialog._.ShowAsync();
+                else if (failure is FlarialClientAlphaV3Failure.Unauthorized)
+                    await ClientAlphaV3AccessDialog._.ShowAsync();
+                else
+                    await ClientUpdateFailureDialog._.ShowAsync();
+
                 return;
             }
 

@@ -12,6 +12,11 @@ static partial class HttpService
         return s_client.SendAsync(request, ResponseHeadersRead);
     }
 
+    internal static Task<HttpResponseMessage> SendWithoutRedirectsAsync(HttpRequestMessage request)
+    {
+        return s_directClient.SendAsync(request, ResponseHeadersRead);
+    }
+
     internal static Task<HttpResponseMessage> PostAsync(string uri, HttpContent content)
     {
         return s_client.PostAsync(uri, content);
