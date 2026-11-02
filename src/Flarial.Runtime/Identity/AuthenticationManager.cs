@@ -64,7 +64,7 @@ static class AuthenticationManager
         finally { listener.Stop(); }
     }
 
-    static async Task<(string AccessToken, string RefreshToken)?> ParseTokensAsync(HttpResponseMessage response)
+    static async Task<(string AccessToken, string RefreshToken)> ParseTokensAsync(HttpResponseMessage response)
     {
         using var stream = await response.Content.ReadAsStreamAsync();
         using var document = await JsonDocument.ParseAsync(stream);
@@ -95,7 +95,7 @@ static class AuthenticationManager
         });
 
         using var response = await HttpService.PostAsync(TokenUri, content);
-        if (!response.IsSuccessStatusCode) return null;
+        response.EnsureSuccessStatusCode();
 
         return await ParseTokensAsync(response);
     }
@@ -147,16 +147,9 @@ static class AuthenticationManager
         });
 
         using var response = await HttpService.PostAsync(TokenUri, content);
+        response.EnsureSuccessStatusCode();
 
-        if (!response.IsSuccessStatusCode)
-        {
-            AccountManager.Logout();
-            return null;
-        }
-
-        if (await ParseTokensAsync(response) is not { } tuple)
-            return null;
-
+        var tuple = await ParseTokensAsync(response);
         CredentialManager._.Write(tuple.RefreshToken);
         FlarialClient.AccessToken = tuple.AccessToken;
 

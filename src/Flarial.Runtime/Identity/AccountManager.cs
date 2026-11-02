@@ -34,7 +34,7 @@ public static class AccountManager
             request.Headers.Authorization = new("Bearer", accessToken);
 
             using var response = await HttpService.SendAsync(request);
-            if (!response.IsSuccessStatusCode) return null;
+            response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var document = await JsonDocument.ParseAsync(stream);
