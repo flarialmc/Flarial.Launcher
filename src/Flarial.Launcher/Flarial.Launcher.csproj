@@ -7,7 +7,7 @@
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
 
-        <NoWarn>IL2026,IL2104</NoWarn>
+        <NoWarn>IL2104</NoWarn>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
