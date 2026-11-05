@@ -18,8 +18,8 @@ namespace Flarial.Launcher.ViewModels;
 public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 {
     [Reactive] bool _isLaunching = true;
-    [Reactive] string _launcherStatus = "Preparing...";
     [Reactive] string _launcherVersion = FlarialLauncher.Version;
+    [Reactive] string _launcherStatus = "Connecting to services...";
 
     [Reactive] string _gameVersion = "0.0.0";
     [Reactive] IImmutableSolidColorBrush _gameVersionColor = Brushes.Gray;
@@ -98,7 +98,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                     return;
                 }
 
-                LauncherStatus = "Launching...";
+                LauncherStatus = "Launching the game...";
                 if (!await Task.Run(() => Injector.Launch(library)))
                 {
                     await LaunchFailureDialog._.ShowAsync();
@@ -114,7 +114,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
 
-            LauncherStatus = "Verifying...";
+            LauncherStatus = "Checking client updates...";
             if (!await client.DownloadAsync(this))
             {
                 await ClientUpdateFailureDialog._.ShowAsync();
@@ -127,7 +127,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
-            LauncherStatus = "Launching...";
+            LauncherStatus = "Launching the client...";
             if (!await Task.Run(client.Launch))
             {
                 await LaunchFailureDialog._.ShowAsync();
@@ -141,7 +141,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
         }
     }
 
-    public void Report(int value) => LauncherStatus = $"Downloading... {value}%";
+    public void Report(int value) => LauncherStatus = $"Downloading client update... {value}%";
 
     public void OnPackageStatusChanged()
     {
