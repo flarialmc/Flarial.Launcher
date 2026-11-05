@@ -16,7 +16,6 @@ static class NativeProcessTokenExtensions
     }
 }
 
-
 unsafe readonly struct NativeProcessToken : IDisposable
 {
     readonly HANDLE _handle;
