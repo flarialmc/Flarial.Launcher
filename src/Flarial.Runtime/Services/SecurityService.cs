@@ -29,7 +29,7 @@ static class SecurityService
 
         using (process)
         {
-            if ((TOKEN_QUERY | TOKEN_QUERY_SOURCE).Open(process) is not { } token)
+            if (TOKEN_QUERY.Open(process) is not { } token)
                 return null;
 
             using (token)
