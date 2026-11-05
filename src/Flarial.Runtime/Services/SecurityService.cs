@@ -1,8 +1,5 @@
-using System;
 using System.Runtime.InteropServices;
 using Flarial.Runtime.Unmanaged;
-using Windows.UI.Text;
-using Windows.Win32.Foundation;
 using Windows.Win32.Security;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.Security.TOKEN_ACCESS_MASK;
