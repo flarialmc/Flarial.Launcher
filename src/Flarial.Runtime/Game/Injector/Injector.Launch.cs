@@ -1,3 +1,5 @@
+using Flarial.Runtime.Exceptions;
+using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 using Windows.Win32.Foundation;
 using static Windows.Win32.PInvoke;
@@ -16,6 +18,9 @@ partial class Injector
 
         if (Minecraft.Launch() is not { } processId)
             return false;
+
+        if (!SecurityService.IsProcessElevated(processId))
+            throw new MinecraftElevatedException();
 
         if (PROCESS_ALL_ACCESS.Open(processId) is not { } process)
             return false;

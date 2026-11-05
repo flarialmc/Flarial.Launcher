@@ -7,6 +7,8 @@ ShellExecute
 GetPackageFamilyName
 OpenProcess
 GetCurrentProcessId
+GetTokenInformation
+OpenProcessToken
 CreateEvent
 SetEvent
 WTSEnumerateProcessesEx
@@ -18,6 +20,8 @@ CompareStringOrdinal
 FindWindowEx
 GetWindowThreadProcessId
 SwitchToThisWindow
+GetSidSubAuthority
+GetSidSubAuthorityCount
 CreateRemoteThread
 QueueUserAPC
 LoadLibraryEx
@@ -44,3 +48,5 @@ PACKAGE_FAMILY_NAME_MAX_LENGTH
 WTS_CURRENT_SESSION
 WTS_CURRENT_SERVER_HANDLE
 WTS_PROCESS_INFOW
+MANDATORY_LEVEL
+TOKEN_MANDATORY_LABEL

@@ -97,7 +97,7 @@
             <!--Center Content and Buttons-->
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
                 <TextBlock Name="GreetingLabel" Margin="0,0,0,0" Text="Welcome!" HorizontalAlignment="Center" FontSize="28" Foreground="White"/>
-                <TextBlock Margin="0,0,0,0" Text="{Binding LauncherStatus}" HorizontalAlignment="Center" FontSize="18" Foreground="DarkGray" />
+                <TextBlock Margin="0,0,0,0" Text="{Binding LauncherStatus}" HorizontalAlignment="Center" FontSize="18" Foreground="LightGray" />
                 <VisualLayerManager>
                     <spotlightDecorator:SpotlightDecorator SpotlightColor="#9f9f9f" SpotlightRadius="120">
                         <StackPanel Background="Transparent">

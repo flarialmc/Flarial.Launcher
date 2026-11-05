@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
@@ -23,6 +25,9 @@ partial class FlarialClient
 
         if (Minecraft.Launch() is not { } processId)
             return false;
+
+        if (!SecurityService.IsProcessElevated(processId))
+            throw new MinecraftElevatedException();
 
         if (PROCESS_ALL_ACCESS.Open(processId) is not { } process)
             return false;
