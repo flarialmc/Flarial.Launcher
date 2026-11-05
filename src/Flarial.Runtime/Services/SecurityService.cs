@@ -1,10 +1,9 @@
 using System;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Flarial.Runtime.Unmanaged;
+using Windows.UI.Text;
 using Windows.Win32.Foundation;
 using Windows.Win32.Security;
-using Windows.Win32.System.Threading;
 using static Windows.Win32.PInvoke;
 using static Windows.Win32.Security.TOKEN_ACCESS_MASK;
 using static Windows.Win32.Security.TOKEN_INFORMATION_CLASS;
@@ -14,49 +13,50 @@ namespace Flarial.Runtime.Services;
 
 static class SecurityService
 {
-    static readonly MANDATORY_LEVEL s_level = GetProcessIntegrity(GetCurrentProcessId());
+    static readonly uint? s_level = GetProcessIntegrity(GetCurrentProcessId());
 
     internal static bool IsProcessElevated(uint processId)
     {
-        return GetProcessIntegrity(processId) <= s_level;
+        if (GetProcessIntegrity(processId) is { } level)
+            return s_level is { } && s_level < level;
+        return true;
     }
 
-    static unsafe MANDATORY_LEVEL GetProcessIntegrity(uint processId)
+    static uint? GetProcessIntegrity(uint processId)
     {
         if (PROCESS_QUERY_LIMITED_INFORMATION.Open(processId) is not { } process)
-            return MANDATORY_LEVEL.MandatoryLevelUntrusted;
+            return null;
 
         using (process)
         {
-            HANDLE token = new();
-            try
-            {
-                if (!OpenProcessToken(process, TOKEN_QUERY_SOURCE, &token))
-                    return MANDATORY_LEVEL.MandatoryLevelUntrusted;
+            if ((TOKEN_QUERY | TOKEN_QUERY_SOURCE).Open(process) is not { } token)
+                return null;
 
-                uint length = 0;
-                GetTokenInformation(token, TokenIntegrityLevel, null, 0, &length);
+            using (token)
+                return GetProcessIntegrity(token);
+        }
+    }
 
-                var info = NativeMemory.Alloc<TOKEN_MANDATORY_LABEL>(length);
-                try
-                {
-                    if (!GetTokenInformation(token, TokenIntegrityLevel, info, length, &length))
-                        return MANDATORY_LEVEL.MandatoryLevelUntrusted;
+    static unsafe uint? GetProcessIntegrity(in NativeProcessToken token)
+    {
+        uint length = 0;
+        GetTokenInformation(token, TokenIntegrityLevel, null, 0, &length);
 
-                    var authority = GetSidSubAuthorityCount(info->Label.Sid) - 1;
-                    var level = *GetSidSubAuthority(info->Label.Sid, *authority) >> 12;
+        var info = NativeMemory.Alloc<TOKEN_MANDATORY_LABEL>(length);
+        try
+        {
+            if (!GetTokenInformation(token, TokenIntegrityLevel, info, length, &length))
+                return null;
 
-                    return (MANDATORY_LEVEL)level;
-                }
-                finally
-                {
-                    NativeMemory.Free(info);
-                }
-            }
-            finally
-            {
-                CloseHandle(token);
-            }
+            var count = (uint*)GetSidSubAuthorityCount(info->Label.Sid);
+            if (count == null || *count < 0) return null;
+
+            var rid = GetSidSubAuthority(info->Label.Sid, (*count) - 1);
+            return rid != null ? *rid : null;
+        }
+        finally
+        {
+            NativeMemory.Free(info);
         }
     }
 }

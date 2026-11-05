@@ -19,7 +19,7 @@ partial class Injector
         if (Minecraft.Launch() is not { } processId)
             return false;
 
-        if (!SecurityService.IsProcessElevated(processId))
+        if (SecurityService.IsProcessElevated(processId))
             throw new MinecraftElevatedException();
 
         if (PROCESS_ALL_ACCESS.Open(processId) is not { } process)
