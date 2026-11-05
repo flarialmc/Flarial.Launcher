@@ -11,10 +11,11 @@ using Flarial.Runtime.Core;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
+using Windows.Management.Deployment;
 
 namespace Flarial.Launcher.ViewModels;
 
-public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
+public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>, IProgress<DeploymentProgress>
 {
     readonly SemaphoreSlim _semaphore = new(1, 1);
 
@@ -61,6 +62,11 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
         HomeViewModel.LauncherStatus = $"Downloading launcher update... {value}%";
     }
 
+    public void Report(DeploymentProgress value)
+    {
+        HomeViewModel.LauncherStatus = $"Installing launcher update... {value}%";
+    }
+
     async Task LoginWithAccountAsync()
     {
         HomeViewModel.LauncherStatus = "Logging into services...";
@@ -80,7 +86,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>
         if (await FlarialLauncher.CheckForUpdatesAsync() && (_settings.AutomaticUpdates || await LauncherUpdateAvailableDialog._.ShowAsync()))
         {
             HomeViewModel.LauncherStatus = "Downloading launcher update...";
-            await FlarialLauncher.DownloadAsync(this);
+            await FlarialLauncher.UpdateAsync(this);
             return;
         }
 

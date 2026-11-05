@@ -114,7 +114,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
 
-            LauncherStatus = "Checking client updates...";
+            LauncherStatus = "Checking client update...";
             if (!await client.DownloadAsync(this))
             {
                 await ClientUpdateFailureDialog._.ShowAsync();

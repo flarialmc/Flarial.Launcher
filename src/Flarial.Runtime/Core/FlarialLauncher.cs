@@ -44,25 +44,12 @@ public static class FlarialLauncher
         return s_version is { } && version != s_version;
     }
 
-    readonly struct OnDownloadAsync<T>(T progress) : IProgress<int>, IProgress<DeploymentProgress> where T : IProgress<int>
+    public static async Task UpdateAsync<T>(T progress) where T : IProgress<int>, IProgress<DeploymentProgress>
     {
-        public void Report(int value)
-        {
-            progress.Report(value);
-        }
-
-        public void Report(DeploymentProgress value)
-        {
-            progress.Report((int)value.percentage);
-        }
-    }
-
-    public static async Task DownloadAsync<T>(T progress) where T : IProgress<int>
-    {
-        if (s_version is null) return;
+        if (s_version is null) throw new NotSupportedException();
         await HttpService.DownloadAsync(LauncherPackageUri, s_path, progress);
 
         RegisterApplicationRestart(null, default);
-        await PackageService.AddAsync(new(s_path), new OnDownloadAsync<T>(progress));
+        await PackageService.AddAsync(new(s_path), progress);
     }
 }
