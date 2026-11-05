@@ -64,7 +64,7 @@ public sealed partial class MainWindowViewModel : ViewModelBase, IProgress<int>,
 
     public void Report(DeploymentProgress value)
     {
-        HomeViewModel.LauncherStatus = $"Installing launcher update... {value}%";
+        HomeViewModel.LauncherStatus = $"Installing launcher update... {value.percentage}%";
     }
 
     async Task LoginWithAccountAsync()
