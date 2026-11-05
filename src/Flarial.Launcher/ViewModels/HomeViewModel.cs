@@ -88,6 +88,12 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
+            if (Minecraft.IsElevated)
+            {
+                await GameElevatedDialog._.ShowAsync();
+                return;
+            }
+
             if (client is null)
             {
                 ModificationLibrary library = new(path);
