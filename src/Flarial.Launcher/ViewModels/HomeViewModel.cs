@@ -121,9 +121,6 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
 
-            LauncherStatus = "Refreshing account...";
-            await AccountManager.RefreshAsync();
-
             LauncherStatus = "Checking client update...";
             if (!await client.DownloadAsync(this))
             {
@@ -138,7 +135,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
             }
 
             LauncherStatus = "Launching the client...";
-            if (!await Task.Run(client.Launch))
+            if (!await client.LaunchAsync())
             {
                 await LaunchFailureDialog._.ShowAsync();
                 return;

@@ -19,7 +19,7 @@ partial class FlarialClient
     static unsafe readonly delegate* unmanaged[Stdcall]<nuint, void> s_apc;
     static unsafe readonly delegate* unmanaged[Stdcall]<void*, uint> s_start;
 
-    internal unsafe bool Activate()
+    internal unsafe bool Activate(Dictionary<string, string?> value)
     {
         var imports = new ModificationLibrary(FileName).AsImports();
 
@@ -54,8 +54,8 @@ partial class FlarialClient
                     QueueUserAPC(s_apc, thread, (nuint)item);
                 }
 
-                Dictionary<string, string?> description = new() { ["access_token"] = AccessToken };
-                fixed (char* ptr = JsonService.Default.Write(description)) SetThreadDescription(thread, ptr);
+                fixed (char* json = JsonService.Default.Write(value))
+                    SetThreadDescription(thread, json);
 
                 ResumeThread(thread);
                 WaitForSingleObject(thread, INFINITE);

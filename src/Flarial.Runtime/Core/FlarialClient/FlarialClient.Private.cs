@@ -2,6 +2,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
 using Flarial.Runtime.Unmanaged;
 using static Windows.Win32.PInvoke;
@@ -37,8 +38,10 @@ partial class FlarialClient
 
         private protected override async Task<bool> OnDownloadAsync<T>(T progress)
         {
+            var token = await AccountManager.GetAccessTokenAsync();
+            
             using HttpRequestMessage request = new(HttpMethod.Post, DownloadUri);
-            request.Headers.Authorization = new("Bearer", AccessToken);
+            request.Headers.Authorization = new("Bearer", token);
 
             using var response = await HttpService.SendAsync(request);
             if (!response.IsSuccessStatusCode) return false;

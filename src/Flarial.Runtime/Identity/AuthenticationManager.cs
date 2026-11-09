@@ -125,9 +125,7 @@ static class AuthenticationManager
     {
         var token = CredentialManager._.Read();
         _ = RevokeRefreshTokenAsync(token);
-
         CredentialManager._.Delete();
-        FlarialClient.AccessToken = null;
     }
 
     internal static async Task<string?> AuthenticateSilentlyAsync()
@@ -151,7 +149,6 @@ static class AuthenticationManager
 
         var tuple = await ParseTokensAsync(response);
         CredentialManager._.Write(tuple.RefreshToken);
-        FlarialClient.AccessToken = tuple.AccessToken;
 
         return tuple.AccessToken;
     }

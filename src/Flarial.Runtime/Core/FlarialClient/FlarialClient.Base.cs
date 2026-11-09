@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Services;
 using Windows.Security.Cryptography;
 using Windows.System.Profile;
@@ -39,6 +40,7 @@ public abstract partial class FlarialClient
     private protected abstract Task<bool> VerifyAsync();
     private protected abstract Task<bool> OnDownloadAsync<T>(T progress) where T : IProgress<int>;
 
+    [Obsolete(" ", true)]
     internal static string? AccessToken
     {
         set => Interlocked.Exchange(ref field, value);
@@ -53,13 +55,19 @@ public abstract partial class FlarialClient
         return json[HashName];
     }
 
-    public bool Launch()
+    public async Task<bool> LaunchAsync()
     {
-        if (!IsRunning && Activate())
+        if (IsRunning) return true;
+
+        var token = await AccountManager.GetAccessTokenAsync();
+        Dictionary<string, string?> value = new() { ["access_token"] = token };
+
+        if (await Task.Run(() => Activate(value)))
         {
             _ = PostAnalyticsAsync();
             return true;
         }
+
         return false;
     }
 
