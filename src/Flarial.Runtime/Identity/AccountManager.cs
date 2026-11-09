@@ -28,13 +28,10 @@ public static class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            if (await AuthenticationManager.AuthenticateSilentlyAsync() is not { } accessToken)
+            if (await TokenManager.GetTokenAsync() is not { } token)
                 return null;
 
-            using HttpRequestMessage request = new(HttpMethod.Get, AccountUri);
-            request.Headers.Authorization = new("Bearer", accessToken);
-
-            using var response = await HttpService.SendAsync(request);
+            using var response = await TokenManager.GetAccountAsync(token);
             response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync();

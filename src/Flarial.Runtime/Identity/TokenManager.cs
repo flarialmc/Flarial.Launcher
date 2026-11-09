@@ -15,16 +15,16 @@ static class TokenManager
 
     const string Uri = "https://api.flarial.xyz/api/v2/account";
 
-    internal static Task<HttpResponseMessage> GetAccountAsync()
+    internal static Task<HttpResponseMessage> GetAccountAsync(string? token)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, Uri);
-        request.Headers.Authorization = new("Bearer", Token);
+        request.Headers.Authorization = new("Bearer", token);
         return HttpService.SendAsync(request);
     }
 
     internal static async Task<string?> GetTokenAsync()
     {
-        using var response = await GetAccountAsync();
+        using var response = await GetAccountAsync(Token);
 
         if (!response.IsSuccessStatusCode)
             Token = await AuthenticationManager.AuthenticateSilentlyAsync();
