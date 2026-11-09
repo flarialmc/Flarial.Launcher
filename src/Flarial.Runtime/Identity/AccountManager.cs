@@ -15,6 +15,12 @@ public static class AccountManager
 
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
 
+    static string? AccessToken
+    {
+        set => Interlocked.Exchange(ref field, value);
+        get => Interlocked.CompareExchange(ref field, null, null);
+    }
+
     public static async Task<bool> AuthenticateAsync()
     {
         await s_semaphore.WaitAsync(); try
