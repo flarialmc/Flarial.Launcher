@@ -8,6 +8,7 @@ using Flarial.Launcher.Models;
 using Flarial.Launcher.Types;
 using Flarial.Runtime.Core;
 using Flarial.Runtime.Game;
+using Flarial.Runtime.Identity;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
 using ReactiveUI.Primitives;
@@ -119,6 +120,9 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 
             if (betaV2 && !await ClientBetaV2ActiveDialog._.ShowAsync())
                 return;
+
+            LauncherStatus = "Refreshing account...";
+            await AccountManager.RefreshAsync();
 
             LauncherStatus = "Checking client update...";
             if (!await client.DownloadAsync(this))

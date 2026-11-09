@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity;
@@ -57,6 +58,22 @@ public static class AccountManager
             });
         }
         catch { _ = LogoutAsync(); throw; }
+        finally { s_semaphore.Release(); }
+    }
+
+    // The client gets one access token at injection and cannot refresh it.
+    // Access tokens last 12 hours, so get a new one for each launch instead of
+    // reusing the token from launcher startup. On failure, launch with the current one.
+    public static async Task RefreshAsync()
+    {
+        await s_semaphore.WaitAsync(); try
+        {
+            if (FlarialClient.AccessToken is null)
+                return;
+
+            await AuthenticationManager.AuthenticateSilentlyAsync();
+        }
+        catch { }
         finally { s_semaphore.Release(); }
     }
 
