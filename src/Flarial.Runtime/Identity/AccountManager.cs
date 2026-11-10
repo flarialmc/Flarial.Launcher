@@ -11,7 +11,15 @@ namespace Flarial.Runtime.Identity;
 
 public static partial class AccountManager
 {
+    const string Uri = "https://api.flarial.xyz/api/v2/account";
+
     static readonly SemaphoreSlim s_semaphore = new(1, 1);
+
+    static string? AccessToken
+    {
+        set => Interlocked.Exchange(ref field, value);
+        get => Interlocked.CompareExchange(ref field, null, null);
+    }
 
     public static async Task<bool> AuthenticateAsync()
     {
@@ -22,9 +30,6 @@ public static partial class AccountManager
         finally { s_semaphore.Release(); }
     }
 
-    const string Uri = "https://api.flarial.xyz/api/v2/account";
-
-    [Obsolete]
     static Task<HttpResponseMessage> GetAccountDetailsAsync(string? token)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, Uri);
@@ -32,17 +37,24 @@ public static partial class AccountManager
         return HttpService.SendAsync(request);
     }
 
+    static async Task<string?> FetchAccessTokenAsync()
+    {
+        using var response = await GetAccountDetailsAsync(AccessToken);
+
+        if (!response.IsSuccessStatusCode)
+            AccessToken = await AuthenticationManager.GetAccessTokenAsync();
+
+        return AccessToken;
+    }
+
     public static async Task<AccountDetails?> LoginAsync()
     {
         await s_semaphore.WaitAsync(); try
         {
-            if (await AuthenticationManager.GetAccessTokenAsync() is not { } accessToken)
+            if (await FetchAccessTokenAsync() is not { } accessToken)
                 return null;
 
-            using HttpRequestMessage request = new(HttpMethod.Get, Uri);
-            request.Headers.Authorization = new("Bearer", accessToken);
-
-            using var response = await HttpService.SendAsync(request);
+            using var response = await GetAccountDetailsAsync(accessToken);
             response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync();
@@ -69,28 +81,11 @@ public static partial class AccountManager
         finally { s_semaphore.Release(); }
     }
 
-    // The client gets one access token at injection and cannot refresh it.
-    // Access tokens last 12 hours, so get a new one for each launch instead of
-    // reusing the token from launcher startup. On failure, launch with the current one.
-    [Obsolete(" ", true)]
-    public static async Task RefreshAsync()
-    {
-        await s_semaphore.WaitAsync(); try
-        {
-            if (FlarialClient.AccessToken is null)
-                return;
-
-            await AuthenticationManager.GetAccessTokenAsync();
-        }
-        catch { }
-        finally { s_semaphore.Release(); }
-    }
-
     internal static async Task<string?> GetAccessTokenAsync()
     {
         await s_semaphore.WaitAsync(); try
         {
-            return await AuthenticationManager.GetAccessTokenAsync();
+            return await FetchAccessTokenAsync();
         }
         finally { s_semaphore.Release(); }
     }
