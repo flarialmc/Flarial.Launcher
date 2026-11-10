@@ -94,7 +94,8 @@ public static partial class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            AuthenticationManager.RevokeAllTokens();
+            AccessToken = null;
+            AuthenticationManager.RevokeRefreshToken();
         }
         finally { s_semaphore.Release(); }
     }

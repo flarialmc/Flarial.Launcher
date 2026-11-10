@@ -121,7 +121,7 @@ static class AuthenticationManager
         using (await HttpService.PostAsync(RevokeUri, content)) { }
     }
 
-    internal static void RevokeAllTokens()
+    internal static void RevokeRefreshToken()
     {
         var token = CredentialManager._.Read();
         _ = RevokeRefreshTokenAsync(token);
