@@ -24,6 +24,7 @@ public static partial class AccountManager
 
     const string Uri = "https://api.flarial.xyz/api/v2/account";
 
+    [Obsolete]
     static Task<HttpResponseMessage> GetAccountDetailsAsync(string? token)
     {
         using HttpRequestMessage request = new(HttpMethod.Get, Uri);
@@ -35,10 +36,13 @@ public static partial class AccountManager
     {
         await s_semaphore.WaitAsync(); try
         {
-            if (await Session.GetAsync() is not { } token)
+            if (await AuthenticationManager.GetAccessTokenAsync() is not { } accessToken)
                 return null;
 
-            using var response = await GetAccountDetailsAsync(token);
+            using HttpRequestMessage request = new(HttpMethod.Get, Uri);
+            request.Headers.Authorization = new("Bearer", accessToken);
+
+            using var response = await HttpService.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             using var stream = await response.Content.ReadAsStreamAsync();
@@ -76,7 +80,7 @@ public static partial class AccountManager
             if (FlarialClient.AccessToken is null)
                 return;
 
-            await AuthenticationManager.AuthenticateSilentlyAsync();
+            await AuthenticationManager.GetAccessTokenAsync();
         }
         catch { }
         finally { s_semaphore.Release(); }
@@ -84,15 +88,19 @@ public static partial class AccountManager
 
     internal static async Task<string?> GetAccessTokenAsync()
     {
-        await s_semaphore.WaitAsync();
-        try { return await Session.GetAsync(); }
+        await s_semaphore.WaitAsync(); try
+        {
+            return await AuthenticationManager.GetAccessTokenAsync();
+        }
         finally { s_semaphore.Release(); }
     }
 
     static async Task LogoutAsync()
     {
-        await s_semaphore.WaitAsync();
-        try { Session.Revoke(); }
+        await s_semaphore.WaitAsync(); try
+        {
+            AuthenticationManager.RevokeAllTokens();
+        }
         finally { s_semaphore.Release(); }
     }
 

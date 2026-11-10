@@ -121,14 +121,14 @@ static class AuthenticationManager
         using (await HttpService.PostAsync(RevokeUri, content)) { }
     }
 
-    internal static void Revoke()
+    internal static void RevokeAllTokens()
     {
         var token = CredentialManager._.Read();
         _ = RevokeRefreshTokenAsync(token);
         CredentialManager._.Delete();
     }
 
-    internal static async Task<string?> AuthenticateSilentlyAsync()
+    internal static async Task<string?> GetAccessTokenAsync()
     {
         if (CredentialManager._.Read() is not { } refreshToken)
         {
