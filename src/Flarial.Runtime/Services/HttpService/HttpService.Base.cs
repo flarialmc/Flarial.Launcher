@@ -8,7 +8,6 @@ static partial class HttpService
 {
     static readonly HttpClient s_client = new(new HttpClientHandler
     {
-        AllowAutoRedirect = true,
         AutomaticDecompression = DecompressionMethods.All
     }, true);
 
