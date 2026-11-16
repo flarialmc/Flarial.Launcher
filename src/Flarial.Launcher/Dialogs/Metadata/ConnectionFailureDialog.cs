@@ -6,9 +6,9 @@ sealed class ConnectionFailureDialog : MessageDialog<ConnectionFailureDialog>
  
     protected override string Message => @"Cannot connect to Flarial's CDN.
 
+• Try using Cloudflare WARP by downloading at 'https://1.1.1.1'.
 • Try changing your DNS, disabling IPv6 or restarting your router.
-• Try using Cloudflare WARP instead by accessing 'https://1.1.1.1'.
-• Check if 'https://cdn.flarial.xyz' can be accessed in your browser.
+• Check if 'https://cdn.flarial.xyz/202.txt' can be accessed in your browser.
 
 If you need help, join our Discord.";
 
