@@ -29,6 +29,29 @@ static class PackageService
         return Task.Run(() => Add(packageUri, progress));
     }
 
+    internal static Task RemoveAsync(string packageFullName)
+    {
+        return Task.Run(() => Remove(packageFullName));
+    }
+
+    unsafe static void Remove(string packageFullName)
+    {
+        var handle = CreateEvent(null, false, false, null);
+        var operation = s_manager.RemovePackageAsync(packageFullName);
+        try
+        {
+            operation.Completed += (_, _) => SetEvent(handle);
+            WaitForSingleObject(handle, INFINITE);
+
+            if (operation.Status is Error)
+                throw operation.ErrorCode;
+        }
+        finally
+        {
+            CloseHandle(handle);
+        }
+    }
+
     unsafe static void Add<T>(Uri packageUri, T progress) where T : IProgress<DeploymentProgress>
     {
         /*
@@ -44,10 +67,12 @@ static class PackageService
         try
         {
             operation.Completed += (_, _) => SetEvent(handle);
-            operation.Progress += (sender, args) => progress.Report(args);
 
+            operation.Progress += (sender, args) => progress.Report(args);
             WaitForSingleObject(handle, INFINITE);
-            if (operation.Status is Error) throw operation.ErrorCode;
+
+            if (operation.Status is Error)
+                throw operation.ErrorCode;
         }
         finally
         {
