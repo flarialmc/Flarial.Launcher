@@ -108,12 +108,6 @@ public sealed partial class VersionItemViewModel : ViewModelBase, IProgress<(int
             return;
         }
 
-        if (Minecraft.IsSideloaded)
-        {
-            await SideloadedInstallDialog._.ShowAsync();
-            return;
-        }
-
         if (!await _installVersionDialog.ShowAsync())
             return;
 

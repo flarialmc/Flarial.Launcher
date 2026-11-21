@@ -4,7 +4,9 @@ using System.Threading.Tasks;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Services;
+using Windows.ApplicationModel;
 using Windows.Management.Deployment;
+using static Windows.ApplicationModel.PackageSignatureKind;
 
 namespace Flarial.Runtime.Versions;
 
@@ -72,7 +74,7 @@ public sealed class VersionItem
             throw new MinecraftNotInstalledException();
 
         if (Minecraft.IsSideloaded)
-            throw new MinecraftSideloadedException();
+            await PackageService.RemoveAsync(Minecraft.Package.Id.FullName);
 
         if (await HttpService.ProbeAsync(_downloadUris) is not { } uri)
             return null;
