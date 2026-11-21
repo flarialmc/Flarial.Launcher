@@ -8,6 +8,7 @@ using Flarial.Launcher.Views;
 using Flarial.Runtime.Game;
 using Flarial.Runtime.Versions;
 using ReactiveUI;
+using ReactiveUI.Binding;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 

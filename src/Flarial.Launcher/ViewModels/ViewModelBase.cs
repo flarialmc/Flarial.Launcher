@@ -1,5 +1,6 @@
 ﻿using Flarial.Launcher.Types;
 using ReactiveUI;
+using ReactiveUI.Binding;
 using ReactiveUI.Primitives;
 using ReactiveUI.SourceGenerators;
 

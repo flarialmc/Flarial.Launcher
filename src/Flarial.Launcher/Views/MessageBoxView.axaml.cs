@@ -10,6 +10,7 @@ using Flarial.Launcher.Controls.AcrylicBlur;
 using Flarial.Launcher.ViewModels;
 using ReactiveUI;
 using ReactiveUI.Avalonia;
+using ReactiveUI.Binding;
 using ReactiveUI.Primitives;
 using ReactiveUI.Primitives.Extensions;
 
