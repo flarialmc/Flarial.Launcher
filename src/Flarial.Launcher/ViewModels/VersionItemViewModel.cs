@@ -76,8 +76,8 @@ public sealed partial class VersionItemViewModel : ViewModelBase, IProgress<(int
         });
 
         Version = $"{versionItem}";
-        DeleteCommand = ReactiveCommand.CreateFromTask(DeleteAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.Installed));
-        InstallCommand = ReactiveCommand.CreateFromTask(InstallAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.NotInstalled));
+        DeleteCommand = ReactiveCommand.CreateFromTask(OnDeleteAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.Installed));
+        InstallCommand = ReactiveCommand.CreateFromTask(OnInstallAsync, this.WhenAnyValue(static _ => _.State).Select(static _ => _ == VersionItemState.NotInstalled));
     }
 
     public void Report((int Percentage, bool Installing) value)
@@ -95,7 +95,7 @@ public sealed partial class VersionItemViewModel : ViewModelBase, IProgress<(int
         finally { InstallingVersionDialogTask = null; }
     }
 
-    private async Task InstallAsync()
+    private async Task OnInstallAsync()
     {
         if (!GamingServices.IsInstalled)
         {
@@ -145,5 +145,5 @@ public sealed partial class VersionItemViewModel : ViewModelBase, IProgress<(int
         await _installedVersionDialog.ShowAsync();
     }
 
-    async Task DeleteAsync() { }
+    async Task OnDeleteAsync() { }
 }
