@@ -30,14 +30,4 @@ public static partial class Minecraft
     public static bool IsInstalled => Package is { };
     public static bool IsRunning => GetWindow()?.IsVisible ?? false;
     public static bool IsSideloaded => Package.SignatureKind != PackageSignatureKind.Store;
-
-    [Obsolete("This feature is deprecated.", true)]
-    public static bool IsElevated
-    {
-        get
-        {
-            if (GetWindow() is not { IsVisible: true } window) return false;
-            return SecurityService.IsProcessElevated(window._processId);
-        }
-    }
 }

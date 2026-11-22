@@ -14,20 +14,10 @@ namespace Flarial.Runtime.Core;
 
 public abstract partial class FlarialClient
 {
-    unsafe static FlarialClient()
+    static FlarialClient()
     {
         var info = SystemIdentification.GetSystemIdForPublisher();
         s_identifier = CryptographicBuffer.EncodeToHexString(info.Id);
-
-        fixed (char* moduleNamePtr = "Kernel32")
-        fixed (byte* procedureNamePtr = "LoadLibraryW"u8)
-        {
-            var module = GetModuleHandle(moduleNamePtr);
-            var address = GetProcAddress(module, new(procedureNamePtr));
-
-            s_apc = (delegate* unmanaged[Stdcall]<nuint, void>)(nint)address;
-            s_start = (delegate* unmanaged[Stdcall]<void*, uint>)(nint)address;
-        }
     }
 
     const string ClassName = "Flarial Client";

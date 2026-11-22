@@ -1,15 +1,13 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Flarial.Runtime.Core;
 using Flarial.Runtime.Services;
 
 namespace Flarial.Runtime.Identity;
 
-public static partial class AccountManager
+public static class AccountManager
 {
     const string Uri = "https://api.flarial.xyz/api/v2/account";
 
