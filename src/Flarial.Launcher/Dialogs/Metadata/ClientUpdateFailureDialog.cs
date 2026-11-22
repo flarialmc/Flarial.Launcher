@@ -6,7 +6,7 @@ sealed class ClientUpdateFailureDialog : MessageDialog<ClientUpdateFailureDialog
 
     protected override string Message => @"A client update couldn't be downloaded.
 
-• Try closing Minecraft & click on [Play] to update the client.
+• Try closing Minecraft & click on [Launch] to update the client.
 • Try rebooting your machine & see if that resolves the issue.
 • If using client's beta or alpha, please verify if you have access to it.
 
