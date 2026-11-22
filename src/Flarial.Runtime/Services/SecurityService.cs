@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.InteropServices;
 using Flarial.Runtime.Unmanaged;
 using Windows.Win32.Security;
@@ -8,6 +9,7 @@ using static Windows.Win32.System.Threading.PROCESS_ACCESS_RIGHTS;
 
 namespace Flarial.Runtime.Services;
 
+[Obsolete("", true)]
 static class SecurityService
 {
     static readonly uint? s_level = GetProcessIntegrity(GetCurrentProcessId());

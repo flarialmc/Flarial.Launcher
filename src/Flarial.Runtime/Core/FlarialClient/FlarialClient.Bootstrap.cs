@@ -19,6 +19,7 @@ partial class FlarialClient
     static unsafe readonly delegate* unmanaged[Stdcall]<nuint, void> s_apc;
     static unsafe readonly delegate* unmanaged[Stdcall]<void*, uint> s_start;
 
+    [Obsolete("This feature is deprecated.", true)]
     internal unsafe bool Activate(Dictionary<string, string?> value)
     {
         var imports = new ModificationLibrary(FileName).AsImports();

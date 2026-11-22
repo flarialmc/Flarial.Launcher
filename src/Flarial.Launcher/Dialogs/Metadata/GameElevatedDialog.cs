@@ -1,5 +1,8 @@
+using System;
+
 namespace Flarial.Launcher.Dialogs.Metadata;
 
+[Obsolete("This feature is deprecated", true)]
 sealed class GameElevatedDialog : MessageDialog<GameElevatedDialog>
 {
     protected override string Primary => "Back";

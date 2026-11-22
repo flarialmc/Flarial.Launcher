@@ -1,6 +1,7 @@
 using System;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.LibraryLoader;
+using Windows.Win32.System.SystemServices;
 using static Windows.Win32.PInvoke;
 
 namespace Flarial.Runtime.Unmanaged;
@@ -33,5 +34,7 @@ unsafe readonly struct NativeModule : IDisposable
         }
     }
 
+    public static implicit operator nint(in NativeModule module) => module._handle;
+    public static implicit operator void*(in NativeModule module) => module._handle;
     public static implicit operator HMODULE(in NativeModule module) => module._handle;
 }

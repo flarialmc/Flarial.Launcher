@@ -1,8 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using Flarial.Runtime.Exceptions;
 using Flarial.Runtime.Unmanaged;
-using Windows.Win32.Foundation;
 using Windows.Win32.System.Diagnostics.Debug;
 using Windows.Win32.System.SystemServices;
 using static System.Environment;
@@ -14,8 +14,6 @@ namespace Flarial.Runtime.Game;
 
 public unsafe sealed class ModificationLibrary(string? path)
 {
-    static readonly string s_system = GetFolderPath(SpecialFolder.System);
-
     public bool IsLoadable
     {
         get
@@ -28,8 +26,8 @@ public unsafe sealed class ModificationLibrary(string? path)
 
             using (module)
             {
-                var dos = (IMAGE_DOS_HEADER*)(void*)(HMODULE)module;
-                var nt = (IMAGE_NT_HEADERS64*)((nint)dos + dos->e_lfanew);
+                var dos = (IMAGE_DOS_HEADER*)(void*)module;
+                var nt = (IMAGE_NT_HEADERS64*)(module + dos->e_lfanew);
                 return nt->FileHeader.Characteristics.HasFlag(IMAGE_FILE_DLL);
             }
         }
@@ -46,19 +44,19 @@ public unsafe sealed class ModificationLibrary(string? path)
         return _path;
     }
 
+    [Obsolete("", true)]
     internal IReadOnlyList<string> AsImports()
     {
         var path = AsPath();
+        var s_system = GetFolderPath(SpecialFolder.System);
 
         if (DONT_RESOLVE_DLL_REFERENCES.Open(path) is not { } module)
             throw new LibraryLoadFailureException();
 
         using (module)
         {
-            var image = (nint)(void*)(HMODULE)module;
-
-            var dos = (IMAGE_DOS_HEADER*)image;
-            var nt = (IMAGE_NT_HEADERS64*)(image + dos->e_lfanew);
+            var dos = (IMAGE_DOS_HEADER*)(void*)module;
+            var nt = (IMAGE_NT_HEADERS64*)(module + dos->e_lfanew);
 
             var directory = nt->OptionalHeader.DataDirectory.AsReadOnlySpan();
             var entry = directory[(int)IMAGE_DIRECTORY_ENTRY_IMPORT];
@@ -68,9 +66,9 @@ public unsafe sealed class ModificationLibrary(string? path)
 
             List<string> items = [];
 
-            for (var import = (IMAGE_IMPORT_DESCRIPTOR*)(image + entry.VirtualAddress); import->Name > 0; import++)
+            for (var import = (IMAGE_IMPORT_DESCRIPTOR*)(module + entry.VirtualAddress); import->Name > 0; import++)
             {
-                var item = (sbyte*)(image + import->Name);
+                var item = (sbyte*)(module + import->Name);
                 items.Add(Path.Combine(s_system, new(item)));
             }
 

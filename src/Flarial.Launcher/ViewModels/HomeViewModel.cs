@@ -19,7 +19,7 @@ namespace Flarial.Launcher.ViewModels;
 public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
 {
     [Reactive] bool _isLaunching = true;
-    [Reactive] string _launcherVersion = FlarialLauncher.Version;
+    [Reactive] string _launcherVersion = $"v2 ~ {FlarialLauncher.Version}";
     [Reactive] string _launcherStatus = "Connecting to services...";
 
     [Reactive] string _gameVersion = "0.0.0";
@@ -89,12 +89,6 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 return;
             }
 
-            if (Minecraft.IsElevated)
-            {
-                await GameElevatedDialog._.ShowAsync();
-                return;
-            }
-
             if (client is null)
             {
                 ModificationLibrary library = new(path);
@@ -106,7 +100,7 @@ public sealed partial class HomeViewModel : ViewModelBase, IProgress<int>
                 }
 
                 LauncherStatus = "Launching the game...";
-                if (!await Task.Run(() => Injector.Launch(library)))
+                if (!await Task.Run(library.Launch))
                 {
                     await LaunchFailureDialog._.ShowAsync();
                     return;

@@ -60,9 +60,12 @@ public abstract partial class FlarialClient
         if (IsRunning) return true;
 
         var token = await AccountManager.GetAccessTokenAsync();
-        Dictionary<string, string?> value = new() { ["access_token"] = token };
+        Dictionary<string, string?> json = new() { ["access_token"] = token };
 
-        if (await Task.Run(() => Activate(value)))
+        var value = JsonService.Default.Write(json);
+        ModificationLibrary library = new(FileName);
+
+        if (await Task.Run(() => library.Launch(value)))
         {
             _ = PostAnalyticsAsync();
             return true;

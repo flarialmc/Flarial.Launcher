@@ -1,5 +1,3 @@
-using System;
-
 namespace Flarial.Runtime.Core;
 
 public sealed class FlarialClientAlphaV3 : FlarialClient.Private<FlarialClientAlphaV3>

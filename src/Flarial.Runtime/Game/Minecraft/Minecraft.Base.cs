@@ -31,6 +31,7 @@ public static partial class Minecraft
     public static bool IsRunning => GetWindow()?.IsVisible ?? false;
     public static bool IsSideloaded => Package.SignatureKind != PackageSignatureKind.Store;
 
+    [Obsolete("This feature is deprecated.", true)]
     public static bool IsElevated
     {
         get
