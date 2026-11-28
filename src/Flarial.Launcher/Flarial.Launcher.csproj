@@ -6,6 +6,8 @@
 
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+
+        <NoWarn>AVA2003</NoWarn>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
 
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
